@@ -1,0 +1,66 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import WeeklySchedule from '../components/schedule/WeeklySchedule.astro';
+import ImportantDates from '../components/schedule/ImportantDates.astro';
+import { COURSE_CONFIG } from '../config/course';
+
+// Helper function to get week number relative to semester start
+function getWeekNumber(date: Date, semesterStart: Date): number {
+  const diffTime = date.getTime() - semesterStart.getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  return Math.ceil(diffDays / 7);
+}
+
+// Get semester start date from the first important date
+const semesterStart = new Date(COURSE_CONFIG.importantDates[0].date);
+
+// Generate weekly schedule from modules
+const weeklySchedule = COURSE_CONFIG.modules.flatMap(module => {
+  const [startWeek, endWeek] = module.weeks.split('-').map(Number);
+  return Array.from(
+    { length: endWeek - startWeek + 1 },
+    (_, i) => ({
+      week: startWeek + i,
+      module: module.title,
+      topics: module.topics,
+      labs: module.labs.filter(lab => {
+        const labDate = new Date(lab.dueDate);
+        const labWeek = getWeekNumber(labDate, semesterStart);
+        return labWeek === startWeek + i;
+      })
+    })
+  );
+}).sort((a, b) => a.week - b.week);
+
+// Important dates combining lab deadlines and course milestones
+const importantDates = [
+  ...COURSE_CONFIG.modules.flatMap(module => 
+    module.labs.map(lab => ({
+      event: `Entrega: ${lab.title}`,
+      date: lab.dueDate,
+      type: 'lab' as const
+    }))
+  ),
+  ...COURSE_CONFIG.importantDates.map(date => ({
+    ...date,
+    type: 'milestone' as const
+  }))
+].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+---
+
+<BaseLayout title="Cronograma">
+  <div class="space-y-4 dark:bg-gray-900">
+    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+      Cronograma
+    </h1>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div class="lg:col-span-2">
+        <WeeklySchedule schedule={weeklySchedule} />
+      </div>
+      <div>
+        <ImportantDates dates={importantDates} />
+      </div>
+    </div>
+  </div>
+</BaseLayout>

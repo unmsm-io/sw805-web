@@ -9,6 +9,12 @@
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^5.1.9"
+    "@astrojs/mdx": "^4.0.7",
+    "@fontsource-variable/heebo": "^5.1.1",
+    "@tailwindcss/typography": "^0.5.16",
+    "@tailwindcss/vite": "^4.0.0",
+    "astro": "^5.1.9",
+    "lucide-astro": "^0.473.0",
+    "tailwindcss": "^4.0.0"
   }
 }

@@ -1,0 +1,50 @@
+---
+import { COURSE_CONFIG } from '../../config/course';
+import { Calendar, BookOpen } from 'lucide-astro';
+
+const allDeadlines = [
+  ...COURSE_CONFIG.modules
+    .flatMap(module => module.labs)
+    .map(lab => ({
+      type: 'lab' as const,
+      title: lab.title,
+      date: lab.dueDate,
+    })),
+  ...COURSE_CONFIG.importantDates
+    .map(date => ({
+      type: 'event' as const,
+      title: date.event,
+      date: date.date,
+    }))
+]
+.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+.slice(0, 3);
+---
+
+<section class="prose dark:prose-invert max-w-none">
+  <div class="p-6">
+    <h2 class="text-xl mt-0 font-semibold mb-4">Próximas Fechas</h2>
+    <div class="space-y-4">
+      {allDeadlines.map(deadline => (
+        <div class="flex gap-3">
+        <div class="w-8 h-8 rounded-full bg-gray-200/70 dark:bg-gray-100/20 flex items-center justify-center">
+            {deadline.type === 'lab' ? 
+              <BookOpen class="w-4 h-4 text-gray-600 dark:text-gray-400" /> : 
+              <Calendar class="w-4 h-4 text-gray-600 dark:text-gray-400" />
+            }
+          </div>
+          <div>
+            <p class="font-medium text-sm mt-0 mb-1">{deadline.title}</p>
+            <time class="text-sm text-gray-500" datetime={deadline.date}>
+              {new Date(deadline.date).toLocaleDateString('es-PE', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              })}
+            </time>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

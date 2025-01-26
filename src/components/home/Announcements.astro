@@ -1,0 +1,44 @@
+---
+const announcements = [
+  {
+    id: 1,
+    title: 'Bienvenidos al curso',
+    content: 'Iniciamos el semestre 2025-I. Por favor, revisen el sílabo y configuren su entorno de desarrollo.',
+    date: '2025-03-01',
+    type: 'info'
+  },
+  {
+    id: 2,
+    title: 'Primer Laboratorio',
+    content: 'El primer laboratorio estará disponible desde el viernes. Recuerden revisar la guía de configuración.',
+    date: '2025-03-05',
+    type: 'lab'
+  }
+] as const;
+---
+
+<section class="prose dark:prose-invert max-w-none">
+  <div class="p-6">
+    <h2 class="text-xl font-semibold mt-0 mb-0 flex items-center gap-2">
+      Anuncios
+    </h2>
+    <div class="divide-y divide-gray-200 dark:divide-gray-700">
+      {announcements.map(announcement => (
+        <div class="py-4">
+          <h3 class="text-base mt-0 font-medium mb-1">{announcement.title}</h3>
+          <p class="text-sm text-gray-600 dark:text-gray-300">{announcement.content}</p>
+          <time 
+            datetime={announcement.date}
+            class="block mt-2 text-sm text-gray-500"
+          >
+            {new Date(announcement.date).toLocaleDateString('es-PE', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            })}
+          </time>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

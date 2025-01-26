@@ -1,0 +1,115 @@
+---
+import '@fontsource-variable/heebo';
+import Header from '../components/common/Header.astro';
+import Footer from '../components/common/Footer.astro';
+import Sidebar from '../components/common/Sidebar.astro';
+import { COURSE_CONFIG } from '../config/course';
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { 
+  title, 
+  description = 'Curso de Programación Paralela y Concurrente - UNMSM', 
+} = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title} | {COURSE_CONFIG.code}</title>
+  </head>
+ <body class="h-full dark:[color-scheme:dark] bg-gray-50 dark:bg-gray-900 font-sans antialiased">
+    <div class="flex min-h-full">
+      <Sidebar />
+      <div class="flex-1 flex flex-col transition-all duration-300 ease-in-out lg:ml-64" id="main-content">
+        <main class=" flex-1 p-4 md:p-8">
+          <slot />
+        </main>
+        <Footer />
+      </div>
+    </div>
+
+    <button
+      type="button"
+      class="fixed bottom-4 right-4 z-50 lg:hidden p-3 rounded-full bg-blue-600 text-white shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+      id="sidebar-toggle"
+      aria-label="Toggle Sidebar"
+    >
+      <span class="sr-only">Toggle Sidebar</span>
+      <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    </button>
+  </body>
+</html>
+
+<script>
+  const mainContent = document.getElementById('main-content');
+  const sidebarToggle = document.getElementById('sidebar-toggle');
+  let isSidebarOpen = window.innerWidth >= 1024;
+
+  function updateMainContentMargin() {
+    if (mainContent) {
+      mainContent.style.marginLeft = isSidebarOpen && window.innerWidth >= 1024 ? '16rem' : '0';
+    }
+  }
+
+  // Handle sidebar toggle
+  document.addEventListener('sidebarToggle', (e: CustomEvent) => {
+    isSidebarOpen = e.detail.isOpen;
+    updateMainContentMargin();
+  });
+
+  // Handle window resize
+  window.addEventListener('resize', () => {
+    if (window.innerWidth >= 1024) {
+      isSidebarOpen = true;
+    }
+    updateMainContentMargin();
+  });
+
+  // Initial setup
+  updateMainContentMargin();
+
+  // Handle navigation
+  document.addEventListener('astro:after-navigation', () => {
+    if (window.innerWidth < 1024) {
+      document.dispatchEvent(new CustomEvent('sidebarToggle', { 
+        detail: { isOpen: false } 
+      }));
+    }
+  });
+</script>
+
+<style is:global>
+  :root {
+    --sidebar-width: 16rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  .dark {
+    color-scheme: dark;
+  }
+
+  @media (max-width: 1024px) {
+    body {
+      overflow-x: hidden;
+    }
+  }
+</style>

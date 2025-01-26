@@ -1,11 +1,24 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
-
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/home/Hero.astro';
+import CourseOverview from '../components/home/CourseOverview.astro';
+import UpcomingDeadlines from '../components/home/UpcomingDeadlines.astro';
+import QuickLinks from '../components/home/QuickLinks.astro';
+import Announcements from '../components/home/Announcements.astro';
 ---
 
-<Layout>
-	<Welcome />
-</Layout>
+<BaseLayout title="Parallel and Concurrent Programming">
+  <Hero />
+  <main class="max-w-6xl mx-auto">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div class="lg:col-span-2 space-y-6">
+        <CourseOverview />
+        <Announcements />
+      </div>
+      <aside class="space-y-6">
+        <QuickLinks />
+        <UpcomingDeadlines />
+      </aside>
+    </div>
+  </main>
+</BaseLayout>

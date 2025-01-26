@@ -1,0 +1,39 @@
+---
+import { COURSE_CONFIG } from '../../config/course';
+---
+
+<section class="prose dark:prose-invert mb-0 max-w-none">
+  <div class="rounded-lg p-6">
+    <h2 class="text-xl font-semibold mb-4 mt-0">Descripción del Curso</h2>
+    <p class="text-gray-600 dark:text-gray-300">
+      Este curso proporciona una introducción completa a la programación paralela y 
+      concurrente, cubriendo los principales paradigmas y tecnologías utilizadas en 
+      la computación de alto rendimiento moderna.
+    </p>
+    
+    <h3 class="text-lg font-semibold mt-6 mb-3">Objetivos de Aprendizaje</h3>
+    <ul class="space-y-2">
+      <li>Comprender los fundamentos de la programación paralela y concurrente</li>
+      <li>Desarrollar habilidades prácticas en OpenMP, MPI, y CUDA</li>
+      <li>Implementar soluciones eficientes para problemas computacionales</li>
+      <li>Analizar y optimizar el rendimiento de aplicaciones paralelas</li>
+    </ul>
+
+    <div class="mt-6">
+      <h3 class="text-lg font-semibold mb-3">Módulos</h3>
+      <div class="grid sm:grid-cols-2 gap-4">
+        {COURSE_CONFIG.modules.map(module => (
+          <div class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded p-4">
+            <h4 class="font-semibold text-sm mb-2 mt-0">{module.title}</h4>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-0">
+              Semanas {module.weeks}
+            </p>
+            <ul class="text-sm mt-2 mb-0 text-gray-600 dark:text-gray-300 space-y-1">
+              {module.topics.map(topic => <li>{topic}</li>)}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
