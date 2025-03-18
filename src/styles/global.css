@@ -5,3 +5,42 @@
 @theme {
   --font-sans: "Heebo Variable", "sans-serif";
 }
+
+html.dark .astro-code,
+html.dark .astro-code span {
+  color: var(--shiki-dark) !important;
+  background-color: var(--shiki-dark-bg) !important;
+}
+
+html.dark .astro-code,
+html:not(.dark) .astro-code {
+  border: 1px solid hsl(var(--border)) !important;
+  font-size: 13px;
+}
+
+html.dark .astro-code code,
+html:not(.dark) .astro-code code {
+  counter-reset: step !important;
+  counter-increment: step calc(var(--start, 1) - 1) !important;
+}
+
+html.dark .astro-code code .line:not(:last-child)::before,
+html:not(.dark) .astro-code code .line:not(:last-child)::before {
+  content: counter(step) !important;
+  counter-increment: step !important;
+  width: 1rem !important;
+  margin-right: 1.5rem !important;
+  display: inline-block !important;
+  text-align: right !important;
+  color: hsl(var(--muted-foreground)) !important;
+  opacity: 0.5 !important;
+}
+
+@media (prefers-color-scheme: dark) {
+
+  .astro-code,
+  .astro-code span {
+    color: var(--shiki-dark) !important;
+    background-color: var(--shiki-dark-bg) !important;
+  }
+}

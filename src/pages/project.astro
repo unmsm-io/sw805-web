@@ -1,104 +1,110 @@
 ---
 // src/pages/project.astro
-import BaseLayout from '../layouts/BaseLayout.astro';
-import { ChevronRight } from 'lucide-astro';
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { ChevronRight } from "lucide-astro";
 
 const projectMilestones = [
   {
-    title: 'Formación de Grupos',
-    date: '2025-04-01',
-    description: 'Formar equipos de 2-3 estudiantes y registrarlos en el campus virtual'
+    title: "Formación de Grupos",
+    date: "2025-04-01",
+    description:
+      "Formar equipos de 2-3 estudiantes y registrarlos en el campus virtual",
   },
   {
-    title: 'Propuesta de Proyecto',
-    date: '2025-04-15',
-    description: 'Presentación de la propuesta inicial incluyendo objetivos, alcance y metodología'
+    title: "Propuesta de Proyecto",
+    date: "2025-04-15",
+    description:
+      "Presentación de la propuesta inicial incluyendo objetivos, alcance y metodología",
   },
   {
-    title: 'Primera Entrega',
-    date: '2025-05-15',
-    description: 'Avance del proyecto con implementación inicial y resultados preliminares'
+    title: "Primera Entrega",
+    date: "2025-05-15",
+    description:
+      "Avance del proyecto con implementación inicial y resultados preliminares",
   },
   {
-    title: 'Entrega Final',
-    date: '2025-06-15',
-    description: 'Presentación final del proyecto, código documentado y análisis de resultados'
-  }
+    title: "Entrega Final",
+    date: "2025-06-15",
+    description:
+      "Presentación final del proyecto, código documentado y análisis de resultados",
+  },
 ] as const;
 
 const projectTracks = [
   {
-    title: 'Computación Científica',
-    description: 'Implementación paralela de algoritmos numéricos y simulaciones científicas',
+    title: "Computación Científica",
+    description:
+      "Implementación paralela de algoritmos numéricos y simulaciones científicas",
     examples: [
-      'Simulación de N-cuerpos',
-      'Dinámica de fluidos computacional',
-      'Métodos de elementos finitos',
-      'Resolución de ecuaciones diferenciales'
-    ]
+      "Simulación de N-cuerpos",
+      "Dinámica de fluidos computacional",
+      "Métodos de elementos finitos",
+      "Resolución de ecuaciones diferenciales",
+    ],
   },
   {
-    title: 'Procesamiento de Datos',
-    description: 'Análisis paralelo de grandes conjuntos de datos y procesamiento masivo',
+    title: "Procesamiento de Datos",
+    description:
+      "Análisis paralelo de grandes conjuntos de datos y procesamiento masivo",
     examples: [
-      'Procesamiento de imágenes médicas',
-      'Análisis de redes sociales',
-      'Clustering de datos masivos',
-      'Procesamiento de señales'
-    ]
+      "Procesamiento de imágenes médicas",
+      "Análisis de redes sociales",
+      "Clustering de datos masivos",
+      "Procesamiento de señales",
+    ],
   },
   {
-    title: 'Optimización',
-    description: 'Algoritmos paralelos para problemas de optimización y búsqueda',
+    title: "Optimización",
+    description:
+      "Algoritmos paralelos para problemas de optimización y búsqueda",
     examples: [
-      'Algoritmos genéticos paralelos',
-      'Optimización de partículas',
-      'Deep Learning distribuido',
-      'Búsqueda de patrones'
-    ]
-  }
+      "Algoritmos genéticos paralelos",
+      "Optimización de partículas",
+      "Deep Learning distribuido",
+      "Búsqueda de patrones",
+    ],
+  },
 ] as const;
 
 const guidelines = [
   {
-    title: 'Objetivos',
+    title: "Objetivos",
     content: `El proyecto final tiene como objetivo aplicar los conceptos y técnicas
       de programación paralela aprendidos durante el curso en un problema real.
       Deberán demostrar el uso efectivo de al menos dos paradigmas de
-      programación paralela (OpenMP, MPI, CUDA) y realizar un análisis de rendimiento.`
+      programación paralela (OpenMP, MPI, CUDA) y realizar un análisis de rendimiento.`,
   },
   {
-    title: 'Requisitos',
+    title: "Requisitos",
     items: [
-      'Equipos de 2-3 estudiantes',
-      'Uso de al menos dos paradigmas de programación paralela',
-      'Análisis de rendimiento y escalabilidad',
-      'Documentación completa del proyecto',
-      'Código fuente en GitHub',
-      'Presentación final'
-    ]
+      "Equipos de 2-3 estudiantes",
+      "Uso de al menos dos paradigmas de programación paralela",
+      "Análisis de rendimiento y escalabilidad",
+      "Documentación completa del proyecto",
+      "Código fuente en GitHub",
+      "Presentación final",
+    ],
   },
   {
-    title: 'Evaluación',
+    title: "Evaluación",
     items: [
-      'Propuesta inicial (10%)',
-      'Avance intermedio (20%)',
-      'Código y documentación (40%)',
-      'Presentación final (30%)'
-    ]
+      "Propuesta inicial (10%)",
+      "Avance intermedio (20%)",
+      "Código y documentación (40%)",
+      "Presentación final (30%)",
+    ],
   },
   {
-    title: 'Entregables',
+    title: "Entregables",
     items: [
-      'Documento de propuesta (PDF)',
-      'Repositorio de código en GitHub',
-      'Informe técnico final (PDF)',
-      'Presentación (PDF/PPT)',
-      'Video demostrativo (5 min)'
-    ]
-  }
+      "Documento de propuesta (PDF)",
+      "Repositorio de código en GitHub",
+      "Informe técnico final (PDF)",
+      "Presentación (PDF/PPT)",
+      "Video demostrativo (5 min)",
+    ],
+  },
 ] as const;
-
 ---
 
 <BaseLayout title="Proyecto">
@@ -109,74 +115,81 @@ const guidelines = [
       <div class="flex gap-4 space-y-6">
         <!-- Guidelines -->
         <section class="p-6 mb-0">
-          {guidelines.map(section => (
-            <div class="mb-6 last:mb-0">
-              <h2 class="text-lg font-medium mt-0 mb-3">{section.title}</h2>
-              {section.content && (
-                <p class="text-gray-600 dark:text-gray-300 text-sm">
-                  {section.content}
-                </p>
-              )}
-              {section.items && (
-                <ul class="mt-3 space-y-2">
-                  {section.items.map(item => (
-                    <li class="flex gap-2 text-sm">
-                      <ChevronRight class="w-4 h-4 text-gray-400 shrink-0" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          ))}
-        </section>
-      <!-- Timeline -->
-      <aside class="space-y-6">
-        <section class="p-6">
-          <h2 class="text-lg font-medium mt-0 mb-4">Cronograma</h2>
-          <div class="space-y-4">
-            {projectMilestones.map(milestone => (
-              <div class="border-l-2 border-gray-200 dark:border-gray-700 pl-4">
-                <h3 class="text-base font-medium mt-0 mb-1">{milestone.title}</h3>
-                <time class="text-sm text-gray-500">
-                  {new Date(milestone.date).toLocaleDateString('es-PE', {
-                    month: 'long',
-                    day: 'numeric'
-                  })}
-                </time>
-                <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">
-                  {milestone.description}
-                </p>
+          {
+            guidelines.map((section) => (
+              <div class="mb-6 last:mb-0">
+                <h2 class="text-lg font-medium mt-0 mb-3">{section.title}</h2>
+                {section.content && (
+                  <p class="text-zinc-600 dark:text-zinc-300 text-sm">
+                    {section.content}
+                  </p>
+                )}
+                {section.items && (
+                  <ul class="mt-3 space-y-2">
+                    {section.items.map((item) => (
+                      <li class="flex gap-2 text-sm">
+                        <ChevronRight class="w-4 h-4 text-zinc-400 shrink-0" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
-            ))}
-          </div>
+            ))
+          }
         </section>
-      </aside>
-
+        <!-- Timeline -->
+        <aside class="space-y-6">
+          <section class="p-6">
+            <h2 class="text-lg font-medium mt-0 mb-4">Cronograma</h2>
+            <div class="space-y-4">
+              {
+                projectMilestones.map((milestone) => (
+                  <div class="border-l-2 border-zinc-200 dark:border-zinc-700 pl-4">
+                    <h3 class="text-base font-medium mt-0 mb-1">
+                      {milestone.title}
+                    </h3>
+                    <time class="text-sm text-zinc-500">
+                      {new Date(milestone.date).toLocaleDateString("es-PE", {
+                        month: "long",
+                        day: "numeric",
+                      })}
+                    </time>
+                    <p class="text-sm text-zinc-600 dark:text-zinc-300 mt-1">
+                      {milestone.description}
+                    </p>
+                  </div>
+                ))
+              }
+            </div>
+          </section>
+        </aside>
       </div>
 
-        <!-- Project Tracks -->
-        <section class="p-6">
-          <h2 class="text-lg font-medium mt-0 mb-4">Líneas de Proyecto</h2>
-          <div class="grid gap-4 sm:grid-cols-2">
-            {projectTracks.map(track => (
-              <div class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded p-4">
+      <!-- Project Tracks -->
+      <section class="p-6">
+        <h2 class="text-lg font-medium mt-0 mb-4">Líneas de Proyecto</h2>
+        <div class="grid gap-4 sm:grid-cols-2">
+          {
+            projectTracks.map((track) => (
+              <div class="bg-white dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded p-4">
                 <h3 class="text-base font-medium mt-0 mb-2">{track.title}</h3>
-                <p class="text-sm text-gray-600 dark:text-gray-300 mb-3">
+                <p class="text-sm text-zinc-600 dark:text-zinc-300 mb-3">
                   {track.description}
                 </p>
                 <ul class="space-y-1 mb-0">
-                  {track.examples.map(example => (
+                  {track.examples.map((example) => (
                     <li class="text-sm flex items-center gap-2">
-                      <ChevronRight class="w-3.5 h-3.5 text-gray-400" />
+                      <ChevronRight class="w-3.5 h-3.5 text-zinc-400" />
                       {example}
                     </li>
                   ))}
                 </ul>
               </div>
-            ))}
-          </div>
-        </section>
+            ))
+          }
+        </div>
+      </section>
     </div>
   </div>
 </BaseLayout>

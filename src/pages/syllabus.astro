@@ -1,127 +1,154 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
-import Hero from '../components/home/Hero.astro';
-import { COURSE_CONFIG } from '../config/course';
-import { Mail, Clock } from 'lucide-astro';
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Hero from "../components/home/Hero.astro";
+import { COURSE_CONFIG } from "../config/course";
+import { Mail, Clock } from "lucide-astro";
 
 const courseBasics = [
-  { label: 'Código', value: COURSE_CONFIG.code },
-  { label: 'Nombre', value: COURSE_CONFIG.name }
+  { label: "Código", value: COURSE_CONFIG.code },
+  { label: "Nombre", value: COURSE_CONFIG.name },
 ];
 
 const courseDetails = [
-  { label: 'Semestre', value: COURSE_CONFIG.semester },
-  { label: 'Créditos', value: COURSE_CONFIG.credits },
-  { label: 'Horario', value: COURSE_CONFIG.schedule.lectures },
-  { label: 'Laboratorio', value: COURSE_CONFIG.schedule.labs },
-  { label: 'Ubicación', value: COURSE_CONFIG.schedule.location }
+  { label: "Semestre", value: COURSE_CONFIG.semester },
+  { label: "Créditos", value: COURSE_CONFIG.credits },
+  { label: "Horario", value: COURSE_CONFIG.schedule.lectures },
+  { label: "Laboratorio", value: COURSE_CONFIG.schedule.labs },
+  { label: "Ubicación", value: COURSE_CONFIG.schedule.location },
 ];
 
 const [mainInstructor, teachingAssistant] = COURSE_CONFIG.instructors;
 
 const staff = [
   {
-    role: 'Profesor',
+    role: "Profesor",
     name: mainInstructor.name,
     email: mainInstructor.email,
     hours: mainInstructor.officeHours,
-    education: mainInstructor.education
+    education: mainInstructor.education,
   },
   {
-    role: 'Jefe de Práctica',
+    role: "Jefe de Práctica",
     name: teachingAssistant.name,
     email: teachingAssistant.email,
     hours: teachingAssistant.officeHours,
-    education: teachingAssistant.education
-  }
+    education: teachingAssistant.education,
+  },
 ];
 ---
 
 <BaseLayout title="Información General">
-  <Hero/>
+  <Hero />
   <main class="prose dark:prose-invert max-w-6xl mx-auto p-6">
-      <!-- Staff -->
+    <!-- Staff -->
     <section>
-        <h2 class="text-lg font-medium mt-0 mb-4">Equipo Docente</h2>
-        <div class="grid gap-4 md:grid-cols-2">
-          {staff.map(member => (
-          <div class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded p-4">
-              <dt class="text-sm text-gray-500 dark:text-gray-400 mt-0">{member.role}</dt>
+      <h2 class="text-lg font-medium mt-0 mb-4">Equipo Docente</h2>
+      <div class="grid gap-4 md:grid-cols-2">
+        {
+          staff.map((member) => (
+            <div class="bg-white dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded p-4">
+              <dt class="text-sm text-zinc-500 dark:text-zinc-400 mt-0">
+                {member.role}
+              </dt>
               <dd class="text-base font-medium mt-1 mb-3">{member.name}</dd>
               <div class="space-y-2 text-sm">
-                <a 
+                <a
                   href={`mailto:${member.email}`}
                   class="items-center inline-flex gap-2 text-blue-600 dark:text-blue-400 hover:underline"
                 >
                   <Mail class="w-3.5 h-3.5" />
                   {member.email}
                 </a>
-                <div class="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                <div class="flex items-center gap-2 text-zinc-600 dark:text-zinc-300">
                   <Clock class="w-3.5 h-3.5" />
                   {member.hours}
                 </div>
                 {member.education && (
-                  <div class="text-gray-600 dark:text-gray-300">
+                  <div class="text-zinc-600 dark:text-zinc-300">
                     {member.education}
                   </div>
                 )}
               </div>
             </div>
-          ))}
-        </div>
-      </section>
+          ))
+        }
+      </div>
+    </section>
 
-      <!-- Prerequisites -->
-      <section>
-        <h2 class="text-lg font-medium mb-4">Prerrequisitos</h2>
-        <div class="grid gap-4 md:grid-cols-2">
-          {COURSE_CONFIG.prerequisites.map(prereq => (
-            <div class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded p-4">
-              <p class="font-medium mt-0 mb-2">{prereq.code}: {prereq.name}</p>
-              <p class="text-sm text-gray-600 dark:text-gray-300 m-0">{prereq.description}</p>
+    <!-- Prerequisites -->
+    <section>
+      <h2 class="text-lg font-medium mb-4">Prerrequisitos</h2>
+      <div class="grid gap-4 md:grid-cols-2">
+        {
+          COURSE_CONFIG.prerequisites.map((prereq) => (
+            <div class="bg-white dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded p-4">
+              <p class="font-medium mt-0 mb-2">
+                {prereq.code}: {prereq.name}
+              </p>
+              <p class="text-sm text-zinc-600 dark:text-zinc-300 m-0">
+                {prereq.description}
+              </p>
             </div>
-          ))}
-        </div>
-      </section>
+          ))
+        }
+      </div>
+    </section>
 
-      <!-- Grading -->
-      <section>
-        <h2 class="text-lg font-medium mb-4">Sistema de Evaluación</h2>
-        <div class="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
-          <table class="min-w-full mt-0 mb-0 divide-y divide-gray-200 dark:divide-gray-700">
-            <thead class="bg-gray-50 dark:bg-gray-800">
-              <tr>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Evaluación
-                </th>
-                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Porcentaje
-                </th>
-              </tr>
-            </thead>
-            <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-              {Object.entries(COURSE_CONFIG.grading).map(([key, value]) => (
+    <!-- Grading -->
+    <section>
+      <h2 class="text-lg font-medium mb-4">Sistema de Evaluación</h2>
+      <div
+        class="overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-700"
+      >
+        <table
+          class="min-w-full mt-0 mb-0 divide-y divide-zinc-200 dark:divide-zinc-700"
+        >
+          <thead class="bg-zinc-50 dark:bg-zinc-800">
+            <tr>
+              <th
+                scope="col"
+                class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider"
+              >
+                Evaluación
+              </th>
+              <th
+                scope="col"
+                class="px-6 py-3 text-right text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider"
+              >
+                Porcentaje
+              </th>
+            </tr>
+          </thead>
+          <tbody
+            class="bg-white dark:bg-zinc-900 divide-y divide-zinc-200 dark:divide-zinc-700"
+          >
+            {
+              Object.entries(COURSE_CONFIG.grading).map(([key, value]) => (
                 <tr>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-700 dark:text-zinc-300">
                     {key.charAt(0).toUpperCase() + key.slice(1)}
                   </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-medium text-gray-900 dark:text-gray-100">
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-medium text-zinc-900 dark:text-zinc-100">
                     {value}%
                   </td>
                 </tr>
-              ))}
-              <tr class="bg-gray-50 dark:bg-gray-800">
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Total
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-medium text-gray-900 dark:text-gray-100">
-                  100%
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-    </main>
-  </div>
+              ))
+            }
+            <tr class="bg-zinc-50 dark:bg-zinc-800">
+              <td
+                class="px-6 py-4 whitespace-nowrap text-sm font-medium text-zinc-700 dark:text-zinc-300"
+              >
+                Total
+              </td>
+              <td
+                class="px-6 py-4 whitespace-nowrap text-sm text-right font-medium text-zinc-900 dark:text-zinc-100"
+              >
+                100%
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
 </BaseLayout>

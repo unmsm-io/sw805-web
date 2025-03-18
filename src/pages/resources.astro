@@ -1,33 +1,32 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
-import { COURSE_CONFIG } from '../config/course';
-import { Book, Cloud, ChevronRight, ExternalLink } from 'lucide-astro';
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { COURSE_CONFIG } from "../config/course";
+import { Book, Cloud, ChevronRight, ExternalLink } from "lucide-astro";
 
 const additionalDocs = [
   {
-    title: 'OpenMP Specifications',
-    description: 'Documentación oficial y especificaciones de OpenMP',
-    url: 'https://www.openmp.org/specifications/',
+    title: "OpenMP Specifications",
+    description: "Documentación oficial y especificaciones de OpenMP",
+    url: "https://www.openmp.org/specifications/",
   },
   {
-    title: 'Open MPI Documentation',
-    description: 'Guías y documentación de Open MPI',
-    url: 'https://www.open-mpi.org/doc/',
+    title: "Open MPI Documentation",
+    description: "Guías y documentación de Open MPI",
+    url: "https://www.open-mpi.org/doc/",
   },
   {
-    title: 'CUDA Documentation',
-    description: 'Documentación completa de NVIDIA CUDA',
-    url: 'https://docs.nvidia.com/cuda/',
+    title: "CUDA Documentation",
+    description: "Documentación completa de NVIDIA CUDA",
+    url: "https://docs.nvidia.com/cuda/",
   },
   {
-    title: 'LLNL HPC Tutorials',
-    description: 'Tutoriales de computación paralela del Lawrence Livermore National Laboratory',
-    url: 'https://computing.llnl.gov/tutorials',
-  }
+    title: "LLNL HPC Tutorials",
+    description:
+      "Tutoriales de computación paralela del Lawrence Livermore National Laboratory",
+    url: "https://computing.llnl.gov/tutorials",
+  },
 ] as const;
-
 ---
-
 
 <BaseLayout title="Recursos">
   <div class="prose dark:prose-invert max-w-none">
@@ -37,55 +36,74 @@ const additionalDocs = [
       <!-- Development Setup -->
       <section>
         <div class="flex items-baseline gap-2 mb-4">
-          <h2 class="text-lg font-medium mt-0 mb-0">Configuración del Entorno</h2>
+          <h2 class="text-lg font-medium mt-0 mb-0">
+            Configuración del Entorno
+          </h2>
         </div>
 
         <!-- Required Software -->
         <div class="grid gap-4 md:grid-cols-3">
-          {COURSE_CONFIG.resources.developmentSetup.requiredSoftware.map(software => (
-            <div class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded p-3">
-              <h3 class="text-base font-medium mt-0 mb-2">{software.name}</h3>
-              <div class="flex gap-3 text-sm">
-                <a 
-                  href={software.url}
-                  class="text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Descargar
-                  <ExternalLink class="w-3.5 h-3.5" />
-                </a>
-                <a 
-                  href={software.setupGuide}
-                  class="text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1"
-                >
-                  Guía
-                  <ChevronRight class="w-3.5 h-3.5" />
-                </a>
-              </div>
-            </div>
-          ))}
+          {
+            COURSE_CONFIG.resources.developmentSetup.requiredSoftware.map(
+              (software) => (
+                <div class="h-full flex flex-col justify-between bg-white dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded p-3">
+                  <div class="flex flex-col">
+                    <h3 class="text-base font-medium mt-0 mb-2">
+                      {software.name}
+                    </h3>
+                    <p class="text-sm text-zinc-600 dark:text-zinc-300 mb-2">
+                      {software.description}
+                    </p>
+                  </div>
+                  <div class="flex gap-3 text-sm">
+                    <a
+                      href={software.url}
+                      class="text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Descargar
+                      <ExternalLink class="w-3.5 h-3.5" />
+                    </a>
+                    {software.setupGuide !== "" && (
+                      <a
+                        href={software.setupGuide}
+                        class="text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1"
+                      >
+                        Guía
+                        <ChevronRight class="w-3.5 h-3.5" />
+                      </a>
+                    )}
+                  </div>
+                </div>
+              ),
+            )
+          }
         </div>
 
         <!-- Extensions -->
         <div class="mt-6">
           <h3 class="text-base font-medium mb-3">Extensiones de VS Code</h3>
           <div class="grid gap-3 md:grid-cols-2">
-            {COURSE_CONFIG.resources.developmentSetup.extensions.map(ext => (
-              <div class="flex items-center justify-between bg-white dark:bg-gray-800/50  border border-gray-200 dark:border-gray-700 rounded p-3">
-                <div>
-                  <p class="font-medium text-sm m-0">{ext.name}</p>
-                  <p class="text-sm text-gray-500 m-0">{ext.description}</p>
+            {
+              COURSE_CONFIG.resources.developmentSetup.extensions.map((ext) => (
+                <div class="flex items-center justify-between bg-white dark:bg-zinc-800/50  border border-zinc-200 dark:border-zinc-700 rounded p-3">
+                  <div>
+                    <h3 class="font-medium text-sm m-0">{ext.name}</h3>
+                    <p class="text-sm text-zinc-600 dark:text-zinc-300 m-0">
+                      {ext.description}
+                    </p>
+                  </div>
+                  <a
+                    href={`vscode:extension/${ext.id}`}
+                    class="text-blue-600 dark:text-blue-400 text-sm hover:underline inline-flex items-center gap-1"
+                  >
+                    Instalar
+                    <ChevronRight class="w-3.5 h-3.5" />
+                  </a>
                 </div>
-                <a
-                  href={`vscode:extension/${ext.id}`}
-                  class="text-blue-600 dark:text-blue-400 text-sm hover:underline inline-flex items-center gap-1"
-                >
-                  Instalar
-                  <ChevronRight class="w-3.5 h-3.5" />
-                </a>
-              </div>
-            ))}
+              ))
+            }
           </div>
         </div>
       </section>
@@ -98,10 +116,12 @@ const additionalDocs = [
 
         <div class="grid gap-4 md:grid-cols-2">
           <!-- Main Textbook -->
-          <div class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded p-3">
+          <div
+            class="bg-white dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded p-3"
+          >
             <div class="flex gap-4">
               <img
-                src={COURSE_CONFIG.resources.mainTextbook.coverImage || '/textbook-cover.webp'}
+                src={COURSE_CONFIG.resources.mainTextbook.coverImage}
                 alt="Portada del libro"
                 class="w-24 h-32 mt-0 mb-0 object-cover rounded"
               />
@@ -109,14 +129,24 @@ const additionalDocs = [
                 <h3 class="text-base font-medium mt-0 mb-2">
                   {COURSE_CONFIG.resources.mainTextbook.title}
                 </h3>
-                <div class="text-sm text-gray-600 dark:text-gray-300 space-y-1">
-                  <p class="mt-0 mb-0">por {COURSE_CONFIG.resources.mainTextbook.author}</p>
-                  <p class="mt-0 mb-0">{COURSE_CONFIG.resources.mainTextbook.edition}</p>
-                  <p class="mt-0 mb-0">{COURSE_CONFIG.resources.mainTextbook.publisher}, {COURSE_CONFIG.resources.mainTextbook.year}</p>
-                  <p class="mt-0 mb-0">ISBN: {COURSE_CONFIG.resources.mainTextbook.isbn}</p>
+                <div class="text-sm text-zinc-600 dark:text-zinc-300 space-y-1">
+                  <p class="mt-0 mb-0">
+                    por {COURSE_CONFIG.resources.mainTextbook.author}
+                  </p>
+                  <p class="mt-0 mb-0">
+                    {COURSE_CONFIG.resources.mainTextbook.edition}
+                  </p>
+                  <p class="mt-0 mb-0">
+                    {COURSE_CONFIG.resources.mainTextbook.publisher}, {
+                      COURSE_CONFIG.resources.mainTextbook.year
+                    }
+                  </p>
+                  <p class="mt-0 mb-0">
+                    ISBN: {COURSE_CONFIG.resources.mainTextbook.isbn}
+                  </p>
                 </div>
-                <a 
-                  href="#" 
+                <a
+                  href="#"
                   class="text-blue-600 dark:text-blue-400 text-sm hover:underline inline-flex items-center gap-1 mt-2"
                 >
                   Ver detalles
@@ -127,26 +157,30 @@ const additionalDocs = [
           </div>
 
           <!-- Additional Docs -->
-          {additionalDocs.map(doc => (
-            <a
-              href={doc.url}
-              class="no-underline hover:underline bg-white dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors block border border-gray-200 dark:border-gray-700 rounded p-3 hover:bg-gray-50 dark:hover:bg-gray-800"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                  <div>
-                    <h4 class="text-base font-medium mb-2 mt-0">{doc.title}</h4>
-                    <p class="text-sm text-gray-600 dark:text-gray-300 mb-0">
-                      {doc.description}
-                    </p>
+          {
+            additionalDocs.map((doc) => (
+              <a
+                href={doc.url}
+                class="no-underline hover:underline bg-white dark:bg-zinc-800/50 hover:bg-zinc-100 dark:hover:bg-zinc-700/50 transition-colors block border border-zinc-200 dark:border-zinc-700 rounded p-3 hover:bg-zinc-50 dark:hover:bg-zinc-800"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <div>
+                      <h4 class="text-base font-medium mb-2 mt-0">
+                        {doc.title}
+                      </h4>
+                      <p class="text-sm text-zinc-600 dark:text-zinc-300 mb-0">
+                        {doc.description}
+                      </p>
+                    </div>
                   </div>
+                  <ExternalLink class="w-3.5 h-3.5 text-zinc-400" />
                 </div>
-                <ExternalLink class="w-3.5 h-3.5 text-gray-400" />
-              </div>
-            </a>
-          ))}
+              </a>
+            ))
+          }
         </div>
       </section>
 
@@ -155,26 +189,30 @@ const additionalDocs = [
         <div class="flex items-baseline gap-2 mb-4">
           <h2 class="text-lg font-medium mt-0 mb-0">Recursos en la Nube</h2>
         </div>
-        
+
         <div class="grid gap-3 md:grid-cols-3">
-          {COURSE_CONFIG.resources.additionalResources.map(resource => (
-            <a
-              href={resource.url}
-              class="block no-underline hover:underline bg-white dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors border border-gray-200 dark:border-gray-700 rounded p-3 hover:bg-gray-50 dark:hover:bg-gray-800"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <div class="flex items-center justify-between">
-                <div>
-                  <h3 class="text-base font-medium mt-0 mb-1">{resource.title}</h3>
-                  <p class="text-sm text-gray-600 dark:text-gray-300 m-0">
-                    {resource.description}
-                  </p>
+          {
+            COURSE_CONFIG.resources.additionalResources.map((resource) => (
+              <a
+                href={resource.url}
+                class="block no-underline hover:underline bg-white dark:bg-zinc-800/50 hover:bg-zinc-100 dark:hover:bg-zinc-700/50 transition-colors border border-zinc-200 dark:border-zinc-700 rounded p-3 hover:bg-zinc-50 dark:hover:bg-zinc-800"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <div class="flex items-center justify-between">
+                  <div>
+                    <h3 class="text-base font-medium mt-0 mb-1">
+                      {resource.title}
+                    </h3>
+                    <p class="text-sm text-zinc-600 dark:text-zinc-300 m-0">
+                      {resource.description}
+                    </p>
+                  </div>
+                  <ExternalLink class="w-3.5 h-3.5 text-zinc-400" />
                 </div>
-                <ExternalLink class="w-3.5 h-3.5 text-gray-400" />
-              </div>
-            </a>
-          ))}
+              </a>
+            ))
+          }
         </div>
       </section>
     </div>

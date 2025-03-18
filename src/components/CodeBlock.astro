@@ -1,0 +1,23 @@
+---
+import { Code } from "astro:components";
+import vesperLight from "../../public/theme/vesper-light.json";
+import vesperDark from "../../public/theme/vesper-dark.json";
+
+interface Props {
+  language?: string;
+  content: string;
+}
+
+const { language = "plaintext", content } = Astro.props;
+const codeContent = content;
+---
+
+<Code
+  class="!border !border-zinc-200 dark:!border-zinc-700 rounded-md"
+  code={codeContent}
+  lang={language as any}
+  themes={{
+    light: vesperLight as any,
+    dark: vesperDark as any,
+  }}
+/>

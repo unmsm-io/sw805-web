@@ -1,7 +1,7 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
-import { COURSE_CONFIG } from '../config/course';
-import { Mail, Clock, ExternalLink, GraduationCap } from 'lucide-astro';
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { COURSE_CONFIG } from "../config/course";
+import { Mail, Clock, ExternalLink, GraduationCap } from "lucide-astro";
 
 const { instructors } = COURSE_CONFIG;
 const [mainInstructor, teachingAssistant] = instructors;
@@ -15,7 +15,9 @@ const [mainInstructor, teachingAssistant] = instructors;
       <!-- Main Instructor -->
       <section>
         <h2 class="text-lg font-medium mt-0 mb-4">Profesor</h2>
-        <div class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded p-4">
+        <div
+          class="bg-white dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded p-4"
+        >
           <div class="flex gap-4">
             <img
               src={mainInstructor.image}
@@ -24,7 +26,9 @@ const [mainInstructor, teachingAssistant] = instructors;
               loading="lazy"
             />
             <div>
-              <h3 class="text-base font-medium mt-0 mb-1">{mainInstructor.name}</h3>
+              <h3 class="text-base font-medium mt-0 mb-1">
+                {mainInstructor.name}
+              </h3>
               <a
                 href={`mailto:${mainInstructor.email}`}
                 class="text-sm text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1"
@@ -33,11 +37,13 @@ const [mainInstructor, teachingAssistant] = instructors;
                 {mainInstructor.email}
                 <ExternalLink class="w-3.5 h-3.5" />
               </a>
-              <div class="mt-2 flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                <Clock class="w-3.5 h-3.5 text-gray-400" />
+              <div
+                class="mt-2 flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-300"
+              >
+                <Clock class="w-3.5 h-3.5 text-zinc-400" />
                 {mainInstructor.officeHours}
               </div>
-              <div class="mt-1 text-sm text-gray-600 dark:text-gray-300">
+              <div class="mt-1 text-sm text-zinc-600 dark:text-zinc-300">
                 <GraduationCap class="w-3.5 h-3.5 inline mr-1" />
                 {mainInstructor.education}
               </div>
@@ -49,7 +55,9 @@ const [mainInstructor, teachingAssistant] = instructors;
       <!-- Teaching Assistant -->
       <section>
         <h2 class="text-lg font-medium mt-0 mb-4">Jefe de Práctica</h2>
-        <div class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded p-4">
+        <div
+          class="bg-white dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded p-4"
+        >
           <div class="flex gap-4">
             <img
               src={teachingAssistant.image}
@@ -58,7 +66,9 @@ const [mainInstructor, teachingAssistant] = instructors;
               loading="lazy"
             />
             <div>
-              <h3 class="text-base font-medium mt-0 mb-1">{teachingAssistant.name}</h3>
+              <h3 class="text-base font-medium mt-0 mb-1">
+                {teachingAssistant.name}
+              </h3>
               <a
                 href={`mailto:${teachingAssistant.email}`}
                 class="text-sm text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1"
@@ -67,11 +77,13 @@ const [mainInstructor, teachingAssistant] = instructors;
                 {teachingAssistant.email}
                 <ExternalLink class="w-3.5 h-3.5" />
               </a>
-              <div class="mt-2 flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                <Clock class="w-3.5 h-3.5 text-gray-400" />
+              <div
+                class="mt-2 flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-300"
+              >
+                <Clock class="w-3.5 h-3.5 text-zinc-400" />
                 {teachingAssistant.officeHours}
               </div>
-              <div class="mt-1 text-sm text-gray-600 dark:text-gray-300">
+              <div class="mt-1 text-sm text-zinc-600 dark:text-zinc-300">
                 <GraduationCap class="w-3.5 h-3.5 inline mr-1" />
                 {teachingAssistant.education}
               </div>

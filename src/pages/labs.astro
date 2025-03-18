@@ -1,15 +1,19 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
-import { COURSE_CONFIG } from '../config/course';
-import { FileText, ExternalLink, ChevronRight } from 'lucide-astro';
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { COURSE_CONFIG } from "../config/course";
+import { FileText, ExternalLink, ChevronRight } from "lucide-astro";
 
 const allLabs = COURSE_CONFIG.modules
-  .flatMap(module => module.labs.map(lab => ({
-    ...lab,
-    module: module.title,
-    moduleId: module.id
-  })))
-  .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime());
+  .flatMap((module) =>
+    module.labs.map((lab) => ({
+      ...lab,
+      module: module.title,
+      moduleId: module.id,
+    })),
+  )
+  .sort(
+    (a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime(),
+  );
 ---
 
 <BaseLayout title="Laboratorios">
@@ -17,63 +21,60 @@ const allLabs = COURSE_CONFIG.modules
     <h1 class="text-2xl font-semibold mb-6">Laboratorios</h1>
 
     <div class="space-y-8">
-      {COURSE_CONFIG.modules.map(module => (
-        <section>
-          <div class="flex items-baseline gap-2 mb-4">
-            <h2 class="text-lg font-medium mt-0 mb-0">{module.title}</h2>
-            <span class="text-sm text-gray-500">Semanas {module.weeks}</span>
-          </div>
-          
-          <div class="grid gap-4 md:grid-cols-2">
-            {module.labs.map(lab => (
-              <article class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded p-4">
-                <div class="flex items-baseline justify-between mb-3">
-                  <h3 class="text-base font-medium mt-0 mb-0">
-                    {lab.title}
-                  </h3>
-                  <time 
-                    datetime={lab.dueDate}
-                    class="text-xs text-gray-500"
-                  >
-                    {new Date(lab.dueDate).toLocaleDateString('es-PE', {
-                      month: 'short',
-                      day: 'numeric'
-                    })}
-                  </time>
-                </div>
+      {
+        COURSE_CONFIG.modules.map((module) => (
+          <section>
+            <div class="flex items-baseline gap-2 mb-4">
+              <h2 class="text-lg font-medium mt-0 mb-0">{module.title}</h2>
+              <span class="text-sm text-zinc-500">Semanas {module.weeks}</span>
+            </div>
 
-                <ul class="mt-2 mb-3 space-y-1">
-                  {lab.files.map(file => (
-                    <li class="text-sm text-gray-600 dark:text-gray-300 flex items-center gap-2">
-                      <FileText class="w-3.5 h-3.5 text-gray-400" />
-                      {file}
-                    </li>
-                  ))}
-                </ul>
+            <div class="grid gap-4 md:grid-cols-2">
+              {module.labs.map((lab) => (
+                <article class="bg-white dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded p-4">
+                  <div class="flex items-baseline justify-between mb-3">
+                    <h3 class="text-base font-medium mt-0 mb-0">{lab.title}</h3>
+                    <time datetime={lab.dueDate} class="text-xs text-zinc-500">
+                      {new Date(lab.dueDate).toLocaleDateString("es-PE", {
+                        month: "short",
+                        day: "numeric",
+                      })}
+                    </time>
+                  </div>
 
-                <div class="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-gray-700">
-                  <a
-                    href={`/labs/${module.id}/${lab.id}`}
-                    class="text-sm text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 no-underline hover:underline flex items-center gap-1"
-                  >
-                    Ver detalles
-                    <ChevronRight class="w-4 h-4" />
-                  </a>
-                  <a
-                    href={`${COURSE_CONFIG.repository.url}/tree/${COURSE_CONFIG.repository.branch}/${lab.path}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="text-sm text-gray-600 hover:text-gray-500 dark:text-gray-400 dark:hover:text-gray-300 no-underline hover:underline flex items-center gap-1"
-                  >
-                    GitHub
-                    <ExternalLink class="w-3.5 h-3.5" />
-                  </a>
-                </div>
-              </article>
-            ))}
-          </div>
-        </section>
-      ))}
+                  <ul class="mt-2 mb-3 space-y-1">
+                    {lab.files.map((file) => (
+                      <li class="text-sm text-zinc-600 dark:text-zinc-300 flex items-center gap-2">
+                        <FileText class="w-3.5 h-3.5 text-zinc-400" />
+                        {file}
+                      </li>
+                    ))}
+                  </ul>
+
+                  <div class="flex items-center justify-between pt-3 border-t border-zinc-200 dark:border-zinc-700">
+                    <a
+                      href={`/labs/${module.id}/${lab.id}`}
+                      class="text-sm text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 no-underline hover:underline flex items-center gap-1"
+                    >
+                      Ver detalles
+                      <ChevronRight class="w-4 h-4" />
+                    </a>
+                    <a
+                      href={`${COURSE_CONFIG.repository.url}/tree/${COURSE_CONFIG.repository.branch}/${lab.path}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="text-sm text-zinc-600 hover:text-zinc-500 dark:text-zinc-400 dark:hover:text-zinc-300 no-underline hover:underline flex items-center gap-1"
+                    >
+                      GitHub
+                      <ExternalLink class="w-3.5 h-3.5" />
+                    </a>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+        ))
+      }
     </div>
   </div>
 </BaseLayout>

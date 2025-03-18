@@ -1,0 +1,55 @@
+---
+import BaseLayout from "./BaseLayout.astro";
+import { ChevronLeft } from "lucide-astro";
+
+interface Props {
+  frontmatter: {
+    title: string;
+    description: string;
+    pubDate: string;
+  };
+}
+
+const { frontmatter } = Astro.props;
+
+// Format date
+const formattedDate = new Date(frontmatter.pubDate).toLocaleDateString(
+  "es-ES",
+  {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  },
+);
+---
+
+<BaseLayout title={frontmatter.title} description={frontmatter.description}>
+  <div class="prose dark:prose-invert max-w-none">
+    <h1 class="text-2xl font-semibold mb-6">{frontmatter.title}</h1>
+
+    <div
+      class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between"
+    >
+      <p class="text-zinc-600 dark:text-zinc-400 text-sm mb-2 sm:mb-0">
+        {frontmatter.description}
+      </p>
+      <time datetime={frontmatter.pubDate} class="text-sm text-zinc-500">
+        {formattedDate}
+      </time>
+    </div>
+
+    <div class="space-y-6">
+      <slot />
+    </div>
+
+    <div class="mt-12 pt-6 border-t border-zinc-200 dark:border-zinc-800">
+      <a
+        href="/guides"
+        class="text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1 text-sm"
+      >
+        <ChevronLeft class="w-3.5 h-3.5" />
+        Volver a Guías
+      </a>
+    </div>
+  </div>
+</BaseLayout>
