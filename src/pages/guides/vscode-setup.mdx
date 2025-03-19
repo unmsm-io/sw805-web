@@ -3,6 +3,8 @@ layout: '../../layouts/GuideLayout.astro'
 title: 'Cómo configurar VSCode para usar MPI, OpenMP y Pthreads'
 description: 'Descubre cómo configurar Visual Studio Code para programar con MPI, OpenMP y Pthreads. Aprende a instalar extensiones, configurar tareas y resolver problemas comunes.'
 pubDate: '2024-03-20'
+author: 'Railly Hugo'
+authorImageUrl: '/hugo-profile.webp'
 ---
 import Alert from '../../components/Alert.astro';
 import CodeBlock from '../../components/CodeBlock.astro';
@@ -27,15 +29,15 @@ Antes de comenzar, asegúrate de tener:
   steps={[
     {
       title: "Descargar Visual Studio Code",
-      content: "Visita la [página oficial de Visual Studio Code](https://code.visualstudio.com) y descarga la versión correspondiente a tu sistema operativo. VSCode está disponible para Windows, macOS y varias distribuciones de Linux."
+      content: '<a href="https://code.visualstudio.com" target="_blank">Visita la página oficial de Visual Studio Code</a> y descarga la versión correspondiente a tu sistema operativo. VSCode está disponible para Windows, macOS y varias distribuciones de Linux.'
     },
     {
       title: "Instalar VSCode",
-      content: "Ejecuta el instalador y sigue las instrucciones en pantalla. En Windows, asegúrate de marcar la opción 'Add to PATH' durante la instalación para poder abrir VSCode desde la terminal."
+      content: "Ejecuta el instalador y sigue las instrucciones en pantalla. En Windows, asegúrate de marcar la opción <code>Add to PATH</code> durante la instalación para poder abrir VSCode desde la terminal."
     },
     {
       title: "Verificar la instalación",
-      content: "Abre VSCode y asegúrate de que se inicia correctamente. Familiarízate con la interfaz: el explorador de archivos a la izquierda, el editor en el centro y la terminal integrada que puedes abrir con `Ctrl+` (o `Cmd+` en macOS)."
+      content: "Abre VSCode y asegúrate de que se inicia correctamente. Familiarízate con la interfaz: el explorador de archivos a la izquierda, el editor en el centro y la terminal integrada que puedes abrir con <code>Ctrl+`</code> (o <code>Cmd+`</code> en macOS)."
     }
   ]}
 />

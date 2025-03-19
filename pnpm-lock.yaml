@@ -8,6 +8,9 @@ dependencies:
   '@astrojs/mdx':
     specifier: ^4.2.0
     version: 4.2.0(astro@5.5.2)
+  '@fontsource-variable/geist-mono':
+    specifier: ^5.2.5
+    version: 5.2.5
   '@fontsource-variable/heebo':
     specifier: ^5.1.1
     version: 5.2.5
@@ -369,6 +372,10 @@ packages:
     requiresBuild: true
     dev: false
     optional: true
+
+  /@fontsource-variable/geist-mono@5.2.5:
+    resolution: {integrity: sha512-zyuyDtO00SbmqU4Bo5XWzX2hE5RUxL+h2bv3P8SrmxqfqW66FU/xw5DW3xRQPqQgyEpb/Fh5FEFCpOna78dvCA==}
+    dev: false
 
   /@fontsource-variable/heebo@5.2.5:
     resolution: {integrity: sha512-EZ87fHaYm+0j6UcHzQ06vLwFVE6sUVghBoFteU8RyOt/TJlRE6RZ9dImonObreelZyseLXF4VrCfmAok/FsJ7g==}

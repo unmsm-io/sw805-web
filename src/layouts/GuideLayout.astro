@@ -7,6 +7,8 @@ interface Props {
     title: string;
     description: string;
     pubDate: string;
+    author: string;
+    authorImageUrl: string;
   };
 }
 
@@ -25,20 +27,27 @@ const formattedDate = new Date(frontmatter.pubDate).toLocaleDateString(
 
 <BaseLayout title={frontmatter.title} description={frontmatter.description}>
   <div class="prose dark:prose-invert max-w-none">
-    <h1 class="text-2xl font-semibold mb-6">{frontmatter.title}</h1>
-
-    <div
-      class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between"
-    >
-      <p class="text-zinc-600 dark:text-zinc-400 text-sm mb-2 sm:mb-0">
-        {frontmatter.description}
-      </p>
-      <time datetime={frontmatter.pubDate} class="text-sm text-zinc-500">
-        {formattedDate}
-      </time>
+    <div class="max-w-4xl mx-auto !mb-20">
+      <h1
+        class="text-5xl leading-tight tracking-tight mx-auto text-center font-semibold mb-0 pt-10"
+      >
+        {frontmatter.title}
+      </h1>
+      <div class="flex items-center mt-4 justify-center gap-2">
+        <img
+          src={frontmatter.authorImageUrl}
+          alt={frontmatter.author}
+          class="size-6 !m-0 rounded-full"
+        />
+        <span class="text-sm !m-0 font-medium">{frontmatter.author}</span>
+        <span class="text-zinc-400">·</span>
+        <time datetime={frontmatter.pubDate} class="text-sm text-zinc-400">
+          {formattedDate}
+        </time>
+      </div>
     </div>
 
-    <div class="space-y-6">
+    <div class="space-y-6 max-w-4xl mx-auto">
       <slot />
     </div>
 

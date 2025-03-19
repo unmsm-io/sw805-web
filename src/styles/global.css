@@ -4,6 +4,7 @@
 
 @theme {
   --font-sans: "Heebo Variable", "sans-serif";
+  --font-mono: "Geist Mono Variable", "monospace";
 }
 
 html.dark .astro-code,
