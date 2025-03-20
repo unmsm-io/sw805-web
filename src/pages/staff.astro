@@ -1,96 +1,242 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { COURSE_CONFIG } from "../config/course";
-import { Mail, Clock, ExternalLink, GraduationCap } from "lucide-astro";
+import {
+  Mail,
+  Clock,
+  ExternalLink,
+  GraduationCap,
+  Github,
+  Linkedin,
+  MapPin,
+} from "lucide-astro";
 
 const { instructors } = COURSE_CONFIG;
 const [mainInstructor, teachingAssistant] = instructors;
 ---
 
 <BaseLayout title="Equipo">
-  <div class="prose dark:prose-invert max-w-none">
-    <h1 class="text-2xl font-semibold mb-6">Equipo Docente</h1>
+  <div class="max-w-7xl mx-auto">
+    <div class="flex flex-col gap-8">
+      <div>
+        <h1 class="text-2xl font-semibold mb-2 tracking-tight">
+          Equipo Docente
+        </h1>
+        <p class="mt-6 text-zinc-600 dark:text-zinc-400">
+          Conoce al equipo detrás del curso de Programación Concurrente y
+          Paralela
+        </p>
+      </div>
 
-    <div class="space-y-8">
-      <!-- Main Instructor -->
-      <section>
-        <h2 class="text-lg font-medium mt-0 mb-4">Profesor</h2>
-        <div
-          class="bg-white dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded p-4"
-        >
-          <div class="flex gap-4">
-            <img
-              src={mainInstructor.image}
-              alt={mainInstructor.name}
-              class="w-36 h-36 mt-0 mb-0 object-cover rounded"
-              loading="lazy"
-            />
-            <div>
-              <h3 class="text-base font-medium mt-0 mb-1">
-                {mainInstructor.name}
-              </h3>
-              <a
-                href={`mailto:${mainInstructor.email}`}
-                class="text-sm text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1"
-              >
-                <Mail class="w-3.5 h-3.5" />
-                {mainInstructor.email}
-                <ExternalLink class="w-3.5 h-3.5" />
-              </a>
-              <div
-                class="mt-2 flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-300"
-              >
-                <Clock class="w-3.5 h-3.5 text-zinc-400" />
-                {mainInstructor.officeHours}
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Main Instructor -->
+        <div class="group relative">
+          <div
+            class="absolute -inset-px border border-transparent opacity-0 transition duration-300 group-hover:opacity-100"
+          >
+          </div>
+          <div
+            class="relative bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6"
+          >
+            <div class="flex flex-col gap-6">
+              <!-- Header with Image and Name -->
+              <div class="flex items-start gap-4">
+                <img
+                  src={mainInstructor.image}
+                  alt={mainInstructor.name}
+                  class="w-24 h-24 object-cover flex-shrink-0"
+                  loading="lazy"
+                />
+                <div>
+                  <h2 class="text-xl font-semibold tracking-tight">
+                    {mainInstructor.name}
+                    <span
+                      class="block text-sm font-normal text-zinc-600 dark:text-zinc-400 mt-1"
+                    >
+                      Profesor Principal
+                    </span>
+                  </h2>
+                  <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+                    {mainInstructor.specialization}
+                  </p>
+                </div>
               </div>
-              <div class="mt-1 text-sm text-zinc-600 dark:text-zinc-300">
-                <GraduationCap class="w-3.5 h-3.5 inline mr-1" />
-                {mainInstructor.education}
+
+              <!-- Two Column Layout for Info and Links -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Contact Information -->
+                <div class="space-y-3">
+                  <h3
+                    class="text-sm font-medium text-zinc-900 dark:text-zinc-100"
+                  >
+                    Información de Contacto
+                  </h3>
+                  <div class="space-y-2">
+                    <a
+                      href={`mailto:${mainInstructor.email}`}
+                      class="inline-flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 transition-colors"
+                    >
+                      <Mail class="w-4 h-4 flex-shrink-0" />
+                      <span>{mainInstructor.email}</span>
+                    </a>
+                    <div
+                      class="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400"
+                    >
+                      <Clock class="w-4 h-4 flex-shrink-0" />
+                      <span>{mainInstructor.officeHours}</span>
+                    </div>
+                    <div
+                      class="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400"
+                    >
+                      <GraduationCap class="w-4 h-4 flex-shrink-0" />
+                      <span>{mainInstructor.education}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Links and Profiles -->
+                <div class="space-y-3">
+                  <h3
+                    class="text-sm font-medium text-zinc-900 dark:text-zinc-100"
+                  >
+                    Enlaces y Perfiles
+                  </h3>
+                  <div class="space-y-2">
+                    <a
+                      href={mainInstructor.socialMedia.github}
+                      class="inline-flex items-center gap-2 text-sm text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200 transition-colors group/link w-full"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Github class="w-4 h-4 flex-shrink-0" />
+                      <span>GitHub</span>
+                      <ExternalLink
+                        class="w-3.5 h-3.5 opacity-0 group-hover/link:opacity-100 transition-opacity"
+                      />
+                    </a>
+                    <a
+                      href={mainInstructor.socialMedia.linkedin}
+                      class="inline-flex items-center gap-2 text-sm text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200 transition-colors group/link w-full"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Linkedin class="w-4 h-4 flex-shrink-0" />
+                      <span>LinkedIn</span>
+                      <ExternalLink
+                        class="w-3.5 h-3.5 opacity-0 group-hover/link:opacity-100 transition-opacity"
+                      />
+                    </a>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </section>
 
-      <!-- Teaching Assistant -->
-      <section>
-        <h2 class="text-lg font-medium mt-0 mb-4">Jefe de Práctica</h2>
-        <div
-          class="bg-white dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded p-4"
-        >
-          <div class="flex gap-4">
-            <img
-              src={teachingAssistant.image}
-              alt={teachingAssistant.name}
-              class="w-32 h-32 mt-0 mb-0 object-cover rounded"
-              loading="lazy"
-            />
-            <div>
-              <h3 class="text-base font-medium mt-0 mb-1">
-                {teachingAssistant.name}
-              </h3>
-              <a
-                href={`mailto:${teachingAssistant.email}`}
-                class="text-sm text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1"
-              >
-                <Mail class="w-3.5 h-3.5" />
-                {teachingAssistant.email}
-                <ExternalLink class="w-3.5 h-3.5" />
-              </a>
-              <div
-                class="mt-2 flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-300"
-              >
-                <Clock class="w-3.5 h-3.5 text-zinc-400" />
-                {teachingAssistant.officeHours}
+        <!-- Teaching Assistant -->
+        <div class="group relative">
+          <div
+            class="absolute -inset-px border border-transparent opacity-0 transition duration-300 group-hover:opacity-100"
+          >
+          </div>
+          <div
+            class="relative bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6"
+          >
+            <div class="flex flex-col gap-6">
+              <!-- Header with Image and Name -->
+              <div class="flex items-start gap-4">
+                <img
+                  src={teachingAssistant.image}
+                  alt={teachingAssistant.name}
+                  class="w-24 h-24 object-cover flex-shrink-0"
+                  loading="lazy"
+                />
+                <div>
+                  <h2 class="text-xl font-semibold tracking-tight">
+                    {teachingAssistant.name}
+                    <span
+                      class="block text-sm font-normal text-zinc-600 dark:text-zinc-400 mt-1"
+                    >
+                      Jefe de Práctica
+                    </span>
+                  </h2>
+                  <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+                    {teachingAssistant.specialization}
+                  </p>
+                </div>
               </div>
-              <div class="mt-1 text-sm text-zinc-600 dark:text-zinc-300">
-                <GraduationCap class="w-3.5 h-3.5 inline mr-1" />
-                {teachingAssistant.education}
+
+              <!-- Two Column Layout for Info and Links -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Contact Information -->
+                <div class="space-y-3">
+                  <h3
+                    class="text-sm font-medium text-zinc-900 dark:text-zinc-100"
+                  >
+                    Información de Contacto
+                  </h3>
+                  <div class="space-y-2">
+                    <a
+                      href={`mailto:${teachingAssistant.email}`}
+                      class="inline-flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 transition-colors"
+                    >
+                      <Mail class="w-4 h-4 flex-shrink-0" />
+                      <span>{teachingAssistant.email}</span>
+                    </a>
+                    <div
+                      class="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400"
+                    >
+                      <Clock class="w-4 h-4 flex-shrink-0" />
+                      <span>{teachingAssistant.officeHours}</span>
+                    </div>
+                    <div
+                      class="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400"
+                    >
+                      <GraduationCap class="w-4 h-4 flex-shrink-0" />
+                      <span>{teachingAssistant.education}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Links and Profiles -->
+                <div class="space-y-3">
+                  <h3
+                    class="text-sm font-medium text-zinc-900 dark:text-zinc-100"
+                  >
+                    Enlaces y Perfiles
+                  </h3>
+                  <div class="space-y-2">
+                    <a
+                      href={teachingAssistant.socialMedia.github}
+                      class="inline-flex items-center gap-2 text-sm text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200 transition-colors group/link w-full"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Github class="w-4 h-4 flex-shrink-0" />
+                      <span>GitHub</span>
+                      <ExternalLink
+                        class="w-3.5 h-3.5 opacity-0 group-hover/link:opacity-100 transition-opacity"
+                      />
+                    </a>
+                    <a
+                      href={teachingAssistant.socialMedia.linkedin}
+                      class="inline-flex items-center gap-2 text-sm text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200 transition-colors group/link w-full"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Linkedin class="w-4 h-4 flex-shrink-0" />
+                      <span>LinkedIn</span>
+                      <ExternalLink
+                        class="w-3.5 h-3.5 opacity-0 group-hover/link:opacity-100 transition-opacity"
+                      />
+                    </a>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </section>
+      </div>
     </div>
   </div>
 </BaseLayout>

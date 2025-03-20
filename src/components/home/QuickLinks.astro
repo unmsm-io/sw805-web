@@ -1,27 +1,13 @@
 ---
-// src/components/home/QuickLinks.astro
-import { Monitor, GraduationCap, Server } from "lucide-astro";
+import { Monitor, GraduationCap, Server, FileText } from "lucide-astro";
+import { COURSE_CONFIG } from "../../config/course";
 
-const links = [
-  {
-    title: "Guía de Instalación",
-    description: "Configura tu entorno de desarrollo",
-    href: "/resources/setup",
-    icon: Monitor,
-  },
-  {
-    title: "GitHub Student Pack",
-    description: "Accede a herramientas gratuitas",
-    href: "https://education.github.com/pack",
-    icon: GraduationCap,
-  },
-  {
-    title: "Recursos de HPC",
-    description: "Acceso a computación de alto rendimiento",
-    href: "/resources/hpc",
-    icon: Server,
-  },
-] as const;
+const iconMap = {
+  Monitor,
+  GraduationCap,
+  Server,
+  FileText,
+} as const;
 ---
 
 <section class="prose dark:prose-invert max-w-none">
@@ -29,22 +15,25 @@ const links = [
     <h2 class="text-xl mt-0 font-semibold mb-4">Links Útiles</h2>
     <div class="space-y-3">
       {
-        links.map(({ href, icon: Icon, title, description }) => (
-          <a
-            href={href}
-            class="block no-underline hover:underline p-3 bg-white dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded hover:bg-zinc-100 dark:hover:bg-zinc-700/50 transition-colors"
-            target={href.startsWith("http") ? "_blank" : undefined}
-            rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
-          >
-            <div class="flex items-center gap-3">
-              <Icon class="w-5 h-5 text-zinc-400" />
-              <div>
-                <div class="font-medium text-sm">{title}</div>
-                <div class="text-sm text-zinc-500">{description}</div>
+        COURSE_CONFIG.quickLinks.map(({ href, icon, title, description }) => {
+          const Icon = iconMap[icon as keyof typeof iconMap];
+          return (
+            <a
+              href={href}
+              class="block no-underline hover:underline p-3 bg-white dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded hover:bg-zinc-100 dark:hover:bg-zinc-700/50 transition-colors"
+              target={href.startsWith("http") ? "_blank" : undefined}
+              rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
+            >
+              <div class="flex items-center gap-3">
+                <Icon class="w-5 h-5 text-zinc-400" />
+                <div>
+                  <div class="font-medium text-sm">{title}</div>
+                  <div class="text-sm text-zinc-500">{description}</div>
+                </div>
               </div>
-            </div>
-          </a>
-        ))
+            </a>
+          );
+        })
       }
     </div>
   </div>

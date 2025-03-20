@@ -2,83 +2,185 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Hero from "../components/home/Hero.astro";
 import { COURSE_CONFIG } from "../config/course";
-import { Mail, Clock } from "lucide-astro";
+import {
+  Mail,
+  Clock,
+  Book,
+  Calendar,
+  GraduationCap,
+  MapPin,
+  FileText,
+  ExternalLink,
+} from "lucide-astro";
 
 const courseBasics = [
   { label: "Código", value: COURSE_CONFIG.code },
   { label: "Nombre", value: COURSE_CONFIG.name },
+  { label: "Tipo", value: COURSE_CONFIG.type },
+  { label: "Área", value: COURSE_CONFIG.area },
+  { label: "Ciclo", value: COURSE_CONFIG.cycle },
+  { label: "Modalidad", value: COURSE_CONFIG.modality },
 ];
 
 const courseDetails = [
   { label: "Semestre", value: COURSE_CONFIG.semester },
   { label: "Créditos", value: COURSE_CONFIG.credits },
-  { label: "Horario", value: COURSE_CONFIG.schedule.lectures },
-  { label: "Laboratorio", value: COURSE_CONFIG.schedule.labs },
-  { label: "Ubicación", value: COURSE_CONFIG.schedule.location },
-];
-
-const [mainInstructor, teachingAssistant] = COURSE_CONFIG.instructors;
-
-const staff = [
   {
-    role: "Profesor",
-    name: mainInstructor.name,
-    email: mainInstructor.email,
-    hours: mainInstructor.officeHours,
-    education: mainInstructor.education,
+    label: "Teoría",
+    value: `${COURSE_CONFIG.weeklyHours.theory} horas semanales`,
   },
   {
-    role: "Jefe de Práctica",
-    name: teachingAssistant.name,
-    email: teachingAssistant.email,
-    hours: teachingAssistant.officeHours,
-    education: teachingAssistant.education,
+    label: "Práctica",
+    value: `${COURSE_CONFIG.weeklyHours.practice} horas semanales`,
   },
+  {
+    label: "Laboratorio",
+    value: `${COURSE_CONFIG.weeklyHours.laboratory} horas semanales`,
+  },
+  { label: "Duración", value: `${COURSE_CONFIG.weeks} semanas` },
 ];
+
+const mainInstructor = COURSE_CONFIG.instructors[0];
+const teachingAssistant = COURSE_CONFIG.instructors[1];
 ---
 
-<BaseLayout title="Información General">
+<BaseLayout title="Sílabo">
   <Hero />
   <main class="prose dark:prose-invert max-w-6xl mx-auto p-6">
-    <!-- Staff -->
+    <div class="mb-8 flex items-center justify-between">
+      <h1 class="text-2xl font-bold mt-0 mb-0">Sílabo del Curso</h1>
+      <a
+        href={COURSE_CONFIG.syllabusUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:underline"
+      >
+        <FileText class="w-4 h-4" />
+        Ver Sílabo Oficial
+        <ExternalLink class="w-3 h-3" />
+      </a>
+    </div>
+
+    <!-- Course Information -->
     <section>
-      <h2 class="text-lg font-medium mt-0 mb-4">Equipo Docente</h2>
+      <h2 class="text-lg font-medium mt-0 mb-4">Información General</h2>
       <div class="grid gap-4 md:grid-cols-2">
         {
-          staff.map((member) => (
+          courseBasics.map((item) => (
             <div class="bg-white dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded p-4">
               <dt class="text-sm text-zinc-500 dark:text-zinc-400 mt-0">
-                {member.role}
+                {item.label}
               </dt>
-              <dd class="text-base font-medium mt-1 mb-3">{member.name}</dd>
-              <div class="space-y-2 text-sm">
-                <a
-                  href={`mailto:${member.email}`}
-                  class="items-center inline-flex gap-2 text-blue-600 dark:text-blue-400 hover:underline"
-                >
-                  <Mail class="w-3.5 h-3.5" />
-                  {member.email}
-                </a>
-                <div class="flex items-center gap-2 text-zinc-600 dark:text-zinc-300">
-                  <Clock class="w-3.5 h-3.5" />
-                  {member.hours}
-                </div>
-                {member.education && (
-                  <div class="text-zinc-600 dark:text-zinc-300">
-                    {member.education}
-                  </div>
-                )}
-              </div>
+              <dd class="text-base font-medium mt-1 mb-0">{item.value}</dd>
             </div>
           ))
         }
       </div>
     </section>
 
-    <!-- Prerequisites -->
-    <section>
-      <h2 class="text-lg font-medium mb-4">Prerrequisitos</h2>
+    <!-- Course Details -->
+    <section class="mt-8">
+      <h2 class="text-lg font-medium mb-4">Detalles del Curso</h2>
       <div class="grid gap-4 md:grid-cols-2">
+        {
+          courseDetails.map((item) => (
+            <div class="bg-white dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded p-4">
+              <dt class="text-sm text-zinc-500 dark:text-zinc-400 mt-0">
+                {item.label}
+              </dt>
+              <dd class="text-base font-medium mt-1 mb-0">{item.value}</dd>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <!-- Staff -->
+    <section class="mt-8">
+      <h2 class="text-lg font-medium mb-4">Equipo Docente</h2>
+      <div class="grid gap-4 md:grid-cols-2">
+        <div
+          class="bg-white dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded p-4"
+        >
+          <h3 class="text-base font-medium mt-0 mb-3">
+            {mainInstructor.name}
+            <span
+              class="text-sm font-normal text-zinc-500 dark:text-zinc-400 block"
+            >
+              {mainInstructor.title}
+            </span>
+          </h3>
+          <div class="space-y-2 text-sm">
+            <a
+              href={`mailto:${mainInstructor.email}`}
+              class="items-center inline-flex gap-2 text-blue-600 dark:text-blue-400 hover:underline"
+            >
+              <Mail class="w-3.5 h-3.5" />
+              {mainInstructor.email}
+            </a>
+            {
+              mainInstructor.officeHours && (
+                <div class="flex items-center gap-2 text-zinc-600 dark:text-zinc-300">
+                  <Clock class="w-3.5 h-3.5" />
+                  {mainInstructor.officeHours}
+                </div>
+              )
+            }
+            {
+              mainInstructor.education && (
+                <div class="flex items-center gap-2 text-zinc-600 dark:text-zinc-300">
+                  <GraduationCap class="w-3.5 h-3.5" />
+                  {mainInstructor.education}
+                </div>
+              )
+            }
+          </div>
+        </div>
+
+        <div
+          class="bg-white dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded p-4"
+        >
+          <h3 class="text-base font-medium mt-0 mb-3">
+            {teachingAssistant.name}
+            <span
+              class="text-sm font-normal text-zinc-500 dark:text-zinc-400 block"
+            >
+              {teachingAssistant.title}
+            </span>
+          </h3>
+          <div class="space-y-2 text-sm">
+            <a
+              href={`mailto:${teachingAssistant.email}`}
+              class="items-center inline-flex gap-2 text-blue-600 dark:text-blue-400 hover:underline"
+            >
+              <Mail class="w-3.5 h-3.5" />
+              {teachingAssistant.email}
+            </a>
+            {
+              teachingAssistant.officeHours && (
+                <div class="flex items-center gap-2 text-zinc-600 dark:text-zinc-300">
+                  <Clock class="w-3.5 h-3.5" />
+                  {teachingAssistant.officeHours}
+                </div>
+              )
+            }
+            {
+              teachingAssistant.education && (
+                <div class="flex items-center gap-2 text-zinc-600 dark:text-zinc-300">
+                  <GraduationCap class="w-3.5 h-3.5" />
+                  {teachingAssistant.education}
+                </div>
+              )
+            }
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Prerequisites -->
+    <section class="mt-8">
+      <h2 class="text-lg font-medium mb-4">Prerrequisitos</h2>
+      <div class="grid gap-4">
         {
           COURSE_CONFIG.prerequisites.map((prereq) => (
             <div class="bg-white dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded p-4">
@@ -94,60 +196,156 @@ const staff = [
       </div>
     </section>
 
+    <!-- Course Units -->
+    <section class="mt-8">
+      <h2 class="text-lg font-medium mb-4">Unidades de Aprendizaje</h2>
+      <div class="space-y-6">
+        {
+          COURSE_CONFIG.modules.map((module) => (
+            <div class="bg-white dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded p-4">
+              <h3 class="text-base font-medium mt-0 mb-2">{module.title}</h3>
+              <p class="text-sm text-zinc-500 dark:text-zinc-400 mb-3">
+                Semanas: {module.weeks}
+              </p>
+              <ul class="list-disc list-inside text-sm space-y-1 mt-0 mb-0">
+                {module.topics.map((topic) => (
+                  <li class="text-zinc-600 dark:text-zinc-300">{topic}</li>
+                ))}
+              </ul>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
     <!-- Grading -->
-    <section>
+    <section class="mt-8">
       <h2 class="text-lg font-medium mb-4">Sistema de Evaluación</h2>
-      <div
-        class="overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-700"
-      >
-        <table
-          class="min-w-full mt-0 mb-0 divide-y divide-zinc-200 dark:divide-zinc-700"
+      <div class="grid gap-6 md:grid-cols-3">
+        <div
+          class="bg-white dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded p-4"
         >
-          <thead class="bg-zinc-50 dark:bg-zinc-800">
-            <tr>
-              <th
-                scope="col"
-                class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider"
-              >
-                Evaluación
-              </th>
-              <th
-                scope="col"
-                class="px-6 py-3 text-right text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider"
-              >
-                Porcentaje
-              </th>
-            </tr>
-          </thead>
-          <tbody
-            class="bg-white dark:bg-zinc-900 divide-y divide-zinc-200 dark:divide-zinc-700"
-          >
+          <h3 class="text-base font-medium mt-0 mb-3">
+            Nota 1 <span
+              class="font-mono text-sm text-zinc-500 dark:text-zinc-400"
+              >(N1)</span
+            >
+          </h3>
+          <ul class="list-none p-0 m-0 space-y-2">
             {
-              Object.entries(COURSE_CONFIG.grading).map(([key, value]) => (
-                <tr>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-700 dark:text-zinc-300">
+              Object.entries(COURSE_CONFIG.grading.n1).map(([key, value]) => (
+                <li class="flex justify-between text-sm">
+                  <span class="text-zinc-600 dark:text-zinc-300">
                     {key.charAt(0).toUpperCase() + key.slice(1)}
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-medium text-zinc-900 dark:text-zinc-100">
-                    {value}%
-                  </td>
-                </tr>
+                  </span>
+                  <span class="font-medium">{value}%</span>
+                </li>
               ))
             }
-            <tr class="bg-zinc-50 dark:bg-zinc-800">
-              <td
-                class="px-6 py-4 whitespace-nowrap text-sm font-medium text-zinc-700 dark:text-zinc-300"
-              >
-                Total
-              </td>
-              <td
-                class="px-6 py-4 whitespace-nowrap text-sm text-right font-medium text-zinc-900 dark:text-zinc-100"
-              >
-                100%
-              </td>
-            </tr>
-          </tbody>
-        </table>
+          </ul>
+        </div>
+        <div
+          class="bg-white dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded p-4"
+        >
+          <h3 class="text-base font-medium mt-0 mb-3">
+            Nota 2 <span
+              class="font-mono text-sm text-zinc-500 dark:text-zinc-400"
+              >(N2)</span
+            >
+          </h3>
+          <ul class="list-none p-0 m-0 space-y-2">
+            {
+              Object.entries(COURSE_CONFIG.grading.n2).map(([key, value]) => (
+                <li class="flex justify-between text-sm">
+                  <span class="text-zinc-600 dark:text-zinc-300">
+                    {key.charAt(0).toUpperCase() + key.slice(1)}
+                  </span>
+                  <span class="font-medium">{value}%</span>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+        <div
+          class="bg-white dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded p-4"
+        >
+          <h3 class="text-base font-medium mt-0 mb-3">
+            Nota 3 <span
+              class="font-mono text-sm text-zinc-500 dark:text-zinc-400"
+              >(N3)</span
+            >
+          </h3>
+          <ul class="list-none p-0 m-0 space-y-2">
+            {
+              Object.entries(COURSE_CONFIG.grading.n3).map(([key, value]) => (
+                <li class="flex justify-between text-sm">
+                  <span class="text-zinc-600 dark:text-zinc-300">
+                    {key.charAt(0).toUpperCase() + key.slice(1)}
+                  </span>
+                  <span class="font-medium">{value}%</span>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Bibliography -->
+    <section class="mt-8">
+      <h2 class="text-lg font-medium mb-4">Bibliografía</h2>
+      <div class="space-y-4">
+        <div
+          class="bg-white dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded p-4"
+        >
+          <div class="flex gap-4">
+            <img
+              src={COURSE_CONFIG.resources.mainTextbook.coverImage}
+              alt="Portada del libro principal"
+              class="w-24 h-auto !my-0 object-cover rounded"
+            />
+            <div class="text-sm space-y-1">
+              <p class="m-0">
+                <span class="font-medium"
+                  >{COURSE_CONFIG.resources.mainTextbook.author}</span
+                >
+                {" "}({COURSE_CONFIG.resources.mainTextbook.year}).{" "}
+                <span class="italic"
+                  >{COURSE_CONFIG.resources.mainTextbook.title}</span
+                >.{" "}
+                {COURSE_CONFIG.resources.mainTextbook.publisher}.
+              </p>
+              <p class="text-zinc-500 dark:text-zinc-400 m-0">
+                ISBN: {COURSE_CONFIG.resources.mainTextbook.isbn}
+              </p>
+              <p class="text-zinc-500 dark:text-zinc-400 m-0">
+                Edición: {COURSE_CONFIG.resources.mainTextbook.edition}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-3">
+          {
+            COURSE_CONFIG.resources.additionalResources.map((resource) => (
+              <div class="bg-white dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded p-4">
+                <div class="text-sm space-y-1">
+                  <p class="m-0">
+                    <span class="font-medium">{resource.author}</span> (
+                    {resource.year}).{" "}
+                    <span class="italic">{resource.title}</span>.{" "}
+                    {resource.publisher}.
+                  </p>
+                  {"isbn" in resource && (
+                    <p class="text-zinc-500 dark:text-zinc-400 m-0">
+                      ISBN: {resource.isbn}
+                    </p>
+                  )}
+                </div>
+              </div>
+            ))
+          }
+        </div>
       </div>
     </section>
   </main>
