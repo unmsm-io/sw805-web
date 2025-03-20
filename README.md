@@ -5,8 +5,11 @@
 Curso avanzado que cubre paradigmas de programación paralela, diseño de sistemas concurrentes y computación de alto rendimiento. Enfoque práctico utilizando OpenMP, MPI, CUDA y Pthreads.
 
 ## Equipo Docente
-**Profesor**: Dr. Herminio Paucar (herminiopaucar@gmail.com)  
-**Jefe de Práctica**: Railly Hugo (raillyhugo@gmail.com)
+**Profesor**: Dr. Herminio Paucar  
+[![GitHub](https://img.shields.io/badge/GitHub-hpaucar-181717?style=flat&logo=github)](https://github.com/hpaucar) [![LinkedIn](https://img.shields.io/badge/LinkedIn-Herminio_Paucar-0077B5?style=flat&logo=linkedin)](https://www.linkedin.com/in/herminio-paucar/)
+
+**Jefe de Práctica**: Railly Hugo  
+[![GitHub](https://img.shields.io/badge/GitHub-railly-181717?style=flat&logo=github)](https://github.com/railly) [![LinkedIn](https://img.shields.io/badge/LinkedIn-Railly_Hugo-0077B5?style=flat&logo=linkedin)](https://www.linkedin.com/in/railly-hugo/)
 
 ## Prerrequisitos
 - 20W0804 - Sistemas Operativos
