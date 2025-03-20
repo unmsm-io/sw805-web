@@ -1,48 +1,43 @@
-# Astro Starter Kit: Basics
+# Programación Concurrente y Paralela
+### 20W0805 | UNMSM FISI | 2025-I
 
-```sh
-npm create astro@latest -- --template basics
-```
+## Descripción
+Curso avanzado que cubre paradigmas de programación paralela, diseño de sistemas concurrentes y computación de alto rendimiento. Enfoque práctico utilizando OpenMP, MPI, CUDA y Pthreads.
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/withastro/astro/tree/latest/examples/basics)
-[![Open with CodeSandbox](https://assets.codesandbox.io/github/button-edit-lime.svg)](https://codesandbox.io/p/sandbox/github/withastro/astro/tree/latest/examples/basics)
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/withastro/astro?devcontainer_path=.devcontainer/basics/devcontainer.json)
+## Equipo Docente
+**Profesor**: Dr. Herminio Paucar (herminiopaucar@gmail.com)  
+**Jefe de Práctica**: Railly Hugo (raillyhugo@gmail.com)
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## Prerrequisitos
+- 20W0804 - Sistemas Operativos
 
-![just-the-basics](https://github.com/withastro/astro/assets/2244813/a0a5533c-a856-4198-8470-2d67b1d7c554)
+## Material del Curso
+### Texto Principal
+Pacheco, P. S., & Malensek, M. (2022). *An Introduction to Parallel Programming* (2da ed.). Morgan Kaufmann.
 
-## 🚀 Project Structure
+### Entorno de Desarrollo
+- Suite de Compiladores GCC/G++
+- Framework OpenMPI
+- NVIDIA CUDA Toolkit
+- Visual Studio Code + Extensiones
 
-Inside of your Astro project, you'll see the following folders and files:
+## Fechas Importantes
+- Inicio de Clases: 26 de marzo, 2025
+- Examen Parcial: 22 de abril, 2025
+- Examen Final: 8 de julio, 2025
 
-```text
-/
-├── public/
-│   └── favicon.svg
-├── src/
-│   ├── layouts/
-│   │   └── Layout.astro
-│   └── pages/
-│       └── index.astro
-└── package.json
-```
+## Sistema de Evaluación
+| Componente    | Peso |
+|--------------|------|
+| Ejercicios   | 20%  |
+| Foros        | 20%  |
+| Lecturas     | 10%  |
+| Exámenes     | 50%  |
 
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
+## Licencia
+Licencia MIT
 
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+---
+Departamento de Ingeniería de Software  
+Facultad de Ingeniería de Sistemas e Informática  
+Universidad Nacional Mayor de San Marcos
