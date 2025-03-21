@@ -1,19 +1,40 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { COURSE_CONFIG } from "../config/course";
+import { getCollection, type CollectionEntry } from "astro:content";
+import { COURSE_CONFIG, type WeekContent } from "../config/course";
 import { FileText, ExternalLink, ChevronRight } from "lucide-astro";
 
-const allLabs = COURSE_CONFIG.modules
-  .flatMap((module) =>
-    module.labs.map((lab) => ({
-      ...lab,
-      module: module.title,
-      moduleId: module.id,
-    })),
-  )
-  .sort(
-    (a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime(),
-  );
+const allLabs = await getCollection("labs");
+
+// Group labs by module
+const labsByModule = COURSE_CONFIG.modules
+  .map((module) => ({
+    ...module,
+    labs: module.content
+      .filter(
+        (
+          week,
+        ): week is WeekContent & { lab: NonNullable<WeekContent["lab"]> } =>
+          week.lab !== null,
+      )
+      .map((week) => {
+        const labEntry = allLabs.find(
+          (entry: CollectionEntry<"labs">) =>
+            entry.id === `${module.id}/${week.lab.id}`,
+        );
+        return {
+          ...week.lab,
+          entry: labEntry,
+          week: week.week,
+          topic: week.topic,
+        };
+      })
+      .filter(
+        (lab): lab is typeof lab & { entry: CollectionEntry<"labs"> } =>
+          lab.entry !== undefined,
+      ),
+  }))
+  .filter((module) => module.labs.length > 0);
 ---
 
 <BaseLayout title="Laboratorios">
@@ -22,7 +43,7 @@ const allLabs = COURSE_CONFIG.modules
 
     <div class="space-y-8">
       {
-        COURSE_CONFIG.modules.map((module) => (
+        labsByModule.map((module) => (
           <section>
             <div class="flex items-baseline gap-2 mb-4">
               <h2 class="text-lg font-medium mt-0 mb-0">{module.title}</h2>
@@ -33,17 +54,29 @@ const allLabs = COURSE_CONFIG.modules
               {module.labs.map((lab) => (
                 <article class="bg-white dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded p-4">
                   <div class="flex items-baseline justify-between mb-3">
-                    <h3 class="text-base font-medium mt-0 mb-0">{lab.title}</h3>
-                    <time datetime={lab.dueDate} class="text-xs text-zinc-500">
-                      {new Date(lab.dueDate).toLocaleDateString("es-PE", {
-                        month: "short",
-                        day: "numeric",
-                      })}
+                    <h3 class="text-base font-medium mt-0 mb-0">
+                      {lab.entry.data.title}
+                    </h3>
+                    <time
+                      datetime={lab.entry.data.dueDate}
+                      class="text-xs text-zinc-500"
+                    >
+                      {new Date(lab.entry.data.dueDate).toLocaleDateString(
+                        "es-PE",
+                        {
+                          month: "short",
+                          day: "numeric",
+                        },
+                      )}
                     </time>
                   </div>
 
+                  <p class="text-sm text-zinc-600 dark:text-zinc-300 mt-2 mb-3">
+                    Semana {lab.week}: {lab.topic}
+                  </p>
+
                   <ul class="mt-2 mb-3 space-y-1">
-                    {lab.files.map((file) => (
+                    {lab.entry.data.files.map((file: string) => (
                       <li class="text-sm text-zinc-600 dark:text-zinc-300 flex items-center gap-2">
                         <FileText class="w-3.5 h-3.5 text-zinc-400" />
                         {file}
@@ -60,7 +93,7 @@ const allLabs = COURSE_CONFIG.modules
                       <ChevronRight class="w-4 h-4" />
                     </a>
                     <a
-                      href={`${COURSE_CONFIG.repository.url}/tree/${COURSE_CONFIG.repository.branch}/${lab.path}`}
+                      href={`${COURSE_CONFIG.repository.url}/tree/${COURSE_CONFIG.repository.branch}/${lab.entry.data.path}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       class="text-sm text-zinc-600 hover:text-zinc-500 dark:text-zinc-400 dark:hover:text-zinc-300 no-underline hover:underline flex items-center gap-1"

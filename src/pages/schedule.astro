@@ -2,44 +2,35 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import WeeklySchedule from "../components/schedule/WeeklySchedule.astro";
 import ImportantDates from "../components/schedule/ImportantDates.astro";
-import { COURSE_CONFIG } from "../config/course";
-
-// Helper function to get week number relative to semester start
-function getWeekNumber(date: Date, semesterStart: Date): number {
-  const diffTime = date.getTime() - semesterStart.getTime();
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  return Math.ceil(diffDays / 7);
-}
+import { COURSE_CONFIG, type WeekContent } from "../config/course";
 
 // Get semester start date from the first important date
 const semesterStart = new Date(COURSE_CONFIG.importantDates[0].date);
 
 // Generate weekly schedule from modules
-const weeklySchedule = COURSE_CONFIG.modules
-  .flatMap((module) => {
-    const [startWeek, endWeek] = module.weeks.split("-").map(Number);
-    return Array.from({ length: endWeek - startWeek + 1 }, (_, i) => ({
-      week: startWeek + i,
-      module: module.title,
-      topics: module.topics,
-      labs: module.labs.filter((lab) => {
-        const labDate = new Date(lab.dueDate);
-        const labWeek = getWeekNumber(labDate, semesterStart);
-        return labWeek === startWeek + i;
-      }),
-    }));
-  })
+const weeklySchedule: WeekContent[] = COURSE_CONFIG.modules
+  .flatMap((module) => [...module.content])
   .sort((a, b) => a.week - b.week);
 
+type ImportantDate = {
+  event: string;
+  date: string;
+  type: "lab" | "milestone";
+};
+
 // Important dates combining lab deadlines and course milestones
-const importantDates = [
-  ...COURSE_CONFIG.modules.flatMap((module) =>
-    module.labs.map((lab) => ({
-      event: `Entrega: ${lab.title}`,
-      date: lab.dueDate,
+const importantDates: ImportantDate[] = [
+  ...COURSE_CONFIG.modules
+    .flatMap((module) => [...module.content])
+    .filter(
+      (week): week is WeekContent & { lab: NonNullable<WeekContent["lab"]> } =>
+        week.lab !== null,
+    )
+    .map((week) => ({
+      event: `Entrega: ${week.lab.title}`,
+      date: week.lab.dueDate,
       type: "lab" as const,
     })),
-  ),
   ...COURSE_CONFIG.importantDates.map((date) => ({
     ...date,
     type: "milestone" as const,

@@ -1,0 +1,33 @@
+---
+import type { GetStaticPaths } from "astro";
+import { getCollection, getEntry, render } from "astro:content";
+import GuideLayout from "../../../../layouts/GuideLayout.astro";
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const labs = await getCollection("labs");
+  return labs.map((entry) => {
+    const [unit, labId] = entry.id.split("/");
+    return {
+      params: { unit, labId },
+      props: { id: entry.id },
+    };
+  });
+};
+
+interface Props {
+  id: string;
+}
+
+const { id } = Astro.props;
+const entry = await getEntry("labs", id);
+
+if (!entry) {
+  return Astro.redirect("/404");
+}
+
+const { Content } = await render(entry);
+---
+
+<GuideLayout frontmatter={entry.data}>
+  <Content />
+</GuideLayout>

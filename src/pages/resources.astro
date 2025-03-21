@@ -19,7 +19,7 @@ const additionalDocs = [
     description: "Documentación completa de NVIDIA CUDA",
     url: "https://docs.nvidia.com/cuda/",
   },
-] as const;
+];
 ---
 
 <BaseLayout title="Recursos">
@@ -123,9 +123,6 @@ const additionalDocs = [
                     <h4 class="text-base font-medium mb-2 mt-0">
                       {resource.title}
                     </h4>
-                    <p class="text-sm text-zinc-600 dark:text-zinc-300 mb-1">
-                      {resource.description}
-                    </p>
                     <p class="text-sm text-zinc-500 mb-0">
                       {resource.author} - {resource.publisher}, {resource.year}
                     </p>

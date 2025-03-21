@@ -1,21 +1,9 @@
 ---
-import { Calendar, BookOpen, Beaker } from "lucide-astro";
-
-interface Lab {
-  id: string;
-  title: string;
-  dueDate: string;
-}
-
-interface ScheduleItem {
-  week: number;
-  module: string;
-  topics: string[];
-  labs: Lab[];
-}
+import { Calendar, BookOpen, Beaker, FileText } from "lucide-astro";
+import type { WeekContent } from "../../config/course";
 
 interface Props {
-  schedule: ScheduleItem[];
+  schedule: WeekContent[];
 }
 
 const { schedule } = Astro.props;
@@ -34,7 +22,7 @@ const { schedule } = Astro.props;
           <div class="border-l-2 border-zinc-200 dark:border-zinc-700 pl-4">
             <div class="flex items-baseline gap-2">
               <h3 class="text-lg font-medium mt-0 mb-0">Semana {week.week}</h3>
-              <span class="text-sm text-zinc-500">{week.module}</span>
+              <span class="text-sm text-zinc-500">{week.topic}</span>
             </div>
 
             <div class="mt-4 grid gap-6 md:grid-cols-2">
@@ -44,40 +32,44 @@ const { schedule } = Astro.props;
                   Temas
                 </h4>
                 <ul class="mt-0 mb-0 space-y-1">
-                  {week.topics.map((topic) => (
+                  {week.subtopics.map((subtopic) => (
                     <li class="text-sm text-zinc-600 dark:text-zinc-300">
-                      {topic}
+                      {subtopic}
                     </li>
                   ))}
                 </ul>
+
+                <h4 class="text-sm font-medium mt-4 mb-2 flex items-center gap-2">
+                  <FileText class="w-4 h-4 text-zinc-400" />
+                  Actividad
+                </h4>
+                <p class="text-sm text-zinc-600 dark:text-zinc-300 mt-0">
+                  {week.activity}
+                </p>
               </div>
 
-              {week.labs.length > 0 && (
+              {week.lab && (
                 <div>
                   <h4 class="text-sm font-medium mt-0 mb-2 flex items-center gap-2">
                     <Beaker class="w-4 h-4 text-zinc-400" />
-                    Laboratorios
+                    Laboratorio
                   </h4>
-                  <ul class="mt-0 mb-0 space-y-2">
-                    {week.labs.map((lab) => (
-                      <li class="text-sm">
-                        <a
-                          href={`/labs/${lab.id}`}
-                          class="text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 no-underline hover:underline"
-                        >
-                          {lab.title}
-                        </a>
-                        <div class="mt-1 text-zinc-500 text-xs">
-                          Entrega:{" "}
-                          {new Date(lab.dueDate).toLocaleDateString("es-PE", {
-                            weekday: "long",
-                            month: "long",
-                            day: "numeric",
-                          })}
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
+                  <div class="text-sm">
+                    <a
+                      href={`/labs/${week.lab.unitId}/${week.lab.id}`}
+                      class="text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 no-underline hover:underline"
+                    >
+                      {week.lab.title}
+                    </a>
+                    <div class="mt-1 text-zinc-500 text-xs">
+                      Entrega:{" "}
+                      {new Date(week.lab.dueDate).toLocaleDateString("es-PE", {
+                        weekday: "long",
+                        month: "long",
+                        day: "numeric",
+                      })}
+                    </div>
+                  </div>
                 </div>
               )}
             </div>

@@ -1,5 +1,5 @@
 ---
-import { COURSE_CONFIG } from "../../config/course";
+import { COURSE_CONFIG, type WeekContent } from "../../config/course";
 import {
   FileText,
   Calendar,
@@ -29,12 +29,17 @@ const mainNavigation = [
 const modules = COURSE_CONFIG.modules.map((module) => ({
   id: module.id,
   title: module.title,
-  labs: module.labs.map((lab) => ({
-    id: lab.id,
-    title: lab.title,
-    href: `/labs/${module.id}/${lab.id}`,
-    dueDate: lab.dueDate,
-  })),
+  labs: module.content
+    .filter(
+      (week): week is WeekContent & { lab: NonNullable<WeekContent["lab"]> } =>
+        week.lab !== null,
+    )
+    .map((week) => ({
+      id: week.lab.id,
+      title: week.lab.title,
+      href: `/labs/${module.id}/${week.lab.id}`,
+      dueDate: week.lab.dueDate,
+    })),
 }));
 ---
 

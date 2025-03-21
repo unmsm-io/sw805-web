@@ -1,14 +1,17 @@
 ---
-layout: '../../layouts/GuideLayout.astro'
-title: 'Cómo configurar VSCode para usar MPI, OpenMP y Pthreads'
-description: 'Descubre cómo configurar Visual Studio Code para programar con MPI, OpenMP y Pthreads. Aprende a instalar extensiones, configurar tareas y resolver problemas comunes.'
-pubDate: '2024-03-20'
-author: 'Railly Hugo'
-authorImageUrl: '/hugo-profile.webp'
+title: "Cómo configurar VSCode para usar MPI, OpenMP y Pthreads"
+description: "Descubre cómo configurar Visual Studio Code para programar con MPI, OpenMP y Pthreads. Aprende a instalar extensiones, configurar tareas y resolver problemas comunes."
+pubDate: "2025-03-20"
+author: "Railly Hugo"
+authorImageUrl: "/hugo-profile.webp"
+dueDate: "2024-04-03"
+files: ["environment_setup.md"]
+path: "Laboratory/Setup"
 ---
-import Alert from '../../components/Alert.astro';
-import CodeBlock from '../../components/CodeBlock.astro';
-import StepGuide from '../../components/StepGuide.astro';
+
+import Alert from "../../../components/Alert.astro";
+import CodeBlock from "../../../components/CodeBlock.astro";
+import StepGuide from "../../../components/StepGuide.astro";
 
 ## Por qué una buena configuración importa
 
@@ -88,7 +91,7 @@ OpenMP es una API para programación paralela en sistemas de memoria compartida.
       "command": "gcc",
       "args": [
         "-fopenmp",
-        "${file}",
+        "\${file}",
         "-o",
         "\${fileDirname}/\${fileBasenameNoExtension}"
       ],
@@ -147,7 +150,7 @@ Para programar con POSIX Threads (Pthreads):
       "type": "shell",
       "command": "gcc",
       "args": [
-        "${file}",
+        "\${file}",
         "-o",
         "\${fileDirname}/\${fileBasenameNoExtension}",
         "-pthread"
@@ -275,4 +278,4 @@ Si recibes errores relacionados con OpenMP:
 
 <Alert type="tip">
   Recuerda que la configuración es solo el primer paso. La práctica constante y la experimentación son clave para dominar la programación paralela. ¡No tengas miedo de probar diferentes enfoques y aprender de los errores!
-</Alert>
+</Alert> 

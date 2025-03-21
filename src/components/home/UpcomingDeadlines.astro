@@ -1,15 +1,22 @@
 ---
-import { COURSE_CONFIG } from "../../config/course";
+import { COURSE_CONFIG, type WeekContent } from "../../config/course";
 import { Calendar, BookOpen } from "lucide-astro";
 
 const allDeadlines = [
-  ...COURSE_CONFIG.modules
-    .flatMap((module) => module.labs)
-    .map((lab) => ({
-      type: "lab" as const,
-      title: lab.title,
-      date: lab.dueDate,
-    })),
+  ...COURSE_CONFIG.modules.flatMap((module) =>
+    module.content
+      .filter(
+        (
+          week,
+        ): week is WeekContent & { lab: NonNullable<WeekContent["lab"]> } =>
+          week.lab !== null,
+      )
+      .map((week) => ({
+        type: "lab" as const,
+        title: week.lab.title,
+        date: week.lab.dueDate,
+      })),
+  ),
   ...COURSE_CONFIG.importantDates.map((date) => ({
     type: "event" as const,
     title: date.event,

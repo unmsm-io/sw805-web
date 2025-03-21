@@ -42,6 +42,11 @@ const courseDetails = [
 
 const mainInstructor = COURSE_CONFIG.instructors[0];
 const teachingAssistant = COURSE_CONFIG.instructors[1];
+
+const moduleTopics = COURSE_CONFIG.modules.map((module) => ({
+  ...module,
+  topics: [...new Set(module.content.map((week) => week.topic))],
+}));
 ---
 
 <BaseLayout title="Sílabo">
@@ -201,7 +206,7 @@ const teachingAssistant = COURSE_CONFIG.instructors[1];
       <h2 class="text-lg font-medium mb-4">Unidades de Aprendizaje</h2>
       <div class="space-y-6">
         {
-          COURSE_CONFIG.modules.map((module) => (
+          moduleTopics.map((module) => (
             <div class="bg-white dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded p-4">
               <h3 class="text-base font-medium mt-0 mb-2">{module.title}</h3>
               <p class="text-sm text-zinc-500 dark:text-zinc-400 mb-3">
