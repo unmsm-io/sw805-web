@@ -9,6 +9,7 @@ export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
   },
+  site: "https://sw805.vercel.app",
   integrations: [mdx()],
   markdown: {
     shikiConfig: {
