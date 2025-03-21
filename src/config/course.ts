@@ -494,7 +494,7 @@ export const COURSE_CONFIG = {
     {
       title: "Guía de Instalación",
       description: "Configura tu entorno de desarrollo",
-      href: "/guides/setup",
+      href: "/labs/unit1/lab1",
       icon: "Monitor"
     },
     {
