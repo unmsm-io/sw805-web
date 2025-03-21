@@ -9,22 +9,91 @@ import "../styles/global.css";
 interface Props {
   title: string;
   description?: string;
+  image?: string;
+  canonicalURL?: string;
+  type?: "website" | "article";
 }
 
 const {
   title,
   description = "Curso de Programación Paralela y Concurrente - UNMSM",
+  image = "/og-image.jpg",
+  canonicalURL = new URL(Astro.url.pathname, Astro.site).href,
+  type = "website",
 } = Astro.props;
+
+const siteInfo = {
+  siteName: `${COURSE_CONFIG.code} - ${COURSE_CONFIG.name}`,
+  siteUrl: Astro.site,
+  author: COURSE_CONFIG.instructors[0].name,
+};
+
+// JSON-LD structured data
+const jsonLD = {
+  "@context": "https://schema.org",
+  "@type": type === "website" ? "WebSite" : "Article",
+  name: title,
+  description: description,
+  url: canonicalURL,
+  author: {
+    "@type": "Person",
+    name: siteInfo.author,
+  },
+  publisher: {
+    "@type": "Organization",
+    name: COURSE_CONFIG.university,
+    logo: {
+      "@type": "ImageObject",
+      url: `${siteInfo.siteUrl}/logo.png`,
+    },
+  },
+};
 ---
 
 <!doctype html>
-<html lang="es">
+<html lang="es" dir="ltr">
   <head>
+    <!-- Essential Meta Tags -->
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
     <meta name="description" content={description} />
+    <meta name="author" content={siteInfo.author} />
+    <meta name="robots" content="index, follow" />
+    <meta name="generator" content={Astro.generator} />
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href={canonicalURL} />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content={type} />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={new URL(image, Astro.site)} />
+    <meta property="og:site_name" content={siteInfo.siteName} />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content={canonicalURL} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={new URL(image, Astro.site)} />
+
+    <!-- Favicons -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <title>{title} | {COURSE_CONFIG.code}</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#ffffff" />
+
+    <!-- JSON-LD -->
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLD)} />
+
+    <title>{title} | {siteInfo.siteName}</title>
   </head>
   <body
     class="min-h-screen h-full dark:[color-scheme:dark] bg-zinc-50 dark:bg-zinc-900 font-sans antialiased"
