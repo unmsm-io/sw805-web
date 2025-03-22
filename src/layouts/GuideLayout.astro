@@ -13,9 +13,13 @@ interface Props {
     tags?: string[];
     category?: string;
   };
+  id: string;
 }
 
-const { frontmatter } = Astro.props;
+const { frontmatter, id } = Astro.props;
+
+const labNumberMatch = id.match(/lab(\d+)/);
+const labNumber = labNumberMatch ? labNumberMatch[1] : null;
 
 // Format date
 const formattedDate = new Date(frontmatter.pubDate).toLocaleDateString(
@@ -48,9 +52,18 @@ const isoDate = new Date(frontmatter.pubDate).toISOString();
         <meta itemprop="keywords" content={frontmatter.tags.join(", ")} />
       )
     }
-    <div class="max-w-4xl mx-auto !mb-20">
+    <div class="max-w-4xl mx-auto !mb-8">
+      {
+        labNumber && (
+          <div class="flex justify-center pt-10 pb-2">
+            <span class="px-3 py-1 text-xs font-semibold border border-zinc-300 dark:border-zinc-600 text-black dark:text-white bg-white dark:bg-zinc-800 rounded-full">
+              Laboratorio {labNumber}
+            </span>
+          </div>
+        )
+      }
       <h1
-        class="text-5xl leading-tight tracking-tight mx-auto text-center font-semibold mb-0 pt-10"
+        class="text-5xl leading-tight tracking-tight mx-auto text-center font-semibold mb-0 pt-4"
         itemprop="headline"
       >
         {frontmatter.title}

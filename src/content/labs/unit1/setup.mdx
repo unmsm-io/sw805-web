@@ -1,0 +1,281 @@
+---
+title: "Cómo configurar VSCode para usar MPI, OpenMP y Pthreads"
+description: "Descubre cómo configurar Visual Studio Code para programar con MPI, OpenMP y Pthreads. Aprende a instalar extensiones, configurar tareas y resolver problemas comunes."
+pubDate: "2025-03-20"
+author: "Railly Hugo"
+authorImageUrl: "/hugo-profile.webp"
+dueDate: "2024-04-03"
+files: ["environment_setup.md"]
+path: "Laboratory/Setup"
+---
+
+import Alert from "../../../components/Alert.astro";
+import CodeBlock from "../../../components/CodeBlock.astro";
+import StepGuide from "../../../components/StepGuide.astro";
+
+## Por qué una buena configuración importa
+
+Cuando nos adentramos en el mundo de la programación paralela, contar con un entorno de desarrollo adecuado no es solo una cuestión de comodidad, sino de productividad. Visual Studio Code se ha convertido en uno de los editores más populares gracias a su equilibrio entre ligereza y potencia, además de su gran ecosistema de extensiones.
+
+![Visual Studio Code Interface](/images/guides/vscode-interface.webp)
+
+## Requisitos Previos
+
+Antes de comenzar, asegúrate de tener:
+- Un sistema operativo compatible (Windows, macOS, o Linux)
+- Conexión a internet para descargar VSCode y las extensiones
+- Permisos de administrador en tu sistema
+
+## Pasos de Instalación
+
+<StepGuide
+  steps={[
+    {
+      title: "Descargar Visual Studio Code",
+      content: '<a href="https://code.visualstudio.com" target="_blank">Visita la página oficial de Visual Studio Code</a> y descarga la versión correspondiente a tu sistema operativo. VSCode está disponible para Windows, macOS y varias distribuciones de Linux.'
+    },
+    {
+      title: "Instalar VSCode",
+      content: "Ejecuta el instalador y sigue las instrucciones en pantalla. En Windows, asegúrate de marcar la opción <code>Add to PATH</code> durante la instalación para poder abrir VSCode desde la terminal."
+    },
+    {
+      title: "Verificar la instalación",
+      content: "Abre VSCode y asegúrate de que se inicia correctamente. Familiarízate con la interfaz: el explorador de archivos a la izquierda, el editor en el centro y la terminal integrada que puedes abrir con <code>Ctrl+`</code> (o <code>Cmd+`</code> en macOS)."
+    }
+  ]}
+/>
+
+![VSCode Installation Options](/images/guides/vscode-installation.webp)
+
+## Extensiones Esenciales
+
+Las siguientes extensiones transformarán VSCode en un poderoso IDE para programación paralela:
+
+1. **C/C++ Extension Pack**
+   - ID: `ms-vscode.cpptools`
+   - Proporciona soporte para C/C++, debugging y IntelliSense
+   - Incluye herramientas para formateo de código y análisis estático
+
+2. **Code Runner**
+   - ID: `formulahendry.code-runner`
+   - Permite ejecutar fragmentos de código directamente desde el editor
+   - Útil para probar pequeños ejemplos rápidamente
+
+3. **CMake Tools**
+   - ID: `ms-vscode.cmake-tools`
+   - Facilita la configuración y compilación de proyectos con CMake
+   - Integración con el sistema de build para proyectos complejos
+
+<Alert type="tip">
+  Puedes instalar las extensiones directamente desde VSCode presionando `Ctrl+P` (o `Cmd+P` en macOS) y pegando: `ext install extensionID`
+</Alert>
+
+![VSCode Extensions](/images/guides/vscode-extensions.webp)
+
+## Configuración para Programación Paralela
+
+### Configuración para OpenMP
+
+OpenMP es una API para programación paralela en sistemas de memoria compartida. Para configurarlo:
+
+1. Crea un archivo `.vscode/tasks.json` para compilar con soporte de OpenMP:
+
+<CodeBlock 
+  language="json" 
+  content={`{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Compilar con OpenMP",
+      "type": "shell",
+      "command": "gcc",
+      "args": [
+        "-fopenmp",
+        "\${file}",
+        "-o",
+        "\${fileDirname}/\${fileBasenameNoExtension}"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    }
+  ]
+}`} 
+/>
+
+### Configuración para MPI
+
+Para trabajar con MPI (Message Passing Interface), necesitarás:
+
+1. Asegúrate de tener instalado una implementación de MPI como OpenMPI o MPICH
+2. Configura el workspace para reconocer las cabeceras de MPI:
+
+<CodeBlock 
+  language="json" 
+  content={`{
+  "configurations": [
+    {
+      "name": "Linux",
+      "includePath": [
+        "\${workspaceFolder}/**",
+        "/usr/include/mpi",
+        "/usr/local/include"
+      ],
+      "defines": [],
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "c11",
+      "cppStandard": "c++17",
+      "intelliSenseMode": "linux-gcc-x64"
+    }
+  ],
+  "version": 4
+}`} 
+/>
+
+### Configuración para Pthreads
+
+Para programar con POSIX Threads (Pthreads):
+
+1. En sistemas Unix/Linux, Pthreads ya está disponible
+2. Para compilar, necesitarás enlazar con la biblioteca pthread:
+
+<CodeBlock 
+  language="json" 
+  content={`{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Compilar con Pthreads",
+      "type": "shell",
+      "command": "gcc",
+      "args": [
+        "\${file}",
+        "-o",
+        "\${fileDirname}/\${fileBasenameNoExtension}",
+        "-pthread"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    }
+  ]
+}`} 
+/>
+
+![Code with Parallel Libraries](/images/guides/parallel-code-example.webp)
+
+## Verificación de la Instalación
+
+Para verificar que todo está correctamente configurado, crea un archivo de prueba para cada tecnología:
+
+### Prueba de OpenMP
+
+<CodeBlock 
+  language="cpp" 
+  content={`#include <omp.h>
+#include <stdio.h>
+
+int main() {
+    #pragma omp parallel
+    {
+        printf("Hola desde el hilo %d de %d\\n", 
+               omp_get_thread_num(), 
+               omp_get_num_threads());
+    }
+    return 0;
+}`} 
+/>
+
+### Prueba de MPI
+
+<CodeBlock 
+  language="cpp" 
+  content={`#include <mpi.h>
+#include <stdio.h>
+
+int main(int argc, char** argv) {
+    MPI_Init(&argc, &argv);
+    
+    int rank, size;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+    
+    printf("Hola desde el proceso %d de %d\\n", rank, size);
+    
+    MPI_Finalize();
+    return 0;
+}`} 
+/>
+
+### Prueba de Pthreads
+
+<CodeBlock 
+  language="cpp" 
+  content={`#include <pthread.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#define NUM_THREADS 4
+
+void *print_hello(void *threadid) {
+    long tid = (long)threadid;
+    printf("Hola desde el hilo %ld\\n", tid);
+    pthread_exit(NULL);
+}
+
+int main() {
+    pthread_t threads[NUM_THREADS];
+    int rc;
+    long t;
+    
+    for(t=0; t<NUM_THREADS; t++) {
+        printf("Creando hilo %ld\\n", t);
+        rc = pthread_create(&threads[t], NULL, print_hello, (void *)t);
+        if (rc) {
+            printf("ERROR: código de retorno de pthread_create() es %d\\n", rc);
+            exit(-1);
+        }
+    }
+    
+    for(t=0; t<NUM_THREADS; t++) {
+        pthread_join(threads[t], NULL);
+    }
+    
+    return 0;
+}`} 
+/>
+
+## Solución de Problemas Comunes
+
+<Alert type="warning">
+  Si encuentras problemas con las rutas de inclusión, asegúrate de que las librerías estén instaladas en tu sistema y que las rutas en `c_cpp_properties.json` sean correctas para tu sistema operativo.
+</Alert>
+
+### Problemas con OpenMP
+
+Si recibes errores relacionados con OpenMP:
+- Verifica que tu compilador soporte OpenMP
+- En macOS, el compilador clang que viene con Xcode puede no soportar OpenMP por defecto. Considera instalar gcc a través de Homebrew.
+
+### Problemas con MPI
+
+- Asegúrate de que MPI esté correctamente instalado: `mpicc --version`
+- Verifica las rutas de inclusión en tu sistema: `mpicc --showme:incdirs`
+
+### Problemas con Pthreads
+
+- En Windows, Pthreads no está disponible nativamente. Considera usar WSL (Windows Subsystem for Linux) o una biblioteca como pthreads-win32.
+
+## Recursos Adicionales
+
+- [Documentación oficial de VSCode](https://code.visualstudio.com/docs)
+- [Guía de C/C++ en VSCode](https://code.visualstudio.com/docs/languages/cpp)
+- [Tutorial de OpenMP](https://www.openmp.org/resources/tutorials-articles/)
+- [Tutorial de MPI](https://mpitutorial.com/)
+- [Tutorial de Pthreads](https://computing.llnl.gov/tutorials/pthreads/)
+
+<Alert type="tip">
+  Recuerda que la configuración es solo el primer paso. La práctica constante y la experimentación son clave para dominar la programación paralela. ¡No tengas miedo de probar diferentes enfoques y aprender de los errores!
+</Alert> 

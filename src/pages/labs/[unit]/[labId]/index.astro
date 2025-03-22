@@ -28,6 +28,6 @@ if (!entry) {
 const { Content } = await render(entry);
 ---
 
-<GuideLayout frontmatter={entry.data}>
+<GuideLayout frontmatter={entry.data} id={id}>
   <Content />
 </GuideLayout>

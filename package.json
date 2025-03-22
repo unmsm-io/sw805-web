@@ -12,6 +12,7 @@
     "@astrojs/mdx": "^4.2.0",
     "@fontsource-variable/geist-mono": "^5.2.5",
     "@fontsource-variable/heebo": "^5.1.1",
+    "@shikijs/transformers": "^3.2.1",
     "@tailwindcss/typography": "^0.5.16",
     "@tailwindcss/vite": "^4.0.0",
     "astro": "^5.1.9",

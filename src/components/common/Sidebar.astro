@@ -165,6 +165,27 @@ const modules = COURSE_CONFIG.modules.map((module) => ({
   const sidebarClose = document.getElementById("sidebar-close");
   const moduleTriggers = document.querySelectorAll("[data-module-trigger]");
 
+  // Get saved module states from localStorage
+  const getSavedModuleStates = () => {
+    try {
+      const saved = localStorage.getItem("openModules");
+      return saved ? JSON.parse(saved) : {};
+    } catch (e) {
+      return {};
+    }
+  };
+
+  // Save module states to localStorage
+  const saveModuleState = (moduleId: string, isOpen: boolean) => {
+    try {
+      const states = getSavedModuleStates();
+      states[moduleId] = isOpen;
+      localStorage.setItem("openModules", JSON.stringify(states));
+    } catch (e) {
+      console.warn("Could not save module state to localStorage");
+    }
+  };
+
   function toggleSidebar(show: boolean) {
     if (sidebar && sidebarOverlay) {
       sidebar.classList.toggle("-translate-x-full", !show);
@@ -180,6 +201,26 @@ const modules = COURSE_CONFIG.modules.map((module) => ({
     }
   }
 
+  // Apply saved module states
+  const applyModuleStates = () => {
+    const savedStates = getSavedModuleStates();
+
+    moduleTriggers.forEach((trigger) => {
+      const moduleId = trigger.getAttribute("data-module-trigger");
+      if (moduleId && savedStates[moduleId]) {
+        const content = document.querySelector(
+          `[data-module-content="${moduleId}"]`,
+        );
+        const icon = trigger.querySelector("svg");
+
+        if (content && icon) {
+          content.classList.remove("hidden");
+          icon.classList.add("rotate-180");
+        }
+      }
+    });
+  };
+
   // Module accordion functionality
   moduleTriggers.forEach((trigger) => {
     trigger.addEventListener("click", () => {
@@ -190,8 +231,13 @@ const modules = COURSE_CONFIG.modules.map((module) => ({
       const icon = trigger.querySelector("svg");
 
       if (content && icon) {
-        content.classList.toggle("hidden");
+        const isOpen = content.classList.toggle("hidden") === false;
         icon.classList.toggle("rotate-180");
+
+        // Save the state
+        if (moduleId) {
+          saveModuleState(moduleId, isOpen);
+        }
       }
     });
   });
@@ -210,8 +256,12 @@ const modules = COURSE_CONFIG.modules.map((module) => ({
     }
   });
 
-  // Handle navigation
+  // Handle navigation - restore original behavior for sidebar but keep dropdown states
   document.addEventListener("astro:after-navigation", () => {
+    // Apply saved module states
+    applyModuleStates();
+
+    // Close sidebar on mobile after navigation (original behavior)
     if (window.innerWidth < 1024) {
       toggleSidebar(false);
     }
@@ -221,4 +271,7 @@ const modules = COURSE_CONFIG.modules.map((module) => ({
   if (window.innerWidth >= 1024) {
     toggleSidebar(true);
   }
+
+  // Apply saved module states on initial load
+  applyModuleStates();
 </script>

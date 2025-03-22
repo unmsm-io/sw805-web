@@ -13,12 +13,18 @@ const codeContent = content;
 ---
 
 <Code
-  class="!border !border-zinc-200 dark:!border-zinc-700 rounded-md"
   code={codeContent}
   lang={language as any}
   themes={{
     light: vesperLight as any,
     dark: vesperDark as any,
   }}
-  wrap
+  wrap={false}
 />
+
+<style is:global>
+  /* Ensure code blocks have horizontal scrolling */
+  .astro-code {
+    overflow-x: auto !important;
+  }
+</style>

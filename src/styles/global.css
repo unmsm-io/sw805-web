@@ -7,41 +7,51 @@
   --font-mono: "Geist Mono Variable", "monospace";
 }
 
-html.dark .astro-code,
-html.dark .astro-code span {
-  color: var(--shiki-dark) !important;
-  background-color: var(--shiki-dark-bg) !important;
-}
-
-html.dark .astro-code,
-html:not(.dark) .astro-code {
-  border: 1px solid hsl(var(--border)) !important;
+/* Light mode styles */
+.astro-code {
+  border: 1px solid var(--color-zinc-200);
+  border-radius: 0 !important;
   font-size: 13px;
+  overflow-x: auto !important;
 }
 
-html.dark .astro-code code,
-html:not(.dark) .astro-code code {
-  counter-reset: step !important;
-  counter-increment: step calc(var(--start, 1) - 1) !important;
-}
-
-html.dark .astro-code code .line:not(:last-child)::before,
-html:not(.dark) .astro-code code .line:not(:last-child)::before {
+.astro-code code .line::before {
   content: counter(step) !important;
   counter-increment: step !important;
-  width: 1rem !important;
   margin-right: 1.5rem !important;
   display: inline-block !important;
   text-align: right !important;
-  color: hsl(var(--muted-foreground)) !important;
+  color: var(--color-zinc-600) !important;
   opacity: 0.5 !important;
 }
 
+/* Common styles */
+.astro-code code {
+  counter-reset: step !important;
+  counter-increment: step calc(var(--start, 1) - 1) !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+/* Fix for prose - prevent fixed width code blocks */
+.prose pre {
+  text-wrap: balance !important;
+}
+
+/* Dark mode styles */
 @media (prefers-color-scheme: dark) {
 
   .astro-code,
   .astro-code span {
     color: var(--shiki-dark) !important;
     background-color: var(--shiki-dark-bg) !important;
+  }
+
+  .astro-code {
+    border: 1px solid var(--color-zinc-700);
+  }
+
+  .astro-code code .line::before {
+    color: var(--color-zinc-400) !important;
   }
 }

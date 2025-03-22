@@ -83,7 +83,7 @@ export const COURSE_CONFIG = {
           lab: {
             id: "lab1",
             unitId: "unit1",
-            title: "Configuración del Entorno",
+            title: "Lab 1: Tutorial de Punteros en C++",
             path: "Laboratory/Setup",
             files: ["environment_setup.md"],
             dueDate: "2024-04-03"
@@ -101,7 +101,7 @@ export const COURSE_CONFIG = {
           lab: {
             id: "lab2",
             unitId: "unit1",
-            title: "Ley de Amdahl",
+            title: "Lab 2: Ley de Amdahl",
             path: "Laboratory/OpenMP",
             files: ["amdahl_law.cpp"],
             dueDate: "2024-04-10"
@@ -118,7 +118,7 @@ export const COURSE_CONFIG = {
           lab: {
             id: "lab3",
             unitId: "unit1",
-            title: "MPI Básico",
+            title: "Lab 3: MPI Básico",
             path: "Laboratory/MPI",
             files: ["mpi_basics.cpp"],
             dueDate: "2024-04-17"
@@ -135,7 +135,7 @@ export const COURSE_CONFIG = {
           lab: {
             id: "lab4",
             unitId: "unit1",
-            title: "MPI Colectivo",
+            title: "Lab 4: MPI Colectivo",
             path: "Laboratory/MPI",
             files: ["collective_ops.cpp"],
             dueDate: "2024-04-24"
@@ -159,7 +159,7 @@ export const COURSE_CONFIG = {
           lab: {
             id: "lab5",
             unitId: "unit2",
-            title: "Pthreads Básico",
+            title: "Lab 5: Pthreads Básico",
             path: "Laboratory/Pthreads",
             files: ["pthread_basics.cpp"],
             dueDate: "2024-05-01"
@@ -177,7 +177,7 @@ export const COURSE_CONFIG = {
           lab: {
             id: "lab6",
             unitId: "unit2",
-            title: "OpenMP vs Pthreads",
+            title: "Lab 6: OpenMP vs Pthreads",
             path: "Laboratory/Comparison",
             files: ["comparison.cpp"],
             dueDate: "2024-05-08"
@@ -194,7 +194,7 @@ export const COURSE_CONFIG = {
           lab: {
             id: "lab7",
             unitId: "unit2",
-            title: "OpenMP Avanzado",
+            title: "Lab 7: OpenMP Avanzado",
             path: "Laboratory/OpenMP",
             files: ["advanced_openmp.cpp"],
             dueDate: "2024-05-15"
@@ -228,7 +228,7 @@ export const COURSE_CONFIG = {
           lab: {
             id: "lab8",
             unitId: "unit3",
-            title: "Estrategias de Paralelización",
+            title: "Lab 8: Estrategias de Paralelización",
             path: "Laboratory/Strategies",
             files: ["parallel_strategies.cpp"],
             dueDate: "2024-05-29"
@@ -246,7 +246,7 @@ export const COURSE_CONFIG = {
           lab: {
             id: "lab9",
             unitId: "unit3",
-            title: "CUDA Básico",
+            title: "Lab 9: CUDA Básico",
             path: "Laboratory/CUDA",
             files: ["vector_add.cu"],
             dueDate: "2024-06-05"
@@ -264,7 +264,7 @@ export const COURSE_CONFIG = {
           lab: {
             id: "lab10",
             unitId: "unit3",
-            title: "CUDA Optimización",
+            title: "Lab 10: CUDA Optimización",
             path: "Laboratory/CUDA",
             files: ["optimization.cu"],
             dueDate: "2024-06-12"
@@ -281,7 +281,7 @@ export const COURSE_CONFIG = {
           lab: {
             id: "lab11",
             unitId: "unit3",
-            title: "CUDA Algoritmos",
+            title: "Lab 11: CUDA Algoritmos",
             path: "Laboratory/CUDA",
             files: ["algorithms.cu"],
             dueDate: "2024-06-19"
@@ -305,7 +305,7 @@ export const COURSE_CONFIG = {
           lab: {
             id: "lab12",
             unitId: "unit4",
-            title: "Análisis de Rendimiento",
+            title: "Lab 12: Análisis de Rendimiento",
             path: "Laboratory/Performance",
             files: ["benchmark.cpp", "benchmark.cu"],
             dueDate: "2024-06-26"
@@ -322,7 +322,7 @@ export const COURSE_CONFIG = {
           lab: {
             id: "lab13",
             unitId: "unit4",
-            title: "ML en CUDA",
+            title: "Lab 13: ML en CUDA",
             path: "Laboratory/CUDA",
             files: ["ml_cuda.cu"],
             dueDate: "2024-07-03"
@@ -494,7 +494,7 @@ export const COURSE_CONFIG = {
     {
       title: "Guía de Instalación",
       description: "Configura tu entorno de desarrollo",
-      href: "/labs/unit1/lab1",
+      href: "/labs/unit1/setup",
       icon: "Monitor"
     },
     {
