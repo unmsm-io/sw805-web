@@ -1,6 +1,7 @@
 ---
 import "@fontsource-variable/heebo";
 import "@fontsource-variable/geist-mono";
+import Analytics from "@vercel/analytics/astro";
 import Footer from "../components/common/Footer.astro";
 import Sidebar from "../components/common/Sidebar.astro";
 import { COURSE_CONFIG } from "../config/course";
@@ -131,6 +132,7 @@ const jsonLD = {
           d="M4 6h16M4 12h16M4 18h16"></path>
       </svg>
     </button>
+    <Analytics />
   </body>
 </html>
 

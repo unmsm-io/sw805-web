@@ -15,6 +15,7 @@
     "@shikijs/transformers": "^3.2.1",
     "@tailwindcss/typography": "^0.5.16",
     "@tailwindcss/vite": "^4.0.0",
+    "@vercel/analytics": "^1.5.0",
     "astro": "^5.1.9",
     "lucide-astro": "^0.473.0",
     "tailwindcss": "^4.0.0"
