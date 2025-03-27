@@ -23,7 +23,7 @@ export const COURSE_CONFIG = {
   instructors: [
     {
       name: "Dr. Herminio Paucar",
-      email: "herminiopaucar@gmail.com",
+      email: "hpaucarc@unmsm.edu.pe",
       officeHours: "Martes y Jueves 14:00 - 16:00",
       image: "/paucar-profile.webp",
       title: "Profesor",
@@ -36,7 +36,7 @@ export const COURSE_CONFIG = {
     },
     {
       name: "Railly Hugo",
-      email: "raillyhugo@gmail.com",
+      email: "railly.hugo@unmsm.edu.pe",
       officeHours: "Lunes 15:00 - 17:00",
       image: "/hugo-profile.webp",
       title: "Jefe de Práctica",
