@@ -5,6 +5,20 @@
 @theme {
   --font-sans: "Heebo Variable", "sans-serif";
   --font-mono: "Geist Mono Variable", "monospace";
+
+  /* Blue color palette based on #326E95 */
+  --color-blue-50: oklch(0.97 0.012 234.52);
+  --color-blue-100: oklch(0.93 0.028 235.15);
+  --color-blue-200: oklch(0.88 0.048 235.89);
+  --color-blue-300: oklch(0.81 0.082 236.42);
+  --color-blue-400: oklch(0.72 0.115 236.98);
+  --color-blue-500: oklch(0.65 0.142 237.54);
+  /* Base: #326E95 */
+  --color-blue-600: oklch(0.58 0.128 238.12);
+  --color-blue-700: oklch(0.51 0.112 238.76);
+  --color-blue-800: oklch(0.44 0.095 239.32);
+  --color-blue-900: oklch(0.38 0.075 239.89);
+  --color-blue-950: oklch(0.28 0.052 240.45);
 }
 
 /* Light mode styles */
@@ -38,6 +52,49 @@
   text-wrap: balance !important;
 }
 
+/* Heading link styles */
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.prose h1 a,
+.prose h2 a,
+.prose h3 a,
+.prose h4 a {
+  text-decoration: none !important;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  font-weight: 700;
+}
+
+.prose h1 a::after,
+.prose h2 a::after,
+.prose h3 a::after,
+.prose h4 a::after {
+  content: "";
+  opacity: 0;
+  width: 1em;
+  height: 1em;
+  margin-left: 0.5rem;
+  transition: opacity 0.15s ease;
+  background-color: var(--color-zinc-400);
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='1.5' stroke='currentColor'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244' /%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='1.5' stroke='currentColor'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244' /%3E%3C/svg%3E");
+}
+
+.prose h1 a:hover::after,
+.prose h2 a:hover::after,
+.prose h3 a:hover::after,
+.prose h4 a:hover::after {
+  opacity: 1;
+}
+
 /* Dark mode styles */
 @media (prefers-color-scheme: dark) {
 
@@ -53,5 +110,12 @@
 
   .astro-code code .line::before {
     color: var(--color-zinc-400) !important;
+  }
+
+  .prose h1 a::after,
+  .prose h2 a::after,
+  .prose h3 a::after,
+  .prose h4 a::after {
+    background-color: var(--color-zinc-500);
   }
 }

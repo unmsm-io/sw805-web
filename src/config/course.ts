@@ -86,59 +86,78 @@ export const COURSE_CONFIG = {
             title: "Lab 1: Tutorial de Punteros en C++",
             path: "Laboratory/Setup",
             files: ["environment_setup.md"],
-            dueDate: "2024-04-03"
+            dueDate: "2025-04-03"
           }
         },
         {
           week: 2,
-          topic: "Hardware y Software Paralelo",
+          topic: "MPI Básico: Procesos, Comunicación y Cálculo Numérico",
           subtopics: [
-            "Arquitecturas de cómputo paralelo",
-            "Modelos de memoria (compartida vs. distribuida)",
-            "Ley de Amdahl y Gustafson"
+            "Modelo de procesos MPI",
+            "Comunicación punto a punto (MPI_Send, MPI_Recv)",
+            "Tipos de datos MPI",
+            "Cálculo de PI (secuencial vs paralelo)"
           ],
-          activity: "Laboratorio: Evaluación empírica de la Ley de Amdahl en OpenMP.",
+          activity: "Laboratorio con programas básicos MPI: HelloWorld, SendMessage, Traductor, AllTypes, PI.",
           lab: {
             id: "lab2",
             unitId: "unit1",
-            title: "Lab 2: Ley de Amdahl",
-            path: "Laboratory/OpenMP",
-            files: ["amdahl_law.cpp"],
-            dueDate: "2024-04-10"
+            title: "Lab 2: Programación Distribuida con MPI",
+            path: "Laboratory/MPI_code",
+            files: [
+              "MPI_code/prog01_HelloWorldMPI_01/HelloWorldMPI_01.c",
+              "MPI_code/prog02_HelloWorldMPI_02/HelloWorldMPI_02.c",
+              "MPI_code/prog03_SendMessage01/SendMessage01.c",
+              "MPI_code/prog04.1_SendMessage02/SendMessage02.c",
+              "MPI_code/prog04.2_SendMessage03Traductor/SendMessageTraductor.c",
+              "MPI_code/prog04.3_SendMessage04AllTypes/SendMessageAllTypes.c",
+              "MPI_code/prog05.0_CalculoPI/CalculoPI_Secuencial.c",
+              "MPI_code/prog05.0_CalculoPI/CalculoPI.c"
+            ],
+            dueDate: "2025-04-10"
           }
         },
         {
           week: 3,
-          topic: "Introducción a MPI (Paso de mensajes)",
+          topic: "MPI Intermedio: Operaciones Colectivas y Distribución de Datos",
           subtopics: [
-            "Comunicación entre procesos",
-            "Envío y recepción de mensajes"
+            "MPI_Bcast, MPI_Reduce, MPI_Scatter, MPI_Gather",
+            "Integración con método del trapecio",
+            "Suma de vectores y promedio de números"
           ],
-          activity: "Implementación de programas MPI simples (Hello World, comunicación punto a punto).",
+          activity: "Implementación de operaciones colectivas. Comparación entre versiones secuenciales y paralelas.",
           lab: {
             id: "lab3",
             unitId: "unit1",
-            title: "Lab 3: MPI Básico",
-            path: "Laboratory/MPI",
-            files: ["mpi_basics.cpp"],
-            dueDate: "2024-04-17"
+            title: "Lab 3: Operaciones Colectivas con MPI",
+            path: "Laboratory/MPI_code",
+            files: [
+              "prog05.1_Trapezoid/mpi_trap1.c",
+              "prog05.1_Trapezoid/mpi_trap2.c",
+              "prog05.1_Trapezoid/mpi_trap3.c",
+              "prog05.1_Trapezoid/mpi_trap4.c",
+              "prog05.2_AddVector/",
+              "prog05.3_NumbersAvg/"
+            ],
+            dueDate: "2025-04-17"
           }
         },
         {
           week: 4,
-          topic: "MPI: Comunicación Colectiva y Optimizaciones",
+          topic: "Evaluación y Comparación: Ley de Amdahl y OpenMP",
           subtopics: [
-            "Broadcast, Scatter, Gather",
-            "Reducciones y sincronización"
+            "Ley de Amdahl",
+            "Speedup y limitaciones teóricas",
+            "Paralelización con OpenMP"
           ],
-          activity: "Taller práctico sobre comunicación colectiva en MPI.",
+          activity: "Evaluación empírica del speedup con OpenMP. Comparación con el modelo MPI.",
           lab: {
             id: "lab4",
             unitId: "unit1",
-            title: "Lab 4: MPI Colectivo",
-            path: "Laboratory/MPI",
-            files: ["collective_ops.cpp"],
-            dueDate: "2024-04-24"
+            title: "Lab 4: Evaluación de Speedup con OpenMP",
+            path: "Laboratory/OpenMP",
+            files: ["amdahl_law.cpp"],
+            dueDate: "2025-04-24"
           }
         }
       ]
@@ -162,7 +181,7 @@ export const COURSE_CONFIG = {
             title: "Lab 5: Pthreads Básico",
             path: "Laboratory/Pthreads",
             files: ["pthread_basics.cpp"],
-            dueDate: "2024-05-01"
+            dueDate: "2025-05-01"
           }
         },
         {
@@ -180,7 +199,7 @@ export const COURSE_CONFIG = {
             title: "Lab 6: OpenMP vs Pthreads",
             path: "Laboratory/Comparison",
             files: ["comparison.cpp"],
-            dueDate: "2024-05-08"
+            dueDate: "2025-05-08"
           }
         },
         {
@@ -197,7 +216,7 @@ export const COURSE_CONFIG = {
             title: "Lab 7: OpenMP Avanzado",
             path: "Laboratory/OpenMP",
             files: ["advanced_openmp.cpp"],
-            dueDate: "2024-05-15"
+            dueDate: "2025-05-15"
           }
         },
         {
@@ -231,7 +250,7 @@ export const COURSE_CONFIG = {
             title: "Lab 8: Estrategias de Paralelización",
             path: "Laboratory/Strategies",
             files: ["parallel_strategies.cpp"],
-            dueDate: "2024-05-29"
+            dueDate: "2025-05-29"
           }
         },
         {
@@ -249,7 +268,7 @@ export const COURSE_CONFIG = {
             title: "Lab 9: CUDA Básico",
             path: "Laboratory/CUDA",
             files: ["vector_add.cu"],
-            dueDate: "2024-06-05"
+            dueDate: "2025-06-05"
           }
         },
         {
@@ -267,7 +286,7 @@ export const COURSE_CONFIG = {
             title: "Lab 10: CUDA Optimización",
             path: "Laboratory/CUDA",
             files: ["optimization.cu"],
-            dueDate: "2024-06-12"
+            dueDate: "2025-06-12"
           }
         },
         {
@@ -284,7 +303,7 @@ export const COURSE_CONFIG = {
             title: "Lab 11: CUDA Algoritmos",
             path: "Laboratory/CUDA",
             files: ["algorithms.cu"],
-            dueDate: "2024-06-19"
+            dueDate: "2025-06-19"
           }
         }
       ]
@@ -308,7 +327,7 @@ export const COURSE_CONFIG = {
             title: "Lab 12: Análisis de Rendimiento",
             path: "Laboratory/Performance",
             files: ["benchmark.cpp", "benchmark.cu"],
-            dueDate: "2024-06-26"
+            dueDate: "2025-06-26"
           }
         },
         {
@@ -325,7 +344,7 @@ export const COURSE_CONFIG = {
             title: "Lab 13: ML en CUDA",
             path: "Laboratory/CUDA",
             files: ["ml_cuda.cu"],
-            dueDate: "2024-07-03"
+            dueDate: "2025-07-03"
           }
         },
         {
@@ -342,7 +361,7 @@ export const COURSE_CONFIG = {
             title: "Proyecto Final",
             path: "Laboratory/Final",
             files: ["README.md"],
-            dueDate: "2024-07-10"
+            dueDate: "2025-07-10"
           }
         },
         {

@@ -1,0 +1,113 @@
+---
+interface Props {
+  headings: {
+    depth: number;
+    slug: string;
+    text: string;
+  }[];
+  title?: string;
+  class?: string;
+}
+
+const {
+  headings,
+  title = "Tabla de Contenidos",
+  class: className = "",
+} = Astro.props;
+
+type Item = {
+  depth: number;
+  slug: string;
+  text: string;
+  children: Item[];
+};
+
+function buildToc(headings: Props["headings"]) {
+  const toc: Item[] = [];
+  const parentHeadings = new Map();
+  let currentH2Index = 0;
+
+  headings.forEach((h) => {
+    const heading = { ...h, children: [] };
+    parentHeadings.set(heading.depth, heading);
+
+    if (heading.depth === 2) {
+      currentH2Index++;
+      toc.push(heading);
+    } else {
+      parentHeadings.get(heading.depth - 1)?.children.push(heading);
+    }
+  });
+
+  return toc;
+}
+
+const toc = buildToc(headings);
+---
+
+{
+  headings.length > 0 && (
+    <nav class:list={["toc not-prose", className]}>
+      {title && (
+        <h2 class="text-sm uppercase font-semibold mb-6 text-zinc-900 dark:text-zinc-100">
+          {title}
+        </h2>
+      )}
+      <ul class="space-y-3">
+        {toc.map((heading, index) => (
+          <li>
+            <a
+              href={`#${heading.slug}`}
+              class="group max-w-max flex gap-4 text-[15px] text-blue-700 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+            >
+              <span class="text-zinc-600 dark:text-zinc-400">{index + 1}</span>
+              <span class="underline decoration-zinc-200 dark:decoration-zinc-700 hover:decoration-blue-800/50 dark:hover:decoration-blue-300/50">
+                {heading.text}
+              </span>
+            </a>
+            {heading.children.length > 0 && (
+              <ul class="mt-2 ml-4 space-y-2 text-[14px]">
+                {heading.children.map((subheading, subIndex) => (
+                  <li>
+                    <a
+                      href={`#${subheading.slug}`}
+                      class="group max-w-max flex gap-4 text-blue-700 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                    >
+                      <span class="text-zinc-600 dark:text-zinc-400">
+                        {String.fromCharCode(97 + subIndex)}
+                      </span>
+                      <span class="underline decoration-zinc-200 dark:decoration-zinc-700 hover:decoration-blue-800/50 dark:hover:decoration-blue-300/50">
+                        {subheading.text}
+                      </span>
+                    </a>
+                    {subheading.children.length > 0 && (
+                      <ul class="mt-2 ml-4 space-y-2">
+                        {subheading.children.map(
+                          (subsubheading, subsubIndex) => (
+                            <li>
+                              <a
+                                href={`#${subsubheading.slug}`}
+                                class="group max-w-max flex gap-4 text-blue-700 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                              >
+                                <span class="text-zinc-600 dark:text-zinc-400">
+                                  {String.fromCharCode(97 + subsubIndex)}
+                                </span>
+                                <span class="underline decoration-zinc-200 dark:decoration-zinc-700 hover:decoration-blue-800/50 dark:hover:decoration-blue-300/50">
+                                  {subsubheading.text}
+                                </span>
+                              </a>
+                            </li>
+                          ),
+                        )}
+                      </ul>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </li>
+        ))}
+      </ul>
+    </nav>
+  )
+}

@@ -25,9 +25,9 @@ if (!entry) {
   return Astro.redirect("/404");
 }
 
-const { Content } = await render(entry);
+const { Content, headings } = await render(entry);
 ---
 
-<GuideLayout frontmatter={entry.data} id={id}>
+<GuideLayout frontmatter={entry.data} id={id} headings={headings}>
   <Content />
 </GuideLayout>

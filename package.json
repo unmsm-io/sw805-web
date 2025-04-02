@@ -18,6 +18,12 @@
     "@vercel/analytics": "^1.5.0",
     "astro": "^5.1.9",
     "lucide-astro": "^0.473.0",
+    "rehype-katex": "^7.0.1",
+    "remark-math": "^6.0.0",
     "tailwindcss": "^4.0.0"
+  },
+  "devDependencies": {
+    "rehype-autolink-headings": "^7.1.0",
+    "rehype-slug": "^6.0.0"
   }
 }

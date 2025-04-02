@@ -1,4 +1,5 @@
 ---
+import TableOfContents from "../components/TableOfContents.astro";
 import BaseLayout from "./BaseLayout.astro";
 import { ChevronLeft } from "lucide-astro";
 
@@ -14,9 +15,14 @@ interface Props {
     category?: string;
   };
   id: string;
+  headings: {
+    slug: string;
+    text: string;
+    depth: number;
+  }[];
 }
 
-const { frontmatter, id } = Astro.props;
+const { frontmatter, id, headings } = Astro.props;
 
 const labNumberMatch = id.match(/lab(\d+)/);
 const labNumber = labNumberMatch ? labNumberMatch[1] : null;
@@ -41,7 +47,13 @@ const isoDate = new Date(frontmatter.pubDate).toISOString();
   image={frontmatter.image}
 >
   <article
-    class="prose dark:prose-invert max-w-none"
+    class="prose dark:prose-invert max-w-none
+    prose-table:border-collapse prose-table:w-full
+    prose-thead:border-b prose-thead:border-zinc-200 dark:prose-thead:border-zinc-700
+    prose-th:py-2 prose-th:px-4 prose-th:text-left prose-th:font-semibold prose-th:bg-zinc-50 dark:prose-th:bg-zinc-800
+    prose-td:py-2 prose-td:px-4 prose-td:border-b prose-td:border-zinc-200 dark:prose-td:border-zinc-700
+    prose-tr:hover:bg-zinc-50 dark:prose-tr:hover:bg-zinc-800/50
+    prose-tr:transition-colors prose-tr:duration-200"
     itemscope
     itemtype="https://schema.org/Article"
   >
@@ -63,7 +75,7 @@ const isoDate = new Date(frontmatter.pubDate).toISOString();
         )
       }
       <h1
-        class="text-5xl leading-tight tracking-tight mx-auto text-center font-semibold mb-0 pt-4"
+        class="flex justify-center text-5xl leading-tight tracking-tight !mx-auto !text-center font-semibold mb-0 pt-4"
         itemprop="headline"
       >
         {frontmatter.title}
@@ -87,7 +99,7 @@ const isoDate = new Date(frontmatter.pubDate).toISOString();
         <span class="text-zinc-400">·</span>
         <time
           datetime={isoDate}
-          class="text-sm text-zinc-400"
+          class="text-sm text-zinc-500 dark:text-zinc-400"
           itemprop="datePublished"
         >
           {formattedDate}
@@ -95,7 +107,11 @@ const isoDate = new Date(frontmatter.pubDate).toISOString();
       </div>
     </div>
 
-    <div class="space-y-6 max-w-4xl mx-auto" itemprop="articleBody">
+    <div
+      class="space-y-6 max-w-4xl mx-auto scroll-smooth"
+      itemprop="articleBody"
+    >
+      <TableOfContents headings={headings} />
       <slot />
     </div>
 

@@ -1,28 +1,238 @@
 ---
-title: "Ley de Amdahl: Evaluación Empírica con OpenMP"
-description: "Explora y verifica empíricamente la Ley de Amdahl mediante experimentos prácticos utilizando OpenMP. Comprende los límites fundamentales de la paralelización."
-pubDate: "2025-03-27"
+title: "Programación Distribuida con MPI"
+description: "Fundamentos prácticos de programación paralela en arquitecturas de memoria distribuida utilizando MPI. Aprende a comunicar procesos, usar tipos de datos MPI y calcular PI en paralelo."
+pubDate: "2025-04-04"
 author: "Railly Hugo"
 authorImageUrl: "/hugo-profile.webp"
-dueDate: "2024-04-10"
-files: ["amdahl_law.cpp"]
-path: "Laboratory/OpenMP"
+dueDate: "2025-04-10"
+files: ["HelloWorldMPI_01.cpp"]
+path: "Laboratory/MPI"
 ---
 
 import Alert from "../../../components/Alert.astro";
 import CodeBlock from "../../../components/CodeBlock.astro";
-import StepGuide from "../../../components/StepGuide.astro";
+import Card from "../../../components/Card.astro";
 
-## Próximamente
+Este laboratorio tiene como objetivo familiarizarte con la programación distribuida usando MPI (Message Passing Interface). Aprenderás a:
 
-Este laboratorio estará disponible pronto. En este laboratorio, exploraremos:
+- Crear programas MPI básicos
+- Comunicar datos entre procesos
+- Implementar operaciones colectivas
+- Manejar diferentes tipos de datos en MPI
 
-- Fundamentos de la Ley de Amdahl
-- Implementación práctica usando OpenMP
-- Medición y análisis del speedup
-- Verificación empírica de los límites teóricos
-- Discusión sobre las implicaciones para el diseño de sistemas paralelos
+Esta práctica servirá como base para experimentos posteriores relacionados con rendimiento, modelos de memoria y eficiencia en cómputo distribuido.
+
+
+## Problema
+
+### Memoria Distribuida vs Compartida
+
+#### Memoria Distribuida
+- Colección de pares núcleo-memoria conectados por una red
+- La memoria asociada a cada núcleo solo es accesible para ese núcleo
+- Diferentes procesos
+
+#### Memoria Compartida
+- Colección de pares núcleo-memoria conectados por una memoria globalmente accesible
+- Cada núcleo puede acceder a cualquier ubicación de memoria
+- Diferentes hilos dentro del mismo proceso
+
+### Funciones MPI Básicas
+
+| Función | Propósito | Analogía |
+|---------|-----------|----------|
+| `MPI_Comm_size` | Obtener número de procesos | "¿Qué tan grande es este equipo?" |
+| `MPI_Comm_rank` | Obtener rango del proceso actual | "¿Cuál es mi número de jersey?" |
+| `MPI_Send` | Enviar datos a otro proceso | "Enviar un mensaje" |
+| `MPI_Recv` | Recibir datos de otro proceso | "Recibir un mensaje" |
+| `MPI_Bcast` | Difundir datos a todos los procesos | "Anunciar a todos" |
+| `MPI_Reduce` | Reducir datos de todos los procesos | "Combinar resultados" |
+
+## Requisitos
+
+- Entregar los archivos fuente de los ejercicios completados
+- El programa debe compilar y ejecutar correctamente en la plataforma especificada
+- Documentar los resultados y observaciones
+
+## Código Base
+
+<div class="grid gap-4 md:grid-cols-2">
+  <Card
+    title="1. Hello World MPI (Básico)"
+    description="Tu primer programa MPI que muestra el rango de cada proceso"
+    href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI_code/prog01_HelloWorldMPI_01/HelloWorldMPI_01.c"
+  />
+
+  <Card
+    title="2. Hello World MPI (Avanzado)"
+    description="Versión mejorada del Hello World con más detalles de proceso"
+    href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI_code/prog02_HelloWorldMPI_02/HelloWorldMPI_02.c"
+  />
+
+  <Card
+    title="3. Envío de Mensajes (Básico)"
+    description="Implementa comunicación básica entre procesos usando MPI_Send y MPI_Recv"
+    href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI_code/prog03_SendMessage01/SendMessage01.c"
+  />
+
+  <Card
+    title="4. Envío de Mensajes (Avanzado)"
+    description="Implementación avanzada de comunicación entre procesos"
+    href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI_code/prog04.1_SendMessage02/SendMessage02.c"
+  />
+
+  <Card
+    title="5. Traductor MPI"
+    description="Implementa un traductor simple usando comunicación MPI"
+    href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI_code/prog04.2_SendMessage03Traductor/SendMessageTraductor.c"
+  />
+
+  <Card
+    title="6. Tipos de Datos MPI"
+    description="Explora diferentes tipos de datos en comunicación MPI"
+    href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI_code/prog04.3_SendMessage04AllTypes/SendMessageAllTypes.c"
+  />
+
+  <Card
+    title="7. Cálculo de PI (Secuencial)"
+    description="Versión secuencial del cálculo de PI para comparación"
+    href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI_code/prog05.0_CalculoPI/CalculoPI_Secuencial.c"
+  />
+
+  <Card
+    title="8. Cálculo de PI (Paralelo)"
+    description="Implementa el cálculo de PI usando MPI"
+    href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI_code/prog05.0_CalculoPI/CalculoPI.c"
+  />
+</div>
+
+## Instalación de MPI
+
+### En macOS/Linux
+
+#### macOS usando Homebrew
+```bash
+# Instalar Homebrew si no está instalado
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# Instalar Open MPI
+brew install open-mpi
+```
+
+#### Linux (Ubuntu/Debian)
+```bash
+# Actualizar repositorios
+sudo apt update
+
+# Instalar Open MPI y compiladores
+sudo apt install openmpi-bin libopenmpi-dev
+```
+
+#### Linux (Fedora/RHEL)
+```bash
+# Instalar Open MPI y compiladores
+sudo dnf install openmpi openmpi-devel
+```
+
+Para verificar la instalación:
+```bash
+# Verificar versión de MPI
+mpirun --version
+
+# Verificar que el compilador está disponible
+mpicc --version
+```
+
+### Instalación en Windows
+
+#### Paso 1: Instalar MS-MPI
+
+1. Visite el sitio oficial de Microsoft MPI:
+   [Microsoft MPI](https://www.microsoft.com/en-us/download/details.aspx?id=57467)
+
+2. Descargue estos dos archivos:
+   - `msmpisetup.exe`
+   - `msmpisdk.msi`
+
+3. Instale los archivos en este orden:
+   - Primero `msmpisetup.exe`
+   - Luego `msmpisdk.msi`
+
+La instalación de MPI está completa cuando ambos archivos se hayan instalado correctamente.
+
+#### Paso 2: Verificar la instalación
+
+Abra el Símbolo del sistema (CMD) o PowerShell y ejecute:
+```bash
+mpiexec
+```
+Si ve un mensaje que comienza con "Microsoft MPI", la instalación fue exitosa.
+
+#### Solución de problemas comunes
+
+**Error: mpicc no se reconoce como comando**
+- Agregue la siguiente ruta al PATH del sistema:
+  `C:\Program Files\Microsoft MPI\Bin`
+
+**Error: Falta de archivos DLL**
+- Reinicie el sistema
+- Si persiste, reinstale ambos componentes de MS-MPI
+
+## Compilación y Ejecución
+
+Una vez instalado MPI, puede compilar y ejecutar sus programas:
+
+### Compilación
+```bash
+# Compilar un programa
+mpicc -o programa programa.c
+
+# Compilar con optimizaciones
+mpicc -O3 -o programa programa.c
+
+# Compilar con información de depuración
+mpicc -g -o programa programa.c
+```
+
+### Ejecución
+```bash
+# Ejecutar con 4 procesos
+mpiexec -n 4 ./programa
+
+# En algunos sistemas también puede usar mpirun
+mpirun -np 4 ./programa
+
+# Para Windows
+mpiexec -n 4 programa.exe
+```
+
+Notas importantes:
+- El parámetro `-n` o `-np` especifica el número de procesos
+- En Windows, use la extensión `.exe`
+- En Linux/macOS, asegúrese de que el archivo tenga permisos de ejecución (`chmod +x programa`)
+
+## Plataforma de Evaluación
+Este laboratorio se ejecuta de forma **local**. Actualmente en San Marcos no tenemos entorno remoto ni SSH, por lo tanto:
+
+- Cada estudiante compilará y ejecutará su código en su propia máquina
+- No se requiere submission por ahora. Guardar resultados para futuras prácticas
+
+## Referencias
+- [MPI Tutorial](https://mpitutorial.com/)
+- [Open MPI Documentation](https://www.open-mpi.org/doc/)
+- [MPI Reference](https://www.mpi-forum.org/docs/mpi-4.0/mpi40-report.pdf)
+- [Peter Pacheco's Book](https://www.cs.usfca.edu/~peter/ppc/)
+- [Microsoft MPI Documentation](https://learn.microsoft.com/en-us/message-passing-interface/microsoft-mpi)
 
 <Alert type="info">
-  El contenido detallado y los materiales del laboratorio estarán disponibles antes de la fecha de inicio.
-</Alert> 
+  **Fecha de entrega sugerida:** 10 de abril de 2025. Asegúrate de completar todos los ejercicios y documentar tus resultados.
+</Alert>
+
+
+## Ejercicios Propuestos
+
+<ul>
+<li>
+<a href="https://docs.google.com/document/d/1OssfLTNgNr0OeEUXlQG_hwc-k-vq2NKcUzZHAjUYSGk/edit?tab=t.0" target="_blank">Lab 02 - Google Drive</a>
+</li>
+</ul>
