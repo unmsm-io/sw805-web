@@ -497,7 +497,7 @@ export const COURSE_CONFIG = {
 
   // Repository Information
   repository: {
-    url: "https://github.com/hpaucar/parallel-programming-repo",
+    url: "https://github.com/FISI-SM/ParallelProgramming-repo",
     branch: "master",
     license: "MIT",
   },
