@@ -139,39 +139,51 @@ mpicc --version
 
 ### Instalación en Windows
 
-#### Paso 1: Instalar MS-MPI
+#### Paso 1: Instalar WSL y Ubuntu
 
-1. Visite el sitio oficial de Microsoft MPI:
-   [Microsoft MPI](https://www.microsoft.com/en-us/download/details.aspx?id=57467)
+1. Abra Microsoft Store y busque "Ubuntu"
+2. Instale la versión más reciente de Ubuntu
+3. Abra Windows Terminal (puede buscarlo en el menú inicio)
+4. En la terminal, abra una nueva instancia de Ubuntu
+5. Durante la primera ejecución, se le pedirá crear un usuario:
+   - Elija el nombre de usuario que desee
+   - Establezca la contraseña como: `FIS2024`
 
-2. Descargue estos dos archivos:
-   - `msmpisetup.exe`
-   - `msmpisdk.msi`
+#### Paso 2: Instalar MPI en Ubuntu
 
-3. Instale los archivos en este orden:
-   - Primero `msmpisetup.exe`
-   - Luego `msmpisdk.msi`
+Una vez dentro de la terminal de Ubuntu, ejecute los siguientes comandos:
 
-La instalación de MPI está completa cuando ambos archivos se hayan instalado correctamente.
-
-#### Paso 2: Verificar la instalación
-
-Abra el Símbolo del sistema (CMD) o PowerShell y ejecute:
 ```bash
-mpiexec
+# Actualizar repositorios
+sudo apt update
+
+# Instalar Open MPI y compiladores
+sudo apt install openmpi-bin openmpi-common libopenmpi-dev
 ```
-Si ve un mensaje que comienza con "Microsoft MPI", la instalación fue exitosa.
 
-#### Solución de problemas comunes
+#### Paso 3: Verificar la instalación
 
-**Error: mpicc no se reconoce como comando**
-- Agregue la siguiente ruta al PATH del sistema:
-  `C:\Program Files\Microsoft MPI\Bin`
+```bash
+# Verificar que el compilador está disponible
+mpicc --version
 
-**Error: Falta de archivos DLL**
-- Reinicie el sistema
-- Si persiste, reinstale ambos componentes de MS-MPI
+# Verificar que MPI está instalado
+mpirun --version
+```
 
+#### Paso 4: Clonar el repositorio
+
+```bash
+# Crear directorio de proyectos
+mkdir projects
+cd projects
+
+# Clonar el repositorio
+git clone https://github.com/FISI-SM/ParallelProgramming-repo.git
+
+# Entrar al directorio MPI
+cd ParallelProgramming-repo/Laboratory/MPI_code
+```
 ## Compilación y Ejecución
 
 Una vez instalado MPI, puede compilar y ejecutar sus programas:
@@ -179,29 +191,17 @@ Una vez instalado MPI, puede compilar y ejecutar sus programas:
 ### Compilación
 ```bash
 # Compilar un programa
-mpicc -o programa programa.c
-
-# Compilar con optimizaciones
-mpicc -O3 -o programa programa.c
-
-# Compilar con información de depuración
-mpicc -g -o programa programa.c
+mpicc -g -Wall -o out <program_name>.c 
 ```
 
 ### Ejecución
 ```bash
 # Ejecutar con 4 procesos
-mpiexec -n 4 ./programa
-
-# En algunos sistemas también puede usar mpirun
-mpirun -np 4 ./programa
-
-# Para Windows
-mpiexec -n 4 programa.exe
+mpiexec -n 4 <program_name>.exe
 ```
 
 Notas importantes:
-- El parámetro `-n` o `-np` especifica el número de procesos
+- El parámetro `-n` especifica el número de procesos
 - En Windows, use la extensión `.exe`
 - En Linux/macOS, asegúrese de que el archivo tenga permisos de ejecución (`chmod +x programa`)
 
