@@ -1,28 +1,58 @@
 ---
-title: "Introducción a MPI: Comunicación Punto a Punto"
-description: "Aprende los fundamentos de la programación con paso de mensajes utilizando MPI. Implementa comunicación punto a punto y comprende los conceptos básicos de la computación distribuida."
-pubDate: "2025-04-03"
+title: "Operaciones Numéricas MPI"
+description: "Implementación de operaciones numéricas distribuidas usando MPI: suma de vectores, promedio, producto escalar y matriz-vector."
+pubDate: "2025-04-23"
 author: "Railly Hugo"
 authorImageUrl: "/hugo-profile.webp"
-dueDate: "2025-04-17"
-files: ["mpi_basics.cpp"]
+dueDate: "2025-04-30"
+files: [
+  "Add_VectorASequential.c",
+  "Add_VectorParallel.c",
+  "avg.c",
+  "all_avg.c",
+  "ProductoEscalarSecu.cpp",
+  "ProductoEscalarParall.cpp",
+  "ProdMatrizVectorSecu.cpp",
+  "ProdMatrizVectorParall.cpp"
+]
 path: "Laboratory/MPI"
 ---
 
 import Alert from "../../../components/Alert.astro";
-import CodeBlock from "../../../components/CodeBlock.astro";
-import StepGuide from "../../../components/StepGuide.astro";
+import Card from "../../../components/Card.astro";
 
-## Próximamente
+Este laboratorio se centra en desarrollar operaciones numéricas básicas con MPI, esenciales para aprovechar el paralelismo en arquitecturas distribuidas.
 
-Este laboratorio estará disponible pronto. En este laboratorio, exploraremos:
+<div class="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+  <Card title="Suma de Vectores (Secuencial)" description="Add_VectorASequential.c" href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI/prog05.2_AddVector/Add_VectorASequential.c" />
+  <Card title="Suma de Vectores (Paralelo)" description="Add_VectorParallel.c" href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI/prog05.2_AddVector/Add_VectorParallel.c" />
+  <Card title="Promedio de Números (Secuencial)" description="avg.c" href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI/prog05.3_NumbersAvg/avg.c" />
+  <Card title="Promedio de Números (Paralelo)" description="all_avg.c" href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI/prog05.3_NumbersAvg/all_avg.c" />
+  <Card title="Producto Escalar (Secuencial)" description="ProductoEscalarSecu.cpp" href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI/prog06_ProductoEscalar/ProductoEscalarSecu.cpp" />
+  <Card title="Producto Escalar (Paralelo)" description="ProductoEscalarParall.cpp" href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI/prog06_ProductoEscalar/ProductoEscalarParall.cpp" />
+  <Card title="Producto Matriz-Vector (Secuencial)" description="ProdMatrizVectorSecu.cpp" href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI/prog07_ProductoMatrizVector/ProdMatrizVectorSecu.cpp" />
+  <Card title="Producto Matriz-Vector (Paralelo)" description="ProdMatrizVectorParall.cpp" href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI/prog07_ProductoMatrizVector/ProdMatrizVectorParall.cpp" />
+</div>
 
-- Fundamentos de la programación con paso de mensajes
-- Inicialización y finalización de MPI
-- Comunicación punto a punto básica
-- Envío y recepción de mensajes
-- Implementación de patrones simples de comunicación
+## Compilación y Ejecución
+
+```bash
+# Para C
+mpicc -g -Wall -o out <program_name>.c
+
+# Para C++
+mpicxx -g -Wall -o out <program_name>.cpp
+
+# Ejecutar con 4 procesos
+mpiexec -n 4 ./out
+```
 
 <Alert type="info">
-  El contenido detallado y los materiales del laboratorio estarán disponibles antes de la fecha de inicio.
-</Alert> 
+  **Fecha de entrega:** 30 de abril de 2025. Asegúrate de completar todos los ejercicios y subir tus observaciones.
+</Alert>
+
+## Referencias
+- [MPI Tutorial](https://mpitutorial.com/)
+- [Open MPI Docs](https://www.open-mpi.org/doc/)
+- [MPI Forum Standard](https://www.mpi-forum.org/docs/mpi-4.0/mpi40-report.pdf)
+

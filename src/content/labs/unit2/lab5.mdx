@@ -1,28 +1,50 @@
 ---
-title: "Introducción a la Programación con Pthreads"
-description: "Aprende los fundamentos de la programación multihilo utilizando POSIX Threads. Implementa sincronización básica y comprende los conceptos de concurrencia."
-pubDate: "2025-04-17"
+title: "PThreads Básico"
+description: "Introducción al modelo de hilos POSIX (PThreads). Aprende a crear hilos y manejar concurrencia básica en C."
+pubDate: "2025-05-01"
 author: "Railly Hugo"
 authorImageUrl: "/hugo-profile.webp"
-dueDate: "2025-05-01"
-files: ["pthread_basics.cpp"]
-path: "Laboratory/Pthreads"
+dueDate: "2025-05-12"
+files: [
+  "prog00-HelloWorld.c",
+  "pth_hello.c"
+]
+path: "Laboratory/PThreads"
 ---
 
 import Alert from "../../../components/Alert.astro";
-import CodeBlock from "../../../components/CodeBlock.astro";
-import StepGuide from "../../../components/StepGuide.astro";
+import Card from "../../../components/Card.astro";
 
-## Próximamente
+Este laboratorio marca el inicio del trabajo con hilos POSIX (PThreads). Aprenderás a:
 
-Este laboratorio estará disponible pronto. En este laboratorio, exploraremos:
+- Crear hilos usando la librería `pthread`
+- Ejecutar funciones concurrentemente
+- Comprender el uso básico de `pthread_create` y `pthread_join`
 
-- Fundamentos de la programación multihilo
-- Creación y gestión de hilos con Pthreads
-- Sincronización básica con mutex
-- Manejo de condiciones de carrera
-- Patrones básicos de concurrencia
+<div class="grid gap-4 md:grid-cols-2">
+  <Card title="Hello World con PThreads" description="prog00-HelloWorld.c" href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/PThreads/prog00-HelloWorld.c" />
+  <Card title="Uso Básico de PThreads" description="pth_hello.c" href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/PThreads/pth_hello.c" />
+</div>
+
+## Compilación y Ejecución
+
+```bash
+# Compilación básica
+gcc -g -Wall -o prog00-HelloWorld prog00-HelloWorld.c -lpthread
+
+gcc -g -Wall -o pth_hello pth_hello.c -lpthread
+
+# Ejecución
+./prog00-HelloWorld 4
+./pth_hello 4
+```
 
 <Alert type="info">
-  El contenido detallado y los materiales del laboratorio estarán disponibles antes de la fecha de inicio.
-</Alert> 
+  **Fecha de entrega:** 12 de mayo de 2025. Asegúrate de probar ambos programas con múltiples hilos y documentar tu análisis.
+</Alert>
+
+## Referencias
+- [POSIX Threads Programming](https://computing.llnl.gov/tutorials/pthreads/)
+- [Tutorial C Pthreads](https://randu.org/tutorials/threads/)
+- Libro: *Using POSIX Threads*, Bradford Nichols
+

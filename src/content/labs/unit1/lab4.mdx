@@ -1,28 +1,58 @@
 ---
-title: "MPI: Operaciones Colectivas y Optimización"
-description: "Domina las operaciones colectivas en MPI como Broadcast, Scatter, Gather y Reduce. Aprende a optimizar el rendimiento de las comunicaciones en aplicaciones distribuidas."
-pubDate: "2025-04-10"
+title: "Ordenamientos y Comunicadores MPI"
+description: "Implementación de algoritmos de ordenamiento y manejo avanzado de comunicadores con MPI."
+pubDate: "2025-05-01"
 author: "Railly Hugo"
 authorImageUrl: "/hugo-profile.webp"
-dueDate: "2025-04-24"
-files: ["collective_ops.cpp"]
+dueDate: "2025-05-10"
+files: [
+  "bubble.c",
+  "mpi_odd_even.c",
+  "odd_even.c",
+  "MergeSort.cpp",
+  "Comunicadores.cpp",
+  "ComunicadorCartesiano.cpp",
+  "ComunicadorCartesianoSecu.cpp",
+  "matrix_mpi.c"
+]
 path: "Laboratory/MPI"
 ---
 
 import Alert from "../../../components/Alert.astro";
-import CodeBlock from "../../../components/CodeBlock.astro";
-import StepGuide from "../../../components/StepGuide.astro";
+import Card from "../../../components/Card.astro";
 
-## Próximamente
+Este laboratorio se enfoca en técnicas avanzadas de programación paralela con MPI. Explorarás algoritmos clásicos de ordenamiento y trabajarás con comunicadores personalizados y cartesianas.
 
-Este laboratorio estará disponible pronto. En este laboratorio, exploraremos:
+<div class="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+  <Card title="Bubble Sort" description="bubble.c" href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI/prog08.0_Bubble-OddEvenSort/bubble.c" />
+  <Card title="Odd-Even Sort (MPI)" description="mpi_odd_even.c" href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI/prog08.0_Bubble-OddEvenSort/mpi_odd_even.c" />
+  <Card title="Odd-Even Sort" description="odd_even.c" href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI/prog08.0_Bubble-OddEvenSort/odd_even.c" />
+  <Card title="Merge Sort" description="MergeSort.cpp" href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI/prog08_MergeSort/MergeSort.cpp" />
+  <Card title="Comunicadores Básicos" description="Comunicadores.cpp" href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI/prog09_Comunicadores/Comunicadores.cpp" />
+  <Card title="Comunicador Cartesiano (Paralelo)" description="ComunicadorCartesiano.cpp" href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI/prog10_ComunicadorCartesiano/ComunicadorCartesiano.cpp" />
+  <Card title="Comunicador Cartesiano (Secuencial)" description="ComunicadorCartesianoSecu.cpp" href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI/prog10_ComunicadorCartesiano/ComunicadorCartesianoSecu.cpp" />
+  <Card title="Distribución de Matrices" description="matrix_mpi.c" href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI/prog11_Matrix/matrix_mpi.c" />
+</div>
 
-- Operaciones colectivas en MPI
-- Implementación de Broadcast, Scatter y Gather
-- Operaciones de reducción y sincronización
-- Optimización de patrones de comunicación
-- Análisis de rendimiento de operaciones colectivas
+## Compilación y Ejecución
+
+```bash
+# Para C
+mpicc -g -Wall -o out <program_name>.c
+
+# Para C++
+mpicxx -g -Wall -o out <program_name>.cpp
+
+# Ejecutar con 4 procesos
+mpiexec -n 4 ./out
+```
 
 <Alert type="info">
-  El contenido detallado y los materiales del laboratorio estarán disponibles antes de la fecha de inicio.
-</Alert> 
+  **Fecha de entrega:** 10 de mayo de 2025. Asegúrate de completar todos los ejercicios y subir tus observaciones.
+</Alert>
+
+## Referencias
+- [MPI Tutorial](https://mpitutorial.com/)
+- [Open MPI Docs](https://www.open-mpi.org/doc/)
+- [MPI Forum Standard](https://www.mpi-forum.org/docs/mpi-4.0/mpi40-report.pdf)
+

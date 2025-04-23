@@ -129,7 +129,7 @@ export const COURSE_CONFIG = {
           lab: {
             id: "lab3",
             unitId: "unit1",
-            title: "Lab 3: Operaciones Colectivas con MPI",
+            title: "Lab 3: Operaciones Numéricas MPI",
             path: "Laboratory/MPI_code",
             files: [
               "prog05.1_Trapezoid/mpi_trap1.c",
@@ -154,7 +154,7 @@ export const COURSE_CONFIG = {
           lab: {
             id: "lab4",
             unitId: "unit1",
-            title: "Lab 4: Evaluación de Speedup con OpenMP",
+            title: "Lab 4: Ordenamientos y Comunicadores MPI",
             path: "Laboratory/OpenMP",
             files: ["amdahl_law.cpp"],
             dueDate: "2025-04-24"
