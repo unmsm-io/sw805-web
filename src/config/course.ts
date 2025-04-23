@@ -105,14 +105,14 @@ export const COURSE_CONFIG = {
             title: "Lab 2: Programación Distribuida con MPI",
             path: "Laboratory/MPI_code",
             files: [
-              "MPI_code/prog01_HelloWorldMPI_01/HelloWorldMPI_01.c",
-              "MPI_code/prog02_HelloWorldMPI_02/HelloWorldMPI_02.c",
-              "MPI_code/prog03_SendMessage01/SendMessage01.c",
-              "MPI_code/prog04.1_SendMessage02/SendMessage02.c",
-              "MPI_code/prog04.2_SendMessage03Traductor/SendMessageTraductor.c",
-              "MPI_code/prog04.3_SendMessage04AllTypes/SendMessageAllTypes.c",
-              "MPI_code/prog05.0_CalculoPI/CalculoPI_Secuencial.c",
-              "MPI_code/prog05.0_CalculoPI/CalculoPI.c"
+              "MPI/prog01_HelloWorldMPI_01/HelloWorldMPI_01.c",
+              "MPI/prog01_HelloWorldMPI_01/HelloWorldMPI_02.c",
+              "MPI/prog03_SendMessage/SendMessage01.c",
+              "MPI/prog03_SendMessage/SendMessage02.c",
+              "MPI/prog03_SendMessage/SendMessageTraductor.c",
+              "MPI/prog03_SendMessage/SendMessageAllTypes.c",
+              "MPI/prog05.0_CalculoPI/PI_asequential1.c",
+              "MPI/prog05.0_CalculoPI/PI_parallel.c"
             ],
             dueDate: "2025-04-10"
           }

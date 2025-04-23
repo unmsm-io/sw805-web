@@ -56,53 +56,61 @@ Esta práctica servirá como base para experimentos posteriores relacionados con
 
 ## Código Base
 
+              {/* "MPI/prog01_HelloWorldMPI_01/HelloWorldMPI_01.c",
+              "MPI/prog01_HelloWorldMPI_01/HelloWorldMPI_02.c",
+              "MPI/prog03_SendMessage/SendMessage01.c",
+              "MPI/prog03_SendMessage/SendMessage02.c",
+              "MPI/prog03_SendMessage/SendMessageTraductor.c",
+              "MPI/prog03_SendMessage/SendMessageAllTypes.c",
+              "MPI/prog05.0_CalculoPI/PI_asequential1.c",
+              "MPI/prog05.0_CalculoPI/PI_parallel.c" */}
 <div class="grid gap-4 md:grid-cols-2">
   <Card
     title="1. Hello World MPI (Básico)"
     description="Tu primer programa MPI que muestra el rango de cada proceso"
-    href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI_code/prog01_HelloWorldMPI_01/HelloWorldMPI_01.c"
+    href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI/prog01_HelloWorldMPI_01/HelloWorldMPI_01.c"
   />
 
   <Card
     title="2. Hello World MPI (Avanzado)"
     description="Versión mejorada del Hello World con más detalles de proceso"
-    href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI_code/prog02_HelloWorldMPI_02/HelloWorldMPI_02.c"
+    href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI/prog01_HelloWorldMPI_01/HelloWorldMPI_02.c"
   />
 
   <Card
     title="3. Envío de Mensajes (Básico)"
     description="Implementa comunicación básica entre procesos usando MPI_Send y MPI_Recv"
-    href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI_code/prog03_SendMessage01/SendMessage01.c"
+    href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI/prog03_SendMessage/SendMessage01.c"
   />
 
   <Card
     title="4. Envío de Mensajes (Avanzado)"
     description="Implementación avanzada de comunicación entre procesos"
-    href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI_code/prog04.1_SendMessage02/SendMessage02.c"
+    href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI/prog03_SendMessage/SendMessage02.c"
   />
 
   <Card
     title="5. Traductor MPI"
     description="Implementa un traductor simple usando comunicación MPI"
-    href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI_code/prog04.2_SendMessage03Traductor/SendMessageTraductor.c"
+    href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI/prog03_SendMessage/SendMessageTraductor.c"
   />
 
   <Card
     title="6. Tipos de Datos MPI"
     description="Explora diferentes tipos de datos en comunicación MPI"
-    href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI_code/prog04.3_SendMessage04AllTypes/SendMessageAllTypes.c"
+    href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI/prog03_SendMessage/SendMessageAllTypes.c"
   />
 
   <Card
     title="7. Cálculo de PI (Secuencial)"
     description="Versión secuencial del cálculo de PI para comparación"
-    href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI_code/prog05.0_CalculoPI/CalculoPI_Secuencial.c"
+    href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI/prog05.0_CalculoPI/PI_asequential1.c"
   />
 
   <Card
     title="8. Cálculo de PI (Paralelo)"
     description="Implementa el cálculo de PI usando MPI"
-    href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI_code/prog05.0_CalculoPI/CalculoPI.c"
+    href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI/prog05.0_CalculoPI/PI_parallel.c"
   />
 </div>
 
@@ -147,8 +155,8 @@ mpicc --version
 
 #### Paso 1: Instalar WSL y Ubuntu
 
-1. Abra Microsoft Store y busque "Ubuntu"
-2. Instale la versión más reciente de Ubuntu
+1. Descargue desde el navegador el instalador de Ubuntu/WSL desde [aquí](https://apps.microsoft.com/detail/9pn20msr04dw)
+2. Ejecute el instalador y siga las instrucciones.
 3. Abra Windows Terminal (puede buscarlo en el menú inicio)
 4. En la terminal, abra una nueva instancia de Ubuntu
 5. Durante la primera ejecución, se le pedirá crear un usuario:
