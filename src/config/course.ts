@@ -2,7 +2,7 @@ export const COURSE_CONFIG = {
   // Course Information
   code: "20W0805",
   name: "Programación Concurrente y Paralela",
-  semester: "2025-I",
+  semester: "2025-II",
   department: "Ingeniería de Software",
   faculty: "Facultad de Ingeniería de Sistemas e Informática",
   university: "Universidad Nacional Mayor de San Marcos",
