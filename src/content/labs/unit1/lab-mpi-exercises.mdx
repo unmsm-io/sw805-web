@@ -48,18 +48,23 @@ Una aplicación puede utilizar el parámetro tag en las funciones send y receive
 3. **Recepción en orden inverso**: Los esclavos deben recibir primero el mensaje con tag 2, luego el mensaje con tag 1
 4. **Documentación**: Explica en tu informe cómo los tags permiten la comunicación selectiva
 
-**Estructura sugerida:**
+**Ejemplo de uso de tags:**
 
-<CodeBlock language="c" content={`#define TAG_MENSAJE1 1
-#define TAG_MENSAJE2 2
+<CodeBlock language="c" content={`#define TAG_DATO_A 100
+#define TAG_DATO_B 200
 
-// Maestro envía dos mensajes con diferentes tags
-MPI_Send(&dato1, 1, MPI_INT, destino, TAG_MENSAJE1, MPI_COMM_WORLD);
-MPI_Send(&dato2, 1, MPI_INT, destino, TAG_MENSAJE2, MPI_COMM_WORLD);
+// Enviar con tags diferentes
+MPI_Send(&dato_a, 1, MPI_INT, destino, TAG_DATO_A, MPI_COMM_WORLD);
+MPI_Send(&dato_b, 1, MPI_INT, destino, TAG_DATO_B, MPI_COMM_WORLD);
 
-// Esclavo recibe en orden inverso
-MPI_Recv(&buffer2, 1, MPI_INT, 0, TAG_MENSAJE2, MPI_COMM_WORLD, &status);
-MPI_Recv(&buffer1, 1, MPI_INT, 0, TAG_MENSAJE1, MPI_COMM_WORLD, &status);`} />
+// Recibir en orden específico usando tags
+MPI_Recv(&buffer_b, 1, MPI_INT, origen, TAG_DATO_B, MPI_COMM_WORLD, &status);
+MPI_Recv(&buffer_a, 1, MPI_INT, origen, TAG_DATO_A, MPI_COMM_WORLD, &status);`} />
+
+**Conceptos clave:**
+- Los tags permiten identificar y ordenar mensajes específicos
+- `MPI_Recv` puede especificar qué tag recibir
+- Útil para protocolos de comunicación complejos
 
 ---
 
@@ -89,24 +94,26 @@ El programa `aproximacion_pi.c` calcula el valor de π usando una aproximación 
 4. **Reducción**: Combina todas las sumas parciales para obtener el resultado final
 5. **Análisis de rendimiento**: Compara tiempos de ejecución entre versión secuencial y paralela
 
-**Pseudocódigo de la solución:**
+**Patrón general de paralelización:**
 
-<CodeBlock language="c" content={`// Cada proceso calcula su rango de trabajo
-int n = total_intervalos;
-int local_n = n / comm_size;
-int start = rank * local_n;
-int end = (rank == comm_size - 1) ? n : start + local_n;
+<CodeBlock language="c" content={`// 1. Cada proceso determina su trabajo
+int mi_inicio = /* calcular según rank */;
+int mi_fin = /* calcular según rank */;
 
-// Cálculo local
-double local_sum = 0.0;
-for (int i = start; i < end; i++) {
-    double x = (i + 0.5) * h;
-    local_sum += 4.0 / (1.0 + x * x);
+// 2. Procesamiento local
+double suma_local = 0.0;
+for (int i = mi_inicio; i < mi_fin; i++) {
+    suma_local += /* función a integrar */;
 }
 
-// Reducción global
-double global_sum;
-MPI_Reduce(&local_sum, &global_sum, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);`} />
+// 3. Combinación de resultados
+double suma_global;
+MPI_Reduce(&suma_local, &suma_global, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);`} />
+
+**Estrategia de solución:**
+- **Descomposición del dominio**: Dividir el intervalo de integración entre procesos
+- **Cálculo distribuido**: Cada proceso trabaja con su subconjunto de datos
+- **Agregación de resultados**: Usar operaciones colectivas para combinar resultados parciales
 
 ---
 
@@ -136,20 +143,25 @@ Un deadlock ocurre cuando:
 3. **Sincronización**: Usa `MPI_Wait` o `MPI_Waitall` para completar las operaciones
 4. **Verificación**: Demuestra que el programa corregido termina correctamente
 
-**Corrección usando comunicación no bloqueante:**
+**Diferencia entre comunicación bloqueante y no bloqueante:**
 
-<CodeBlock language="c" content={`// Problemático (bloqueante)
-MPI_Send(data, size, MPI_INT, dest, tag, MPI_COMM_WORLD);
-MPI_Recv(buffer, size, MPI_INT, source, tag, MPI_COMM_WORLD, &status);
+<CodeBlock language="c" content={`// Comunicación bloqueante (puede causar deadlock)
+MPI_Send(datos, tamaño, MPI_INT, destino, tag, MPI_COMM_WORLD);
+MPI_Recv(buffer, tamaño, MPI_INT, origen, tag, MPI_COMM_WORLD, &status);
 
-// Solución (no bloqueante)
-MPI_Request send_request, recv_request;
-MPI_Isend(data, size, MPI_INT, dest, tag, MPI_COMM_WORLD, &send_request);
-MPI_Irecv(buffer, size, MPI_INT, source, tag, MPI_COMM_WORLD, &recv_request);
+// Comunicación no bloqueante (evita deadlock)
+MPI_Request request_send, request_recv;
+MPI_Isend(datos, tamaño, MPI_INT, destino, tag, MPI_COMM_WORLD, &request_send);
+MPI_Irecv(buffer, tamaño, MPI_INT, origen, tag, MPI_COMM_WORLD, &request_recv);
 
-// Esperar completar ambas operaciones
-MPI_Wait(&send_request, MPI_STATUS_IGNORE);
-MPI_Wait(&recv_request, &status);`} />
+// Esperar a que terminen las operaciones
+MPI_Wait(&request_send, MPI_STATUS_IGNORE);
+MPI_Wait(&request_recv, &status);`} />
+
+**Conceptos clave:**
+- **Deadlock**: Cuando procesos esperan indefinidamente unos por otros
+- **Funciones no bloqueantes**: Permiten continuar la ejecución sin esperar
+- **MPI_Request**: Maneja el estado de operaciones asíncronas
 
 ---
 
@@ -175,13 +187,14 @@ El método de los mínimos cuadrados es una técnica de optimización matemátic
 - Compara con la versión serial
 
 #### 4.2 Compilación y ejecución
-**Compilación (si se usa pausa_personalizada):**
+**Ejemplo de compilación:**
 
-<CodeBlock language="bash" content={`# Compilar pausa_personalizada.c primero
+<CodeBlock language="bash" content={`# Si usas pausa_personalizada (para ciertos procesadores)
 gcc -c pausa_personalizada.c -o pausa_personalizada.o
+mpicc minimos_cuadrados.c pausa_personalizada.o -o programa -lm
 
-# Compilar programa principal
-mpicc minimos_cuadrados.c pausa_personalizada.o -o minimos_cuadrados -lm`} />
+# Compilación estándar
+mpicc minimos_cuadrados.c -o programa -lm`} />
 
 #### 4.3 Experimentación con procesos
 - Ejecuta con diferentes números de procesos (2-10)
@@ -201,27 +214,11 @@ Reescribe el paso 4 (donde el proceso 0 recibe todas las sumas parciales) usando
 2. Cada proceso del grupo 2 envía su suma parcial al grupo 1
 3. Repite la división hasta que el proceso 0 tenga todas las sumas
 
-**Algoritmo de árbol binario:**
-
-<CodeBlock language="c" content={`// Reducción usando árbol binario
-int step = 1;
-while (step < comm_size) {
-    if (rank % (2 * step) == 0) {
-        // Proceso receptor
-        int source = rank + step;
-        if (source < comm_size) {
-            double received_sum;
-            MPI_Recv(&received_sum, 1, MPI_DOUBLE, source, 0, MPI_COMM_WORLD, &status);
-            local_sum += received_sum;
-        }
-    } else if (rank % (2 * step) == step) {
-        // Proceso emisor
-        int dest = rank - step;
-        MPI_Send(&local_sum, 1, MPI_DOUBLE, dest, 0, MPI_COMM_WORLD);
-        break;
-    }
-    step *= 2;
-}`} />
+**Implementación del árbol binario:**
+- **Fase de reducción**: Los procesos se organizan en niveles jerárquicos
+- **Patrón de comunicación**: En cada nivel, la mitad de los procesos envían datos
+- **Eficiencia**: Reducir la complejidad de O(n) a O(log n)
+- **Desafío**: Manejar números impares de procesos correctamente
 
 ---
 
@@ -253,17 +250,25 @@ Implementar operaciones de comunicación colectiva en MPI para distribución de 
 #### 5.2 Implementación de comunicaciones colectivas
 Inserta las rutinas MPI apropiadas en los puntos indicados:
 
-**Operaciones colectivas sugeridas:**
+**Ejemplos de operaciones colectivas:**
 
-<CodeBlock language="c" content={`// Paso 2: Broadcast del número inicial
+<CodeBlock language="c" content={`// Distribuir datos desde el proceso 0
+int semilla;
 MPI_Bcast(&semilla, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
-// Paso 4: Gather de números aleatorios al proceso de mayor rank
-MPI_Gather(&mi_numero, 1, MPI_DOUBLE, numeros_array, 1, MPI_DOUBLE,
-           comm_size-1, MPI_COMM_WORLD);
+// Recolectar datos en un proceso específico
+double mi_valor, todos_los_valores[comm_size];
+MPI_Gather(&mi_valor, 1, MPI_DOUBLE, todos_los_valores, 1, MPI_DOUBLE,
+           proceso_destino, MPI_COMM_WORLD);
 
-// Paso 6: Allreduce para máximo y operaciones globales
-MPI_Allreduce(&local_max, &global_max, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);`} />
+// Operación global (todos obtienen el resultado)
+double valor_local, valor_maximo;
+MPI_Allreduce(&valor_local, &valor_maximo, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);`} />
+
+**Operaciones colectivas a implementar:**
+- **MPI_Bcast**: Para distribuir la semilla inicial
+- **MPI_Gather**: Para recolectar datos en un proceso específico
+- **MPI_Allreduce**: Para operaciones globales (máximo, suma, etc.)
 
 #### 5.3 Compilación y pruebas
 
@@ -316,14 +321,11 @@ Medir y analizar el rendimiento de comunicaciones punto a punto en MPI, determin
   **Nota:** Para mensajes muy largos, disminuye el número de repeticiones para evitar tiempos de ejecución excesivos.
 </Alert>
 
-**Cálculo de ancho de banda:**
-
-<CodeBlock language="c" content={`// Fórmula general
-double bandwidth = (message_size * iterations * 2) / elapsed_time;
-// message_size: tamaño del mensaje en bytes
-// iterations: número de iteraciones del ping-pong
-// 2: factor para considerar ida y vuelta
-// elapsed_time: tiempo total medido`} />
+**Métricas a calcular:**
+- **Latencia**: Tiempo mínimo de transmisión (mensajes pequeños)
+- **Ancho de banda**: Throughput máximo (mensajes grandes)
+- **Variación con el tamaño**: Cómo cambia el rendimiento según el tamaño del mensaje
+- **Efecto del número de procesos**: Impacto en el rendimiento de la red
 
 ---
 
