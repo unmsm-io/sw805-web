@@ -157,7 +157,28 @@ export const COURSE_CONFIG = {
             title: "Lab 4: Ordenamientos y Comunicadores MPI",
             path: "Laboratory/OpenMP",
             files: ["amdahl_law.cpp"],
-            dueDate: "2025-04-24"
+            dueDate: "2025-09-15"
+          }
+        },
+        {
+          week: "4+",
+          topic: "Lista de Ejercicios Avanzados de MPI",
+          subtopics: [
+            "Comunicación con tags",
+            "Paralelización de algoritmos secuenciales",
+            "Comunicación no bloqueante vs bloqueante",
+            "Método de mínimos cuadrados paralelo",
+            "Operaciones colectivas avanzadas",
+            "Análisis de rendimiento MPI"
+          ],
+          activity: "Conjunto completo de 6 ejercicios prácticos de MPI para consolidar conocimientos de comunicación, paralelización y optimización.",
+          lab: {
+            id: "lab-mpi-exercises",
+            unitId: "unit1",
+            title: "Lista de Ejercicios de MPI",
+            path: "Laboratory/MPI/exercises",
+            files: ["ejercicios_mpi.zip"],
+            dueDate: "2025-10-15"
           }
         }
       ]
@@ -403,15 +424,15 @@ export const COURSE_CONFIG = {
   importantDates: [
     {
       event: "Inicio de Clases",
-      date: "2025-03-27"
+      date: "2025-08-25"
     },
     {
       event: "Examen Parcial",
-      date: "2025-05-15"
+      date: "2025-10-20"
     },
     {
       event: "Examen Final",
-      date: "2025-07-10"
+      date: "2025-12-15"
     }
   ],
 
@@ -535,15 +556,22 @@ export const COURSE_CONFIG = {
     {
       id: 1,
       title: "Bienvenidos al curso",
-      content: "Iniciamos el semestre 2025-I. Por favor, revisen el sílabo y configuren su entorno de desarrollo.",
-      date: "2025-03-27",
+      content: "Iniciamos el semestre 2025-II. Por favor, revisen el sílabo y configuren su entorno de desarrollo.",
+      date: "2025-08-25",
       type: "info"
     },
     {
       id: 2,
+      title: "Lista de Ejercicios MPI",
+      content: "Nueva lista de ejercicios avanzados de MPI disponible. Incluye 6 ejercicios prácticos para después de la semana 4.",
+      date: "2025-09-17",
+      type: "lab"
+    },
+    {
+      id: 3,
       title: "Primer Laboratorio",
       content: "El primer laboratorio estará disponible desde el viernes. Recuerden revisar la guía de configuración.",
-      date: "2025-03-29",
+      date: "2025-08-27",
       type: "lab"
     }
   ]
