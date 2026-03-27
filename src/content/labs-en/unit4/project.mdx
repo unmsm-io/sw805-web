@@ -1,0 +1,208 @@
+---
+title: "Final Project: Parallel Computing Application"
+description: "Develop a complete project that demonstrates mastery of the technologies and concepts learned throughout the course. Implement a solution that combines multiple parallel programming paradigms."
+pubDate: "2025-07-03"
+author: "Railly Hugo"
+authorImageUrl: "/hugo-profile.webp"
+dueDate: "2025-07-10"
+files: ["README.md"]
+path: "Laboratory/Final"
+---
+
+import Alert from "../../../components/Alert.astro";
+import CodeBlock from "../../../components/CodeBlock.astro";
+import StepGuide from "../../../components/StepGuide.astro";
+
+## General Description
+
+The final project is the synthesis of everything learned throughout the course. Each team will design and implement a complete parallel computing application: from the sequential reference version to an optimized parallel implementation with quantitative performance analysis.
+
+The goal is not only for the program to work, but for students to be able to explain every design decision: why they chose that technology, how they distribute the work, what bottlenecks they found, and how they resolved them.
+
+---
+
+## Objectives
+
+Upon completing the project, each student must be able to:
+
+- Analyze a computational problem and identify the parallelizable parts.
+- Design a parallelization strategy using at least two technologies from the course.
+- Implement and debug parallel code in a real environment.
+- Measure speedup and efficiency using a reproducible methodology.
+- Quantitatively compare a sequential implementation against the parallel one.
+- Communicate technical results clearly in a report and oral presentation.
+
+---
+
+## Project Requirements
+
+### Mandatory technical requirements
+
+1. **At least two parallel technologies** from the following set: MPI, OpenMP, Pthreads, CUDA.
+2. **Sequential reference implementation** to calculate real speedup.
+3. **Performance analysis** with at least three different problem sizes.
+4. **Reported metrics**: execution time, speedup S(p) = T(1)/T(p), efficiency E(p) = S(p)/p.
+5. **Scalability**: show how performance varies when changing the number of processes/threads/blocks.
+6. **Error handling**: the code must not fail silently on invalid inputs or allocation errors.
+
+### Team requirements
+
+- Groups of **2 to 3 students**.
+- Each member must be able to defend any part of the project during the presentation.
+- The GitHub repository must show contributions from all members (commit history).
+
+<Alert type="warning">
+Projects with commits from only one member will be evaluated with a reduction factor applied to the team grade. Genuine collaborative work is expected — not a division where "one person implements and the other documents."
+</Alert>
+
+---
+
+## Proposed Topics
+
+| # | Topic | Difficulty | Recommended technologies | Brief description |
+|---|-------|-----------|--------------------------|-------------------|
+| 1 | N-body simulation | High | CUDA + OpenMP | Simulate gravitational interactions between N particles. O(N²) complexity per time step. |
+| 2 | Image processing | Medium | CUDA + Pthreads | Apply filters (Gaussian blur, Sobel, thresholding) to high-resolution images in parallel. |
+| 3 | Sparse matrix multiplication | Medium | MPI + OpenMP | SpMM (Sparse Matrix-Matrix Multiply) with CSR format. Relevant for graphs and ML. |
+| 4 | Heat transfer simulation | Medium | MPI + OpenMP | 2D heat equation with finite difference method. Domain decomposed across processes. |
+| 5 | Parallel ray tracing | High | CUDA + OpenMP | Render 3D scenes with ray tracing. Each pixel is independent: perfect parallelism. |
+| 6 | Data compression | Medium | OpenMP + Pthreads | Parallel Run-Length or Huffman compression over independent data blocks. |
+| 7 | Graph search (BFS/DFS) | High | MPI + CUDA | BFS/DFS over massive graphs. Level exploration in parallel with distributed frontiers. |
+| 8 | Monte Carlo simulation | Medium | MPI + OpenMP | Valuation of financial options (Black-Scholes model). Millions of independent trajectories. |
+| 9 | Parallel FFT | High | CUDA + MPI | Fast Fourier Transform for audio signal or seismic data analysis. |
+| 10 | Parallel neural network | High | CUDA + OpenMP | Parallel training of a feedforward network. GPU for forward/backward, CPU for weight update. |
+
+<Alert type="tip">
+If you have your own idea outside this list, you may propose it in the first week. It must meet the technical requirements and be approved by the instructor.
+</Alert>
+
+---
+
+## Deliverables
+
+### 1. Source code on GitHub
+
+- Public repository or shared with the instructor.
+- Clear folder structure: `src/`, `sequential/`, `parallel/`, `benchmarks/`, `report/`.
+- `Makefile` or script that compiles the entire project with a single command.
+- `README.md` with step-by-step compilation and execution instructions.
+- Appropriate `.gitignore` (no compiled binaries or temporary files).
+
+### 2. Technical report
+
+PDF document of 8 to 15 pages. See the **Report Format** section below.
+
+### 3. Oral presentation (15 minutes)
+
+- 10 minutes of presentation + 5 minutes of questions.
+- Must include: motivation, design, live demo, results, conclusions.
+- All members must speak during the presentation.
+- Free format: slides, Jupyter Notebook, terminal, whatever you prefer.
+
+### 4. Live demo
+
+During the presentation, you will run the program in real time. You must be able to:
+- Change the problem size and show how the time varies.
+- Show the GPU monitor (`nvidia-smi`) or CPU metrics during execution.
+- Answer questions about the code directly in the editor or terminal.
+
+<Alert type="warning">
+The live demo is mandatory. A project that cannot be executed on the day of the presentation will receive a severe penalty in the rubric, regardless of the quality of the report.
+</Alert>
+
+---
+
+## Evaluation Rubric
+
+| Criterion | Weight | Indicators of full achievement |
+|-----------|--------|-------------------------------|
+| Implementation | 30% | Functional code, correctly parallelized, no race conditions, error handling |
+| Performance and optimization | 25% | Demonstrable speedup, scalability analysis, justification of design decisions |
+| Technical report | 20% | Clear methodology, performance charts, results analysis, well-founded conclusions |
+| Presentation | 15% | Expository clarity, topic mastery, answers to questions, successful demo |
+| Clean code and documentation | 10% | Descriptive names, modular structure, complete README, atomic commits with clear messages |
+
+### Grade scale per criterion
+
+| Score | Level |
+|-------|-------|
+| 90-100% | Excellent: exceeds requirements, demonstrates deep understanding |
+| 75-89%  | Good: meets all requirements, minor omissions |
+| 60-74%  | Fair: meets minimum requirements with notable deficiencies |
+| < 60%   | Insufficient: important requirements not met |
+
+<Alert type="info">
+The "Performance and optimization" criterion does not evaluate whether the project is the fastest in the class, but whether the analysis is rigorous. A 3x speedup that is well explained is worth more than a 10x speedup without justification.
+</Alert>
+
+---
+
+## Schedule
+
+| Week | Activity | Deliverable |
+|------|-----------|------------|
+| Week 1 | Team formation, topic selection, bibliography review | 1-page proposal (topic, team, work plan) |
+| Week 2 | Sequential reference implementation, parallel architecture design | Functional sequential version + design diagram |
+| Week 3 | Parallel implementation, correctness testing | First parallel version that produces correct results |
+| Week 4 | Optimization, complete benchmarks, report writing, presentation preparation | Final report + complete repository + presentation |
+
+<Alert type="warning">
+The Week 1 proposal is mandatory to be registered for the project. Teams without an approved proposal will not be allowed to present the final project.
+</Alert>
+
+---
+
+## Report Format
+
+The report must be written in English, in PDF format, with the following sections in order:
+
+### Cover page
+- Project title, full names of all members, course code, submission date.
+
+### Abstract
+Maximum 200 words. Briefly describe the problem, the parallelization approach, the main results, and the conclusions. It must be readable independently of the rest of the report.
+
+### 1. Introduction
+- Problem description: what is being solved and why it is computationally expensive.
+- Motivation for parallelization.
+- Specific objectives of the project.
+
+### 2. Methodology
+- Description of the sequential algorithm.
+- Parallelization strategy: how work is divided, what data is shared, how processes are synchronized.
+- Technologies used and justification for why they were chosen.
+- Test environment: hardware (CPU, GPU, RAM), operating system, compiler and library versions.
+
+### 3. Results and Analysis
+- Table of execution times for different problem sizes and number of processes/threads.
+- Speedup and efficiency charts.
+- Analysis of results: does the speedup approach the ideal? Where are the bottlenecks?
+- Application of Amdahl's Law where applicable.
+
+### 4. Conclusions
+- What worked well and what was difficult.
+- Limitations of the current implementation.
+- Future work: what you would improve with more time.
+
+### 5. References
+Bibliography in APA format. Minimum 5 references (books, articles, or official documentation).
+
+---
+
+## Frequently Asked Questions
+
+**Can I use external libraries such as Thrust or OpenBLAS?**
+Yes, but you must understand what the library does. If you use `thrust::sort`, you must be able to explain what parallel algorithm it executes internally.
+
+**Can the report be written in Spanish?**
+No. The report and the presentation must be in English. The code may use variable names and comments in either language, which is standard convention.
+
+**What if the team has only 2 people and the topic is High difficulty?**
+The same level of quality is expected. The difficulty of the topic does not adjust the rubric, but it may result in a more impressive project if executed well.
+
+**Does the repository have to be public?**
+It can be private, but it must be shared with the instructor's GitHub user before the submission deadline.
+
+<Alert type="tip">
+Use GitHub Projects or Issues to distribute tasks within the team. This also serves as evidence of collaborative work and can compensate for any imbalance in code commits.
+</Alert>

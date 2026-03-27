@@ -1,0 +1,237 @@
+---
+title: "Distributed Programming with MPI"
+description: "Practical fundamentals of parallel programming on distributed-memory architectures using MPI. Learn to communicate processes, use MPI data types, and compute PI in parallel."
+pubDate: "2025-04-04"
+author: "Railly Hugo"
+authorImageUrl: "/hugo-profile.webp"
+dueDate: "2025-04-10"
+files: ["HelloWorldMPI_01.cpp"]
+path: "Laboratory/MPI"
+---
+
+import Alert from "../../../components/Alert.astro";
+import CodeBlock from "../../../components/CodeBlock.astro";
+import Card from "../../../components/Card.astro";
+
+This lab aims to familiarize you with distributed programming using MPI (Message Passing Interface). You will learn to:
+
+- Create basic MPI programs
+- Communicate data between processes
+- Implement collective operations
+- Handle different data types in MPI
+
+This practice will serve as a foundation for subsequent experiments related to performance, memory models, and efficiency in distributed computing.
+
+
+## Background
+
+### Distributed vs Shared Memory
+
+#### Distributed Memory
+- Collection of core-memory pairs connected by a network
+- The memory associated with each core is only accessible to that core
+- Different processes
+
+#### Shared Memory
+- Collection of core-memory pairs connected by a globally accessible memory
+- Each core can access any memory location
+- Different threads within the same process
+
+### Basic MPI Functions
+
+| Function | Purpose | Analogy |
+|----------|---------|---------|
+| `MPI_Comm_size` | Get the number of processes | "How large is this team?" |
+| `MPI_Comm_rank` | Get the rank of the current process | "What is my jersey number?" |
+| `MPI_Send` | Send data to another process | "Send a message" |
+| `MPI_Recv` | Receive data from another process | "Receive a message" |
+| `MPI_Bcast` | Broadcast data to all processes | "Announce to everyone" |
+| `MPI_Reduce` | Reduce data from all processes | "Combine results" |
+
+## Requirements
+
+- Submit the source files for the completed exercises
+- The program must compile and execute correctly on the specified platform
+- Document your results and observations
+
+## Base Code
+
+<div class="grid gap-4 md:grid-cols-2">
+  <Card
+    title="1. Hello World MPI (Basic)"
+    description="Your first MPI program that displays the rank of each process"
+    href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI/prog01_HelloWorldMPI_01/HelloWorldMPI_01.c"
+  />
+
+  <Card
+    title="2. Hello World MPI (Advanced)"
+    description="Enhanced Hello World version with more process details"
+    href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI/prog01_HelloWorldMPI_01/HelloWorldMPI_02.c"
+  />
+
+  <Card
+    title="3. Message Passing (Basic)"
+    description="Implements basic inter-process communication using MPI_Send and MPI_Recv"
+    href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI/prog03_SendMessage/SendMessage01.c"
+  />
+
+  <Card
+    title="4. Message Passing (Advanced)"
+    description="Advanced implementation of inter-process communication"
+    href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI/prog03_SendMessage/SendMessage02.c"
+  />
+
+  <Card
+    title="5. MPI Translator"
+    description="Implements a simple translator using MPI communication"
+    href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI/prog03_SendMessage/SendMessageTraductor.c"
+  />
+
+  <Card
+    title="6. MPI Data Types"
+    description="Explore different data types in MPI communication"
+    href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI/prog03_SendMessage/SendMessageAllTypes.c"
+  />
+
+  <Card
+    title="7. PI Calculation (Sequential)"
+    description="Sequential version of PI calculation for comparison"
+    href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI/prog05.0_CalculoPI/PI_asequential1.c"
+  />
+
+  <Card
+    title="8. PI Calculation (Parallel)"
+    description="Implements PI calculation using MPI"
+    href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI/prog05.0_CalculoPI/PI_parallel.c"
+  />
+</div>
+
+## Installing MPI
+
+### On macOS/Linux
+
+#### macOS using Homebrew
+```bash
+# Install Homebrew if not already installed
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# Install Open MPI
+brew install open-mpi
+```
+
+#### Linux (Ubuntu/Debian)
+```bash
+# Update repositories
+sudo apt update
+
+# Install Open MPI and compilers
+sudo apt install openmpi-bin libopenmpi-dev
+```
+
+To verify the installation:
+```bash
+# Check MPI version
+mpirun --version
+
+# Verify the compiler is available
+mpicc --version
+```
+
+### Installation on Windows
+
+#### Step 0: Install MINGW and GCC
+
+1. Download and install MINGW from [here](https://code.visualstudio.com/docs/cpp/config-mingw).
+2. Follow the instructions on the page to install MINGW and GCC.
+3. Verify the GCC installation by typing the command `gcc --version` in the terminal.
+
+#### Step 1: Install WSL and Ubuntu
+
+1. Download the Ubuntu/WSL installer from your browser [here](https://apps.microsoft.com/detail/9pn20msr04dw)
+2. Run the installer and follow the instructions.
+3. Open Windows Terminal (you can search for it in the start menu)
+4. In the terminal, open a new Ubuntu instance
+5. During first launch, you will be prompted to create a user:
+   - Choose any username you like
+   - Set the password to: `FISI2024`
+
+#### Step 2: Install MPI on Ubuntu
+
+Once inside the Ubuntu terminal, run the following commands:
+
+```bash
+# Update repositories
+sudo apt update
+
+# Install Open MPI and compilers
+sudo apt install openmpi-bin openmpi-common libopenmpi-dev
+```
+
+#### Step 3: Verify the installation
+
+```bash
+# Verify the compiler is available
+mpicc --version
+
+# Verify MPI is installed
+mpirun --version
+```
+
+#### Step 4: Clone the repository
+
+```bash
+# Create projects directory
+mkdir projects
+cd projects
+
+# Clone the repository
+git clone https://github.com/FISI-SM/ParallelProgramming-repo.git
+
+# Enter the MPI directory
+cd ParallelProgramming-repo/Laboratory/MPI_code
+```
+## Compilation and Execution
+
+Once MPI is installed, you can compile and run your programs:
+
+### Compilation
+```bash
+# Compile a program
+mpicc -g -Wall -o out <program_name>.c
+```
+
+### Execution
+```bash
+# Run with 4 processes
+mpiexec -n 4 <program_name>.exe
+```
+
+Important notes:
+- The `-n` parameter specifies the number of processes
+- On Windows, use the `.exe` extension
+- On Linux/macOS, ensure the file has execute permissions (`chmod +x programa`)
+
+## Evaluation Platform
+This lab runs **locally**. Currently at San Marcos we do not have a remote environment or SSH, therefore:
+
+- Each student will compile and run their code on their own machine
+- No submission is required for now. Save your results for future labs
+
+<Alert type="info">
+  **Suggested due date:** April 10, 2025. Make sure to complete all exercises and document your results.
+</Alert>
+
+
+## Proposed Exercises
+
+<ul>
+<li>
+<a href="https://docs.google.com/document/d/1OssfLTNgNr0OeEUXlQG_hwc-k-vq2NKcUzZHAjUYSGk/edit?tab=t.0" target="_blank">Lab 02 - Google Drive</a>
+</li>
+</ul>
+
+## References
+- [MPI Tutorial](https://mpitutorial.com/)
+- [Open MPI Documentation](https://www.open-mpi.org/doc/)
+- [MPI Reference](https://www.mpi-forum.org/docs/mpi-4.0/mpi40-report.pdf)
+- [Microsoft MPI Documentation](https://learn.microsoft.com/en-us/message-passing-interface/microsoft-mpi)

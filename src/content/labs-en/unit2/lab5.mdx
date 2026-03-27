@@ -1,0 +1,49 @@
+---
+title: "Basic PThreads"
+description: "Introduction to the POSIX thread model (PThreads). Learn to create threads and handle basic concurrency in C."
+pubDate: "2025-05-01"
+author: "Railly Hugo"
+authorImageUrl: "/hugo-profile.webp"
+dueDate: "2025-05-12"
+files: [
+  "prog00-HelloWorld.c",
+  "pth_hello.c"
+]
+path: "Laboratory/PThreads"
+---
+
+import Alert from "../../../components/Alert.astro";
+import Card from "../../../components/Card.astro";
+
+This laboratory marks the beginning of working with POSIX threads (PThreads). You will learn to:
+
+- Create threads using the `pthread` library
+- Execute functions concurrently
+- Understand the basic usage of `pthread_create` and `pthread_join`
+
+<div class="grid gap-4 md:grid-cols-2">
+  <Card title="Hello World with PThreads" description="prog00-HelloWorld.c" href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/PThreads/prog00-HelloWorld.c" />
+  <Card title="Basic PThreads Usage" description="pth_hello.c" href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/PThreads/pth_hello.c" />
+</div>
+
+## Compilation and Execution
+
+```bash
+# Basic compilation
+gcc -g -Wall -o prog00-HelloWorld prog00-HelloWorld.c -lpthread
+
+gcc -g -Wall -o pth_hello pth_hello.c -lpthread
+
+# Execution
+./prog00-HelloWorld 4
+./pth_hello 4
+```
+
+<Alert type="info">
+  **Due date:** May 12, 2025. Make sure to test both programs with multiple threads and document your analysis.
+</Alert>
+
+## References
+- [POSIX Threads Programming](https://computing.llnl.gov/tutorials/pthreads/)
+- [C Pthreads Tutorial](https://randu.org/tutorials/threads/)
+- Book: *Using POSIX Threads*, Bradford Nichols

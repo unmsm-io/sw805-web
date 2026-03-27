@@ -1,0 +1,375 @@
+---
+title: "MPI Exercise List"
+description: "A comprehensive set of practical MPI exercises covering tagged communication, algorithm parallelization, non-blocking communication, least squares method, collective operations, and performance analysis."
+pubDate: "2025-09-17"
+author: "Railly Hugo"
+authorImageUrl: "/hugo-profile.webp"
+dueDate: "2025-10-15"
+files: ["ejercicios_mpi.zip"]
+path: "Laboratory/MPI/exercises"
+---
+
+import Alert from "../../../components/Alert.astro";
+import CodeBlock from "../../../components/CodeBlock.astro";
+import Card from "../../../components/Card.astro";
+
+<Alert type="info">
+  **Important:** This set of exercises should be completed after finishing week 4 of the course. Make sure your MPI environment is correctly configured before you begin.
+</Alert>
+
+## General Description
+
+This exercise list is designed to deepen your understanding of advanced MPI concepts, including communication techniques, parallelization of sequential algorithms, deadlock handling, and performance analysis. Each exercise must include a **detailed report** explaining the implemented solution.
+
+**Code repository:** [https://github.com/FISI-SM/parallelProgramming-repo/tree/main/exercises/MPI](https://github.com/FISI-SM/parallelProgramming-repo/tree/main/exercises/MPI)
+
+---
+
+## Exercise 1: Message Combining Using Tags
+
+### Files
+- **Reference File:** [`comunicacion_basica.c`](https://github.com/FISI-SM/parallelProgramming-repo/blob/main/exercises/MPI/comunicacion_basica.c)
+- **Solution File:** `comunicacion_basica_solucion.c`
+
+### Objective
+Use the `tag` parameter in `MPI_Send` and `MPI_Recv` functions to distinguish different types of messages in an MPI application.
+
+### Problem Description
+An application can use the tag parameter in send and receive functions to distinguish messages. Use the program `comunicacion_basica.c` and modify it so that:
+
+1. The **master** sends **two messages** to each slave, using **different tags**
+2. Each **slave** receives the messages in **reverse order**, using the tags
+3. Then replies to the master as in the original file
+
+### Tasks
+
+1. **Original code analysis**: Examine the behavior of the base program
+2. **Tag implementation**: Modify the code to use different tags (e.g., `TAG_MENSAJE1 = 1` and `TAG_MENSAJE2 = 2`)
+3. **Reverse-order reception**: Slaves must first receive the message with tag 2, then the message with tag 1
+4. **Documentation**: Explain in your report how tags enable selective communication
+
+**Example of tag usage:**
+
+<CodeBlock language="c" content={`#define TAG_DATO_A 100
+#define TAG_DATO_B 200
+
+// Enviar con tags diferentes
+MPI_Send(&dato_a, 1, MPI_INT, destino, TAG_DATO_A, MPI_COMM_WORLD);
+MPI_Send(&dato_b, 1, MPI_INT, destino, TAG_DATO_B, MPI_COMM_WORLD);
+
+// Recibir en orden específico usando tags
+MPI_Recv(&buffer_b, 1, MPI_INT, origen, TAG_DATO_B, MPI_COMM_WORLD, &status);
+MPI_Recv(&buffer_a, 1, MPI_INT, origen, TAG_DATO_A, MPI_COMM_WORLD, &status);`} />
+
+**Key concepts:**
+- Tags allow identifying and ordering specific messages
+- `MPI_Recv` can specify which tag to receive
+- Useful for complex communication protocols
+
+---
+
+## Exercise 2: Converting Serial Code to Parallel
+
+### Files
+- **Reference File:** [`aproximacion_pi.c`](https://github.com/FISI-SM/parallelProgramming-repo/blob/main/exercises/MPI/aproximacion_pi.c)
+- **Solution File:** `aproximacion_pi_solucion.c`
+- **Input Data:** `datos_valores`
+
+### Objective
+Parallelize a sequential algorithm that computes the value of π using an integral approximation, implementing the SPMD (Single Program, Multiple Data) approach.
+
+### Problem Description
+The program `aproximacion_pi.c` computes the value of π using an integral approximation. You must modify this algorithm to create a parallel version using the SPMD approach.
+
+### Key Concepts
+- **Integral approximation**: π is computed as ∫₀¹ 4/(1+x²) dx
+- **SPMD**: All processes execute the same program but work with different data
+- **Reduction**: Combining partial results from all processes
+
+### Tasks
+
+1. **Sequential algorithm analysis**: Understand how π is computed in the original code
+2. **Domain decomposition**: Divide the interval [0,1] among the available processes
+3. **Parallel computation**: Each process computes its partial sum
+4. **Reduction**: Combine all partial sums to obtain the final result
+5. **Performance analysis**: Compare execution times between sequential and parallel versions
+
+**General parallelization pattern:**
+
+<CodeBlock language="c" content={`// 1. Cada proceso determina su trabajo
+int mi_inicio = /* calcular según rank */;
+int mi_fin = /* calcular según rank */;
+
+// 2. Procesamiento local
+double suma_local = 0.0;
+for (int i = mi_inicio; i < mi_fin; i++) {
+    suma_local += /* función a integrar */;
+}
+
+// 3. Combinación de resultados
+double suma_global;
+MPI_Reduce(&suma_local, &suma_global, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);`} />
+
+**Solution strategy:**
+- **Domain decomposition**: Divide the integration interval among processes
+- **Distributed computation**: Each process works with its subset of data
+- **Result aggregation**: Use collective operations to combine partial results
+
+---
+
+## Exercise 3: Non-Blocking vs Blocking Communication
+
+### Files
+- **Reference File:** [`bloqueo_mutuo.c`](https://github.com/FISI-SM/parallelProgramming-repo/blob/main/exercises/MPI/bloqueo_mutuo.c)
+- **Solution File:** `bloqueo_mutuo_corregido.c`
+
+### Objective
+Identify and fix a deadlock problem in MPI communication by replacing blocking communication with non-blocking communication.
+
+### Problem Description
+The program `bloqueo_mutuo.c` presents a deadlock when run with two nodes. The program prints some lines and then hangs, requiring the process to be terminated with Control+C.
+
+### Deadlock Analysis
+A deadlock occurs when:
+1. Two processes attempt to send data to each other simultaneously
+2. Both use `MPI_Send` (blocking) at the same time
+3. Each process waits for the other to receive before continuing
+4. The system blocks indefinitely
+
+### Tasks
+
+1. **Problem identification**: Analyze the code and explain why the deadlock occurs
+2. **Non-blocking communication solution**: Implement `MPI_Isend` and `MPI_Irecv`
+3. **Synchronization**: Use `MPI_Wait` or `MPI_Waitall` to complete the operations
+4. **Verification**: Demonstrate that the corrected program terminates correctly
+
+**Difference between blocking and non-blocking communication:**
+
+<CodeBlock language="c" content={`// Comunicación bloqueante (puede causar deadlock)
+MPI_Send(datos, tamaño, MPI_INT, destino, tag, MPI_COMM_WORLD);
+MPI_Recv(buffer, tamaño, MPI_INT, origen, tag, MPI_COMM_WORLD, &status);
+
+// Comunicación no bloqueante (evita deadlock)
+MPI_Request request_send, request_recv;
+MPI_Isend(datos, tamaño, MPI_INT, destino, tag, MPI_COMM_WORLD, &request_send);
+MPI_Irecv(buffer, tamaño, MPI_INT, origen, tag, MPI_COMM_WORLD, &request_recv);
+
+// Esperar a que terminen las operaciones
+MPI_Wait(&request_send, MPI_STATUS_IGNORE);
+MPI_Wait(&request_recv, &status);`} />
+
+**Key concepts:**
+- **Deadlock**: When processes wait indefinitely for one another
+- **Non-blocking functions**: Allow execution to continue without waiting
+- **MPI_Request**: Manages the state of asynchronous operations
+
+---
+
+## Exercise 4: Least Squares Method
+
+### Reference Files
+- [`minimos_cuadrados.c`](https://github.com/FISI-SM/parallelProgramming-repo/blob/main/exercises/MPI/minimos_cuadrados.c)
+- [`pausa_personalizada.c`](https://github.com/FISI-SM/parallelProgramming-repo/blob/main/exercises/MPI/pausa_personalizada.c)
+- [`minimos_cuadrados_serial.c`](https://github.com/FISI-SM/parallelProgramming-repo/blob/main/exercises/MPI/minimos_cuadrados_serial.c)
+- [`datos_xy.txt`](https://github.com/FISI-SM/parallelProgramming-repo/blob/main/exercises/MPI/datos_xy.txt)
+
+### Objective
+Implement and optimize the least squares method in parallel, exploring different communication strategies and load balancing approaches.
+
+### Problem Description
+The least squares method is a mathematical optimization technique for finding the best fit for a dataset, minimizing the sum of squared differences between estimated and observed values.
+
+### Sub-exercises
+
+#### 4.1 Base code analysis
+- Study the algorithm and understand the data decomposition
+- Analyze the blocking communications used
+- Compare with the serial version
+
+#### 4.2 Compilation and execution
+**Compilation example:**
+
+<CodeBlock language="bash" content={`# If using pausa_personalizada (for certain processors)
+gcc -c pausa_personalizada.c -o pausa_personalizada.o
+mpicc minimos_cuadrados.c pausa_personalizada.o -o programa -lm
+
+# Standard compilation
+mpicc minimos_cuadrados.c -o programa -lm`} />
+
+#### 4.3 Experimenting with processes
+- Run with different numbers of processes (2–10)
+- Analyze behavior and performance
+
+#### 4.4 Non-blocking communication
+- Replace `MPI_Send`/`MPI_Recv` with `MPI_Isend`/`MPI_Irecv`
+- Compare performance between both versions
+
+#### 4.5 Load balancing
+The original program is not optimized because the last process handles more data. Implement a more equitable load balancing strategy.
+
+#### 4.6 Binary tree reduction
+Rewrite step 4 (where process 0 receives all partial sums) using a binary tree:
+
+1. Divide the processes into two groups
+2. Each process in group 2 sends its partial sum to group 1
+3. Repeat the split until process 0 has all the sums
+
+**Binary tree implementation:**
+- **Reduction phase**: Processes are organized into hierarchical levels
+- **Communication pattern**: At each level, half of the processes send data
+- **Efficiency**: Reduce complexity from O(n) to O(log n)
+- **Challenge**: Handle odd numbers of processes correctly
+
+---
+
+## Exercise 5: Collective Communication Practice
+
+### Files
+- **Reference File:** [`comunicacion_colectiva.c`](https://github.com/FISI-SM/parallelProgramming-repo/blob/main/exercises/MPI/comunicacion_colectiva.c)
+- **Data File:** [`semilla.seed`](https://github.com/FISI-SM/parallelProgramming-repo/blob/main/exercises/MPI/semilla.seed)
+- **Solution Files:** `comunicacion_colectiva_solucion.c`, `datos_salida.data`
+
+### Objective
+Implement collective communication operations in MPI for data distribution and distributed statistics computation.
+
+### Program Structure
+
+1. **Process 0** reads a random number (`semilla.seed`)
+2. That number is **sent to all other processes**
+3. Each process **computes a random number** based on the received number and its rank
+4. The process with the **highest rank** computes the **mean value** of the random numbers
+5. **Four new random numbers** are generated by each node
+6. The **maximum value** and **standard deviation** of all numbers are computed
+
+### Tasks
+
+#### 5.1 Structural analysis
+- Identify each of the 6 steps in the code
+- Understand the `ObtenerEstadisticas` function that computes maximum and standard deviation
+
+#### 5.2 Collective communication implementation
+Insert the appropriate MPI routines at the indicated points:
+
+**Examples of collective operations:**
+
+<CodeBlock language="c" content={`// Distribuir datos desde el proceso 0
+int semilla;
+MPI_Bcast(&semilla, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+// Recolectar datos en un proceso específico
+double mi_valor, todos_los_valores[comm_size];
+MPI_Gather(&mi_valor, 1, MPI_DOUBLE, todos_los_valores, 1, MPI_DOUBLE,
+           proceso_destino, MPI_COMM_WORLD);
+
+// Operación global (todos obtienen el resultado)
+double valor_local, valor_maximo;
+MPI_Allreduce(&valor_local, &valor_maximo, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);`} />
+
+**Collective operations to implement:**
+- **MPI_Bcast**: To distribute the initial seed
+- **MPI_Gather**: To collect data at a specific process
+- **MPI_Allreduce**: For global operations (maximum, sum, etc.)
+
+#### 5.3 Compilation and testing
+
+<CodeBlock language="bash" content={`mpicc -o comunicacion_colectiva comunicacion_colectiva.c -lm`} />
+
+#### 5.4 Verification
+- Run with 1–8 processes
+- To verify correctness, change `semilla.seed` to `123456`
+- Compare your output with `datos_salida.data`
+
+---
+
+## Exercise 6: Point-to-Point Communication Practice
+
+### Files
+- **Reference File:** [`latencia_mpi.c`](https://github.com/FISI-SM/parallelProgramming-repo/blob/main/exercises/MPI/latencia_mpi.c)
+- **Reference File:** [`ancho_banda_mpi.c`](https://github.com/FISI-SM/parallelProgramming-repo/blob/main/exercises/MPI/ancho_banda_mpi.c)
+
+### Objective
+Measure and analyze the performance of point-to-point communications in MPI, determining network latency and bandwidth.
+
+### Part A: Latency Measurement
+
+#### Concepts
+- **Latency**: Minimum time to send a message (typically measured with small messages)
+- **Ping-pong**: Method where two processes repeatedly exchange messages
+
+#### Tasks
+1. **Code analysis**: Understand how `latencia_mpi.c` works
+2. **Compilation**: Compile the program normally
+3. **Execution**: Run with exactly 2 nodes and 2 processes
+4. **Measurement**: Record the latency times obtained
+
+### Part B: Bandwidth Measurement
+
+#### Concepts
+- **Bandwidth**: Maximum amount of data that can be transmitted per unit of time
+- **Throughput**: Actual data transfer performance
+
+#### Tasks
+1. **Code analysis**: Study `ancho_banda_mpi.c` and understand the parameters
+2. **Experiment 1**: Vary the number of processes and explain how bandwidth changes
+3. **Experiment 2**: Fix 2 processes and modify the message size:
+   - 10,000 elements
+   - 100,000 elements
+   - 1,000,000 elements
+4. **Analysis**: What patterns do you observe in bandwidth with different sizes?
+
+<Alert type="warning">
+  **Note:** For very large messages, decrease the number of repetitions to avoid excessive execution times.
+</Alert>
+
+**Metrics to compute:**
+- **Latency**: Minimum transmission time (small messages)
+- **Bandwidth**: Maximum throughput (large messages)
+- **Size variation**: How performance changes with message size
+- **Effect of process count**: Impact on network performance
+
+---
+
+## Deliverables
+
+### Report Format
+Each exercise must include:
+
+1. **Problem analysis**: Description of the problem and solution approach
+2. **Implementation**: Source code with explanatory comments
+3. **Results**: Program output and performance measurements
+4. **Comparative analysis**: Comparison between sequential/parallel versions where applicable
+5. **Conclusions**: Lessons learned and important observations
+
+### File Structure
+```
+ejercicios_mpi/
+├── ejercicio1/
+│   ├── comunicacion_basica_solucion.c
+│   └── informe_ejercicio1.md
+├── ejercicio2/
+│   ├── aproximacion_pi_solucion.c
+│   └── informe_ejercicio2.md
+├── ejercicio3/
+│   ├── bloqueo_mutuo_corregido.c
+│   └── informe_ejercicio3.md
+├── ejercicio4/
+│   ├── minimos_cuadrados_optimizado.c
+│   └── informe_ejercicio4.md
+├── ejercicio5/
+│   ├── comunicacion_colectiva_solucion.c
+│   └── informe_ejercicio5.md
+├── ejercicio6/
+│   ├── analisis_rendimiento.txt
+│   └── informe_ejercicio6.md
+└── README.md
+```
+
+### Evaluation Criteria
+- **Code correctness (40%)**: Programs compile and execute correctly
+- **Report quality (30%)**: Detailed analysis and clear explanations
+- **Optimization (20%)**: Efficient implementation and appropriate use of MPI
+- **Experimentation (10%)**: Tests with different configurations and analysis of results
+
+<Alert type="success">
+  **Tip:** Use tools such as `time` or `mpirun --hostfile` to measure performance and test different node configurations.
+</Alert>

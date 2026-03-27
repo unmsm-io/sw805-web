@@ -1,0 +1,451 @@
+---
+title: "Advanced OpenMP: Task-Based Programming"
+description: "Explore advanced OpenMP features such as task-based programming, dynamic scheduling, and optimization techniques to improve the performance of parallel applications."
+pubDate: "2025-05-01"
+author: "Railly Hugo"
+authorImageUrl: "/hugo-profile.webp"
+dueDate: "2025-05-15"
+files: ["advanced_openmp.cpp"]
+path: "Laboratory/OpenMP"
+---
+
+import Alert from "../../../components/Alert.astro";
+import CodeBlock from "../../../components/CodeBlock.astro";
+import StepGuide from "../../../components/StepGuide.astro";
+
+## Introduction
+
+The loop parallelism model with `#pragma omp parallel for` works well when work is distributed across regular iterations. However, many important algorithms — recursion, graphs, tree processing — do not fit that pattern. For these cases, OpenMP 3.0 introduced the **task model**.
+
+In the task model, the programmer defines units of work (tasks) that the OpenMP runtime enqueues and dispatches dynamically among the available threads. This makes it possible to parallelize irregular algorithms without needing to know in advance how much work there is or how to distribute it.
+
+In this laboratory we will explore task directives, dynamic loop scheduling, and parallel sections.
+
+## Task Directives
+
+### `#pragma omp task`
+
+Creates a task that will be executed by some thread in the current team. The task may execute immediately or be enqueued for future execution.
+
+```c
+#pragma omp parallel
+{
+    #pragma omp single
+    {
+        #pragma omp task
+        { /* esta tarea la ejecuta cualquier hilo */ }
+
+        #pragma omp task
+        { /* esta otra tarea también */ }
+    }
+}
+```
+
+<Alert type="info">
+The `#pragma omp single` block is fundamental: it guarantees that only one thread generates the tasks. If all threads generated tasks simultaneously, N copies of each task would be created (one per thread).
+</Alert>
+
+### `#pragma omp taskwait`
+
+Suspends the current thread until all **direct child tasks** of the current context have completed. It is the equivalent of `pthread_join` for tasks.
+
+```c
+#pragma omp task
+{ tarea_A(); }
+
+#pragma omp task
+{ tarea_B(); }
+
+#pragma omp taskwait
+/* aquí tarea_A y tarea_B ya terminaron */
+usar_resultados();
+```
+
+### `#pragma omp taskgroup`
+
+Similar to `taskwait`, but waits for all tasks created within the group, including nested tasks (children of children). It is more powerful than `taskwait` for deeply recursive algorithms.
+
+```c
+#pragma omp taskgroup
+{
+    #pragma omp task
+    procesar_subproblema_recursivo(datos);
+}
+```
+
+### `#pragma omp task depend`
+
+Declares data dependencies between tasks. The runtime guarantees the correct execution order without the programmer using explicit barriers.
+
+```c
+int x, y, z;
+
+#pragma omp task depend(out: x)
+{ x = calcular_x(); }
+
+#pragma omp task depend(in: x) depend(out: y)
+{ y = calcular_y(x); }
+
+#pragma omp task depend(in: x, y) depend(out: z)
+{ z = calcular_z(x, y); }
+```
+
+## Exercise 1: Recursive Fibonacci
+
+The Fibonacci number is the canonical example for introducing tasks: the recursion generates a tree of subproblems that can naturally be explored in parallel.
+
+### Sequential Version
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+
+long fib(int n) {
+    if (n < 2) return n;
+    return fib(n - 1) + fib(n - 2);
+}
+
+int main(void) {
+    int n = 40;
+    printf("fib(%d) = %ld\n", n, fib(n));
+    return 0;
+}
+```
+
+### Parallel Version with Tasks
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <omp.h>
+
+#define UMBRAL_SECUENCIAL 20
+
+long fib_seq(int n) {
+    if (n < 2) return n;
+    return fib_seq(n - 1) + fib_seq(n - 2);
+}
+
+long fib(int n) {
+    if (n < UMBRAL_SECUENCIAL) {
+        return fib_seq(n);
+    }
+
+    long x, y;
+
+    #pragma omp task shared(x)
+    x = fib(n - 1);
+
+    #pragma omp task shared(y)
+    y = fib(n - 2);
+
+    #pragma omp taskwait
+    return x + y;
+}
+
+int main(void) {
+    int n = 40;
+    long resultado;
+
+    double t_start = omp_get_wtime();
+
+    #pragma omp parallel
+    {
+        #pragma omp single
+        resultado = fib(n);
+    }
+
+    double t_end = omp_get_wtime();
+
+    printf("fib(%d) = %ld\n", n, resultado);
+    printf("Tiempo: %.4f segundos\n", t_end - t_start);
+
+    return 0;
+}
+```
+
+```bash
+gcc -O2 -fopenmp fib_omp.c -o fib_omp
+export OMP_NUM_THREADS=4
+./fib_omp
+```
+
+<Alert type="warning">
+The `UMBRAL_SECUENCIAL` parameter is critical. Without it, `fib(40)` generates more than 300 million tasks and the runtime overhead far exceeds the actual computation. The correct threshold depends on the hardware; experiment with values between 15 and 25.
+</Alert>
+
+**Experiment:** measure the time with `UMBRAL_SECUENCIAL` set to 10, 15, 20, and 25. Which value produces the best performance on your machine?
+
+## Exercise 2: Parallel Merge Sort
+
+Recursive merge sort is an ideal candidate for tasks: each half of the array can be sorted completely independently.
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <omp.h>
+
+#define UMBRAL_INSERCION 1000
+
+void insertion_sort(int *arr, int n) {
+    for (int i = 1; i < n; i++) {
+        int clave = arr[i];
+        int j = i - 1;
+        while (j >= 0 && arr[j] > clave) {
+            arr[j + 1] = arr[j];
+            j--;
+        }
+        arr[j + 1] = clave;
+    }
+}
+
+void merge(int *arr, int *tmp, int izq, int mid, int der) {
+    int i = izq, j = mid, k = izq;
+    while (i < mid && j < der) {
+        tmp[k++] = (arr[i] <= arr[j]) ? arr[i++] : arr[j++];
+    }
+    while (i < mid) tmp[k++] = arr[i++];
+    while (j < der) tmp[k++] = arr[j++];
+    memcpy(arr + izq, tmp + izq, (der - izq) * sizeof(int));
+}
+
+void mergesort(int *arr, int *tmp, int izq, int der) {
+    if (der - izq <= UMBRAL_INSERCION) {
+        insertion_sort(arr + izq, der - izq);
+        return;
+    }
+
+    int mid = izq + (der - izq) / 2;
+
+    #pragma omp task shared(arr, tmp) if(der - izq > 10000)
+    mergesort(arr, tmp, izq, mid);
+
+    #pragma omp task shared(arr, tmp) if(der - izq > 10000)
+    mergesort(arr, tmp, mid, der);
+
+    #pragma omp taskwait
+    merge(arr, tmp, izq, mid, der);
+}
+
+int main(void) {
+    int n = 10000000;
+    int *arr = malloc(n * sizeof(int));
+    int *tmp = malloc(n * sizeof(int));
+
+    srand(42);
+    for (int i = 0; i < n; i++) {
+        arr[i] = rand();
+    }
+
+    double t_start = omp_get_wtime();
+
+    #pragma omp parallel
+    {
+        #pragma omp single
+        mergesort(arr, tmp, 0, n);
+    }
+
+    double t_end = omp_get_wtime();
+
+    int ordenado = 1;
+    for (int i = 1; i < n; i++) {
+        if (arr[i] < arr[i - 1]) { ordenado = 0; break; }
+    }
+
+    printf("Arreglo ordenado: %s\n", ordenado ? "sí" : "no");
+    printf("Tiempo: %.4f segundos\n", t_end - t_start);
+
+    free(arr); free(tmp);
+    return 0;
+}
+```
+
+```bash
+gcc -O2 -fopenmp mergesort_omp.c -o mergesort_omp
+export OMP_NUM_THREADS=4
+./mergesort_omp
+```
+
+The `if(der - izq > 10000)` clause is the **granularity control**: when the subarray is small, the task executes synchronously on the current thread instead of being enqueued. This avoids task creation overhead for trivial work.
+
+## Dynamic Scheduling
+
+When loop iterations have unequal workloads, the default static scheduling (`schedule(static)`) produces imbalance: some threads finish much earlier than others. OpenMP offers alternatives:
+
+| Schedule | Behavior | When to use |
+|---|---|---|
+| `static` | Divides iterations into equal blocks assigned before execution | Uniform load, better cache locality |
+| `dynamic[,chunk]` | Each thread requests the next block when it finishes the current one | Highly variable load, expensive iterations |
+| `guided[,chunk]` | Decreasing block sizes: large at the start, small at the end | Moderately variable load |
+| `auto` | The compiler/runtime decides | When you are unsure which to use |
+| `runtime` | Reads `OMP_SCHEDULE` at runtime | Experimentation without recompiling |
+
+### Exercise 3: Matrix Multiplication with Different Schedules
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <omp.h>
+
+#define N 1024
+
+double A[N][N], B[N][N], C[N][N];
+
+void multiplicar(omp_sched_t tipo, int chunk) {
+    omp_set_schedule(tipo, chunk);
+
+    for (int i = 0; i < N; i++)
+        for (int j = 0; j < N; j++)
+            C[i][j] = 0.0;
+
+    double t_start = omp_get_wtime();
+
+    #pragma omp parallel for schedule(runtime)
+    for (int i = 0; i < N; i++) {
+        for (int k = 0; k < N; k++) {
+            for (int j = 0; j < N; j++) {
+                C[i][j] += A[i][k] * B[k][j];
+            }
+        }
+    }
+
+    double t_end = omp_get_wtime();
+    printf("schedule tipo=%d chunk=%d -> %.4f s\n", tipo, chunk, t_end - t_start);
+}
+
+int main(void) {
+    for (int i = 0; i < N; i++)
+        for (int j = 0; j < N; j++) {
+            A[i][j] = (double)(i + j) / N;
+            B[i][j] = (double)(i - j + N) / N;
+        }
+
+    multiplicar(omp_sched_static,  0);
+    multiplicar(omp_sched_dynamic, 1);
+    multiplicar(omp_sched_dynamic, 4);
+    multiplicar(omp_sched_guided,  1);
+
+    return 0;
+}
+```
+
+```bash
+gcc -O2 -fopenmp matmul_sched.c -o matmul_sched
+export OMP_NUM_THREADS=4
+./matmul_sched
+```
+
+**Question:** Why does `schedule(static)` generally outperform `schedule(dynamic)` in matrix multiplication? What happens to the L1/L2 cache when switching between schedules?
+
+## Parallel Sections
+
+Sections (`sections`) allow executing independent blocks of code in parallel, useful when you have distinct tasks that do not fit into a loop.
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <omp.h>
+
+#define N 1000000
+
+double calcular_suma(double *v, int n) {
+    double s = 0.0;
+    for (int i = 0; i < n; i++) s += v[i];
+    return s;
+}
+
+double calcular_max(double *v, int n) {
+    double m = v[0];
+    for (int i = 1; i < n; i++) if (v[i] > m) m = v[i];
+    return m;
+}
+
+double calcular_min(double *v, int n) {
+    double m = v[0];
+    for (int i = 1; i < n; i++) if (v[i] < m) m = v[i];
+    return m;
+}
+
+int main(void) {
+    double *v = malloc(N * sizeof(double));
+    for (int i = 0; i < N; i++) v[i] = (double)(i % 1000) / 10.0;
+
+    double suma, maximo, minimo;
+
+    double t_start = omp_get_wtime();
+
+    #pragma omp parallel sections
+    {
+        #pragma omp section
+        suma = calcular_suma(v, N);
+
+        #pragma omp section
+        maximo = calcular_max(v, N);
+
+        #pragma omp section
+        minimo = calcular_min(v, N);
+    }
+
+    double t_end = omp_get_wtime();
+
+    printf("Suma:   %.2f\n", suma);
+    printf("Máximo: %.2f\n", maximo);
+    printf("Mínimo: %.2f\n", minimo);
+    printf("Tiempo: %.4f segundos\n", t_end - t_start);
+
+    free(v);
+    return 0;
+}
+```
+
+<Alert type="info">
+Sections are effective when you have exactly as many distinct tasks as available threads. If there are more threads than sections, the surplus threads remain idle during that region. For more dynamic work, prefer tasks.
+</Alert>
+
+## Environment Variables
+
+OpenMP exposes its behavior through environment variables, allowing you to tune execution without recompiling.
+
+| Variable | Description | Example |
+|---|---|---|
+| `OMP_NUM_THREADS` | Default number of threads | `export OMP_NUM_THREADS=8` |
+| `OMP_SCHEDULE` | Schedule and chunk for `runtime` | `export OMP_SCHEDULE="dynamic,4"` |
+| `OMP_DYNAMIC` | Allows the runtime to adjust the thread count | `export OMP_DYNAMIC=true` |
+| `OMP_NESTED` | Enables nested parallelism | `export OMP_NESTED=true` |
+| `OMP_MAX_ACTIVE_LEVELS` | Maximum depth of nested parallelism | `export OMP_MAX_ACTIVE_LEVELS=2` |
+| `OMP_PROC_BIND` | Thread affinity to cores | `export OMP_PROC_BIND=close` |
+| `OMP_PLACES` | Defines execution places | `export OMP_PLACES=cores` |
+
+```bash
+export OMP_NUM_THREADS=4
+export OMP_SCHEDULE="guided,2"
+export OMP_DYNAMIC=false
+
+./matmul_sched
+```
+
+<Alert type="tip">
+For production, set `OMP_DYNAMIC=false` and explicitly define `OMP_NUM_THREADS`. Dynamic runtime adjustment can introduce timing variability that makes reproducible benchmarking difficult.
+</Alert>
+
+## Proposed Exercises
+
+### PE1: Sum Tree with Tasks and Dependencies
+
+Given an array of N numbers, implement a binary tree reduction using `#pragma omp task depend`. Each task sums two elements and stores the result in an auxiliary array. Dependencies must guarantee that each level of the tree waits for the previous one without using explicit `taskwait`. Compare the time against a standard `reduction(+:suma)`.
+
+### PE2: Adaptive Parallel QuickSort
+
+Implement parallel QuickSort using OpenMP tasks. Apply an adaptive heuristic: use tasks only when the subarray exceeds a configurable threshold, and fall back to `std::sort` (or insertion sort) for small subarrays. Measure speedup for arrays of 1M, 10M, and 100M elements with 2, 4, and 8 threads.
+
+### PE3: Image Processing Pipeline
+
+Model a three-stage pipeline for processing a sequence of images (N×N matrices): (1) apply a smoothing filter, (2) detect edges with the Sobel operator, (3) binarize the result. Use `#pragma omp sections` to execute the stages in parallel with double buffering (while stage 1 processes image i+1, stage 2 processes image i). Report throughput in images per second.
+
+## References
+
+- OpenMP Architecture Review Board, *OpenMP Application Programming Interface*, v5.2, 2021. https://www.openmp.org/specifications/
+- Tim Mattson, Alice Koniges, Mark Bull, *The OpenMP Common Core: Making OpenMP Simple Again*, MIT Press, 2019.
+- Blaise Barney, *OpenMP Tutorial*, Lawrence Livermore National Laboratory. https://hpc-tutorials.llnl.gov/openmp/
+- Ruud van der Pas, Eric Stotzer, Christian Terboven, *Using OpenMP — The Next Step*, MIT Press, 2017. Chapters 6 and 7.

@@ -1,0 +1,523 @@
+---
+title: "Introduction to CUDA: GPU Programming"
+description: "Get started with GPU programming using CUDA. Learn the fundamental concepts of GPU architecture and develop basic parallel applications."
+pubDate: "2025-05-29"
+author: "Railly Hugo"
+authorImageUrl: "/hugo-profile.webp"
+dueDate: "2025-06-05"
+files: ["vector_add.cu", "matrix_add.cu", "grayscale.cu"]
+path: "Laboratory/CUDA"
+---
+
+import Alert from "../../../components/Alert.astro";
+import CodeBlock from "../../../components/CodeBlock.astro";
+import StepGuide from "../../../components/StepGuide.astro";
+
+This laboratory introduces GPU programming on NVIDIA hardware using CUDA (Compute Unified Device Architecture). You will learn to:
+
+- Understand the basic architecture of NVIDIA GPUs
+- Master the CUDA programming model: host vs. device
+- Implement basic kernels in CUDA C
+- Correctly manage memory between CPU and GPU
+
+CUDA enables thousands of threads to execute in parallel, leveraging the hundreds of cores in a GPU. This capability is fundamental for scientific computing, image processing, and machine learning applications.
+
+## 1. GPU Architecture
+
+An NVIDIA GPU is composed of multiple **Streaming Multiprocessors (SMs)**. Each SM contains dozens of CUDA cores capable of executing threads in parallel.
+
+### Thread Hierarchy
+
+| Level | Unit | Description |
+|-------|------|-------------|
+| Finest | Thread | Minimum execution unit |
+| Middle | Block | Group of cooperating threads |
+| Coarsest | Grid | Collection of blocks |
+
+Threads within a block are internally grouped into **warps** of 32 threads. A warp is the hardware scheduling unit: all its threads execute the same instruction simultaneously (SIMT — Single Instruction, Multiple Threads).
+
+```
+Grid
+├── Block (0,0)   Block (1,0)   Block (2,0)
+│   ├── Warp 0: threads  0-31
+│   ├── Warp 1: threads 32-63
+│   └── Warp 2: threads 64-95
+├── Block (0,1)   Block (1,1)   Block (2,1)
+└── ...
+```
+
+<Alert type="info">
+  The optimal block size is usually a multiple of 32 (the warp size). Common values: 128, 256, or 512 threads per block.
+</Alert>
+
+### Memory Types
+
+| Type | Scope | Speed | Size |
+|------|-------|-------|------|
+| Registers | Thread | Fastest | ~255 per thread |
+| Shared memory | Block | Very fast | ~48 KB per SM |
+| Global memory | Grid (all) | Slow | GBs |
+| Constant memory | Grid (read-only) | Fast (cached) | 64 KB |
+
+## 2. CUDA Programming Model
+
+CUDA extends C/C++ with special keywords to define functions that run on the GPU.
+
+### Function Qualifiers
+
+| Qualifier | Executes on | Called from |
+|-----------|-------------|-------------|
+| `__global__` | Device (GPU) | Host (CPU) |
+| `__device__` | Device (GPU) | Device (GPU) |
+| `__host__` | Host (CPU) | Host (CPU) |
+
+```cpp
+__global__ void miKernel(float* datos) {
+}
+
+__device__ float funcionAuxiliar(float x) {
+    return x * x;
+}
+```
+
+### Thread Indexing
+
+Inside a kernel, each thread knows its position through built-in variables:
+
+```cpp
+int idx = threadIdx.x + blockIdx.x * blockDim.x;
+```
+
+| Variable | Meaning |
+|----------|---------|
+| `threadIdx.x` | Thread index within its block (X axis) |
+| `blockIdx.x` | Block index within the grid (X axis) |
+| `blockDim.x` | Number of threads per block (X axis) |
+| `gridDim.x` | Number of blocks in the grid (X axis) |
+
+### Kernel Launch
+
+The `<<<numBlocks, threadsPerBlock>>>` syntax configures the grid before executing the kernel:
+
+```cpp
+int N = 1024;
+int threadsPerBlock = 256;
+int numBlocks = (N + threadsPerBlock - 1) / threadsPerBlock;
+
+miKernel<<<numBlocks, threadsPerBlock>>>(d_datos);
+```
+
+<Alert type="warning">
+  The expression `(N + threadsPerBlock - 1) / threadsPerBlock` guarantees enough blocks even when N is not an exact multiple of threadsPerBlock. Without this, the last elements would go unprocessed.
+</Alert>
+
+## 3. Memory Management
+
+Every CUDA program follows the same memory management pattern:
+
+```
+CPU (Host)          GPU (Device)
+   |                    |
+   |-- cudaMalloc() --> |  (allocate on GPU)
+   |-- cudaMemcpy() --> |  (send data)
+   |                    |
+   |    kernel<<<>>>()  |  (execute on GPU)
+   |                    |
+   |<-- cudaMemcpy() -- |  (retrieve results)
+   |-- cudaFree() ----> |  (free GPU memory)
+```
+
+### Core Functions
+
+```cpp
+float* d_ptr;
+cudaMalloc((void**)&d_ptr, N * sizeof(float));
+
+cudaMemcpy(d_ptr, h_ptr, N * sizeof(float), cudaMemcpyHostToDevice);
+
+cudaMemcpy(h_ptr, d_ptr, N * sizeof(float), cudaMemcpyDeviceToHost);
+
+cudaFree(d_ptr);
+```
+
+### Error Handling
+
+```cpp
+cudaError_t err = cudaMalloc((void**)&d_ptr, size);
+if (err != cudaSuccess) {
+    printf("Error: %s\n", cudaGetErrorString(err));
+    return -1;
+}
+
+miKernel<<<blocks, threads>>>(d_ptr);
+cudaDeviceSynchronize();
+err = cudaGetLastError();
+if (err != cudaSuccess) {
+    printf("Error en kernel: %s\n", cudaGetErrorString(err));
+}
+```
+
+<Alert type="warning">
+  `cudaGetLastError()` only detects kernel errors if you first call `cudaDeviceSynchronize()`. Without synchronization, the host continues executing before the kernel finishes.
+</Alert>
+
+## 4. Exercise 1: Hello CUDA
+
+The first CUDA program prints the ID of each thread from the GPU.
+
+```cpp
+#include <stdio.h>
+
+__global__ void helloKernel() {
+    int threadId = threadIdx.x + blockIdx.x * blockDim.x;
+    printf("Hola desde el thread %d (block %d, thread local %d)\n",
+           threadId, blockIdx.x, threadIdx.x);
+}
+
+int main() {
+    helloKernel<<<2, 4>>>();
+    cudaDeviceSynchronize();
+    return 0;
+}
+```
+
+Running this program with `<<<2, 4>>>` (2 blocks of 4 threads each) produces 8 threads in total with IDs from 0 to 7. The print order may vary because threads execute in parallel.
+
+<Alert type="info">
+  `cudaDeviceSynchronize()` blocks the CPU until all kernel threads finish. Without this call, the program could terminate before the GPU prints anything.
+</Alert>
+
+## 5. Exercise 2: Vector Addition
+
+Vector addition is the canonical "Hello World" of parallel computing. Each thread computes the sum of one pair of elements.
+
+**File:** `vector_add.cu`
+
+```cpp
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+#define N 1048576
+#define THREADS_PER_BLOCK 256
+
+__global__ void vectorAdd(float* a, float* b, float* c, int n) {
+    int idx = threadIdx.x + blockIdx.x * blockDim.x;
+    if (idx < n) {
+        c[idx] = a[idx] + b[idx];
+    }
+}
+
+int main() {
+    int size = N * sizeof(float);
+
+    float* h_a = (float*)malloc(size);
+    float* h_b = (float*)malloc(size);
+    float* h_c = (float*)malloc(size);
+
+    for (int i = 0; i < N; i++) {
+        h_a[i] = (float)i;
+        h_b[i] = (float)(N - i);
+    }
+
+    float *d_a, *d_b, *d_c;
+    cudaMalloc((void**)&d_a, size);
+    cudaMalloc((void**)&d_b, size);
+    cudaMalloc((void**)&d_c, size);
+
+    cudaMemcpy(d_a, h_a, size, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_b, h_b, size, cudaMemcpyHostToDevice);
+
+    int numBlocks = (N + THREADS_PER_BLOCK - 1) / THREADS_PER_BLOCK;
+    vectorAdd<<<numBlocks, THREADS_PER_BLOCK>>>(d_a, d_b, d_c, N);
+
+    cudaDeviceSynchronize();
+
+    cudaMemcpy(h_c, d_c, size, cudaMemcpyDeviceToHost);
+
+    int errores = 0;
+    for (int i = 0; i < N; i++) {
+        if (fabs(h_c[i] - (float)N) > 1e-5) {
+            errores++;
+        }
+    }
+    printf("Verificación: %s (%d errores)\n", errores == 0 ? "CORRECTO" : "FALLO", errores);
+
+    cudaFree(d_a);
+    cudaFree(d_b);
+    cudaFree(d_c);
+    free(h_a);
+    free(h_b);
+    free(h_c);
+
+    return 0;
+}
+```
+
+The guard `if (idx < n)` is essential: the number of launched threads may exceed the vector size when N is not a multiple of THREADS_PER_BLOCK. Without this check, out-of-range threads would access invalid memory.
+
+## 6. Exercise 3: 2D Matrix Addition
+
+For matrices, it is convenient to use a 2D configuration of blocks and threads. Each thread computes one element of the result matrix.
+
+**File:** `matrix_add.cu`
+
+```cpp
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+#define ROWS 1024
+#define COLS 1024
+#define BLOCK_SIZE 16
+
+__global__ void matrixAdd(float* a, float* b, float* c, int rows, int cols) {
+    int col = threadIdx.x + blockIdx.x * blockDim.x;
+    int row = threadIdx.y + blockIdx.y * blockDim.y;
+
+    if (row < rows && col < cols) {
+        int idx = row * cols + col;
+        c[idx] = a[idx] + b[idx];
+    }
+}
+
+int main() {
+    int totalElements = ROWS * COLS;
+    int size = totalElements * sizeof(float);
+
+    float* h_a = (float*)malloc(size);
+    float* h_b = (float*)malloc(size);
+    float* h_c = (float*)malloc(size);
+
+    for (int i = 0; i < totalElements; i++) {
+        h_a[i] = 1.0f;
+        h_b[i] = 2.0f;
+    }
+
+    float *d_a, *d_b, *d_c;
+    cudaMalloc((void**)&d_a, size);
+    cudaMalloc((void**)&d_b, size);
+    cudaMalloc((void**)&d_c, size);
+
+    cudaMemcpy(d_a, h_a, size, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_b, h_b, size, cudaMemcpyHostToDevice);
+
+    dim3 threadsPerBlock(BLOCK_SIZE, BLOCK_SIZE);
+    dim3 numBlocks(
+        (COLS + BLOCK_SIZE - 1) / BLOCK_SIZE,
+        (ROWS + BLOCK_SIZE - 1) / BLOCK_SIZE
+    );
+
+    matrixAdd<<<numBlocks, threadsPerBlock>>>(d_a, d_b, d_c, ROWS, COLS);
+
+    cudaDeviceSynchronize();
+
+    cudaMemcpy(h_c, d_c, size, cudaMemcpyDeviceToHost);
+
+    int errores = 0;
+    for (int i = 0; i < totalElements; i++) {
+        if (fabs(h_c[i] - 3.0f) > 1e-5) {
+            errores++;
+        }
+    }
+    printf("Verificación: %s (%d errores)\n", errores == 0 ? "CORRECTO" : "FALLO", errores);
+
+    cudaFree(d_a);
+    cudaFree(d_b);
+    cudaFree(d_c);
+    free(h_a);
+    free(h_b);
+    free(h_c);
+
+    return 0;
+}
+```
+
+`dim3` allows specifying dimensions in X, Y (and Z). With a 16×16 thread block, each block processes a 16×16 submatrix. The `dim3` type defaults unused dimensions to 1.
+
+<Alert type="info">
+  A 16×16 block = 256 threads. This value is common because it is within the 1024-thread-per-block limit of modern GPUs and is a multiple of 32 (the warp size).
+</Alert>
+
+## 7. Exercise 4: Grayscale Conversion
+
+RGB-to-grayscale image conversion applies the standard ITU-R BT.601 luminance formula. Each pixel is processed independently, making it perfectly parallelizable.
+
+**File:** `grayscale.cu`
+
+```cpp
+#include <stdio.h>
+#include <stdlib.h>
+
+#define WIDTH  1920
+#define HEIGHT 1080
+#define CHANNELS 3
+#define BLOCK_SIZE 16
+
+__global__ void rgbToGrayscale(
+    unsigned char* rgb,
+    unsigned char* gray,
+    int width,
+    int height
+) {
+    int col = threadIdx.x + blockIdx.x * blockDim.x;
+    int row = threadIdx.y + blockIdx.y * blockDim.y;
+
+    if (row < height && col < width) {
+        int grayIdx = row * width + col;
+        int rgbIdx  = grayIdx * 3;
+
+        unsigned char r = rgb[rgbIdx + 0];
+        unsigned char g = rgb[rgbIdx + 1];
+        unsigned char b = rgb[rgbIdx + 2];
+
+        gray[grayIdx] = (unsigned char)(0.299f * r + 0.587f * g + 0.114f * b);
+    }
+}
+
+int main() {
+    int rgbSize  = WIDTH * HEIGHT * CHANNELS * sizeof(unsigned char);
+    int graySize = WIDTH * HEIGHT * sizeof(unsigned char);
+
+    unsigned char* h_rgb  = (unsigned char*)malloc(rgbSize);
+    unsigned char* h_gray = (unsigned char*)malloc(graySize);
+
+    for (int i = 0; i < WIDTH * HEIGHT; i++) {
+        h_rgb[i * 3 + 0] = 255;
+        h_rgb[i * 3 + 1] = 128;
+        h_rgb[i * 3 + 2] = 64;
+    }
+
+    unsigned char *d_rgb, *d_gray;
+    cudaMalloc((void**)&d_rgb,  rgbSize);
+    cudaMalloc((void**)&d_gray, graySize);
+
+    cudaMemcpy(d_rgb, h_rgb, rgbSize, cudaMemcpyHostToDevice);
+
+    dim3 threadsPerBlock(BLOCK_SIZE, BLOCK_SIZE);
+    dim3 numBlocks(
+        (WIDTH  + BLOCK_SIZE - 1) / BLOCK_SIZE,
+        (HEIGHT + BLOCK_SIZE - 1) / BLOCK_SIZE
+    );
+
+    rgbToGrayscale<<<numBlocks, threadsPerBlock>>>(d_rgb, d_gray, WIDTH, HEIGHT);
+
+    cudaDeviceSynchronize();
+
+    cudaMemcpy(h_gray, d_gray, graySize, cudaMemcpyDeviceToHost);
+
+    unsigned char esperado = (unsigned char)(0.299f * 255 + 0.587f * 128 + 0.114f * 64);
+    printf("Primer pixel: esperado=%d, obtenido=%d\n", esperado, h_gray[0]);
+
+    cudaFree(d_rgb);
+    cudaFree(d_gray);
+    free(h_rgb);
+    free(h_gray);
+
+    return 0;
+}
+```
+
+The RGB image is stored as a linear array where each pixel occupies 3 consecutive bytes (R, G, B). The index in the grayscale image is simply `row * width + col`, while in the RGB image it is that same value multiplied by 3.
+
+<Alert type="info">
+  The coefficients 0.299, 0.587, 0.114 reflect the human eye's sensitivity to each color channel. The eye is most sensitive to green, less to red, and much less to blue.
+</Alert>
+
+## 8. Compilation and Execution
+
+CUDA uses its own compiler `nvcc` (NVIDIA CUDA Compiler), which generates code for both CPU and GPU.
+
+### Basic Compilation
+
+```bash
+nvcc vector_add.cu -o vector_add
+
+nvcc -O2 vector_add.cu -o vector_add
+
+nvcc -arch=sm_75 vector_add.cu -o vector_add
+```
+
+### Useful Flags
+
+| Flag | Description |
+|------|-------------|
+| `-O2` | Optimization level 2 |
+| `-arch=sm_XX` | Target architecture (sm_75 = Turing, sm_86 = Ampere) |
+| `-G` | Debug information for the device |
+| `-lineinfo` | Line information for profiling |
+| `-Xcompiler` | Pass flags to the host compiler |
+
+### Check Available Architecture
+
+```bash
+nvidia-smi
+
+nvcc --version
+```
+
+### Compile and Run the Exercises
+
+```bash
+nvcc vector_add.cu -o vector_add && ./vector_add
+
+nvcc matrix_add.cu -o matrix_add && ./matrix_add
+
+nvcc grayscale.cu -o grayscale && ./grayscale
+```
+
+<Alert type="warning">
+  If you get `nvcc: command not found`, CUDA is not in your PATH. Add it with: `export PATH=/usr/local/cuda/bin:$PATH`. You also need an NVIDIA GPU with drivers installed. In environments without a GPU, consider using Google Colab with a GPU runtime.
+</Alert>
+
+### Using Google Colab (alternative without a local GPU)
+
+If you do not have a GPU available, Google Colab provides free access to NVIDIA GPUs:
+
+1. Create a notebook at [colab.research.google.com](https://colab.research.google.com)
+2. Runtime → Change runtime type → GPU
+3. Write CUDA code in a cell using the magic `%%writefile archivo.cu`
+4. Compile with `!nvcc archivo.cu -o archivo && ./archivo`
+
+## 9. Proposed Exercises
+
+### Exercise A: Scalar Vector Multiplication
+
+Implement a kernel that multiplies each element of a vector by a scalar:
+
+```
+c[i] = alpha * a[i]
+```
+
+Verify the result against a sequential CPU implementation.
+
+### Exercise B: Dot Product
+
+Implement the dot product of two vectors. Each thread computes `a[i] * b[i]` and the partial result must be accumulated in global memory using `atomicAdd`.
+
+```cpp
+atomicAdd(&resultado, a[idx] * b[idx]);
+```
+
+How does the use of `atomicAdd` affect performance compared to a parallel reduction sum?
+
+### Exercise C: Matrix Transposition
+
+Transpose a square N×N matrix in parallel. The kernel should compute `B[j][i] = A[i][j]` using 2D indexing. Analyze the memory access pattern: which of the two accesses (read or write) is coalesced?
+
+### Exercise D: Parallel Histogram
+
+Given an array of integer values in the range [0, 255], compute the frequency histogram. Each thread reads one element and uses `atomicAdd` to increment the corresponding bin:
+
+```cpp
+atomicAdd(&histogram[data[idx]], 1);
+```
+
+Compare performance with the sequential version for different input sizes.
+
+## References
+
+- [CUDA C Programming Guide](https://docs.nvidia.com/cuda/cuda-c-programming-guide/)
+- [CUDA C Best Practices Guide](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/)
+- [NVIDIA CUDA Samples](https://github.com/NVIDIA/cuda-samples)
+- [An Even Easier Introduction to CUDA](https://developer.nvidia.com/blog/even-easier-introduction-cuda/)

@@ -1,0 +1,58 @@
+---
+title: "How to Set Up Visual Studio Code for MPI Development"
+description: "Step-by-step guide to install MS-MPI, configure VSCode, and compile MPI programs on Windows using MinGW and mpiexec."
+pubDate: "2025-03-20"
+author: "Railly Hugo"
+authorImageUrl: "/hugo-profile.webp"
+dueDate: "2025-04-03"
+files: ["environment_setup.md"]
+path: "Laboratory/Setup"
+---
+
+import Alert from "../../../components/Alert.astro";
+import CodeBlock from "../../../components/CodeBlock.astro";
+import StepGuide from "../../../components/StepGuide.astro";
+
+<Alert type="info">
+  **Important:** Make sure you have **Command Prompt (cmd.exe)** set as the default terminal in VSCode. You can do this from the general settings (`terminal.integrated.defaultProfile.windows`) or directly in your `tasks.json`.
+</Alert>
+
+## Installing MPI on Windows
+
+Before compiling MPI code from VSCode on Windows, you need to install MS-MPI from the official Microsoft page:
+
+1. Go to [Microsoft MPI](https://www.microsoft.com/en-us/download/details.aspx?id=105289)
+2. Click **Download** and download both installers:
+   - `msmpisetup.exe` (7.4 MB) → Install this one first
+   - `msmpisdk.msi` (2.2 MB) → Install this one after the previous
+
+## Installing MinGW and GCC
+
+Follow the MinGW installation guide we prepared in the previous lab:
+
+👉 [Installing GCC on Windows](https://sw805.vercel.app/labs/unit1/lab2#instalaci%C3%B3n-en-windows)
+
+## Syncing the Lab Repository
+
+To have access to the latest source code:
+
+<CodeBlock language="bash" content={`git pull origin main`} />
+
+If you made local changes you want to completely discard:
+
+<CodeBlock language="bash" content={`git reset --hard HEAD && git clean -fd`} />
+
+## Compiling and Running Your MPI Program
+
+1. Open the `.c` file containing your MPI program
+2. Press `Ctrl + Shift + B` to compile the file using VSCode tasks
+3. An `.exe` file will be generated at the same level as the `.c` file
+4. Open the integrated terminal and run:
+
+<CodeBlock language="bash" content={`mpiexec -n 4 ./NombreDelArchivo.exe`} />
+
+You are now running your first MPI program from VSCode with GCC and MS-MPI.
+
+<Alert type="tip">
+  If you have issues with paths containing spaces (such as "Program Files"), make sure to separate flags and values in `tasks.json`, like `"-I", "C:\\\\Program Files (x86)\\\\Microsoft SDKs\\\\MPI\\\\Include"`.
+</Alert>

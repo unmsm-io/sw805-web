@@ -1,0 +1,168 @@
+---
+title: "C++ Pointers Tutorial"
+description: "A comprehensive guide to pointers in C++, from basic concepts to advanced topics such as memory management and namespaces."
+pubDate: "2025-03-20"
+author: "Railly Hugo"
+authorImageUrl: "/hugo-profile.webp"
+dueDate: "2025-04-03"
+files: ["C++TutorialCompletePointersUd"]
+path: "C++TutorialCompletePointersUd"
+---
+
+import Alert from "../../../components/Alert.astro";
+import CodeBlock from "../../../components/CodeBlock.astro";
+import StepGuide from "../../../components/StepGuide.astro";
+import Card from "../../../components/Card.astro";
+
+This lab will guide you through a series of practical exercises on pointers in C++. The exercises are designed to help you understand everything from basic concepts to more advanced topics such as memory management and namespaces.
+
+<Alert type="tip">
+  All exercises are available in our
+  <a href="https://github.com/FISI-SM/ParallelProgramming-repo/tree/main/C%2B%2BTutorialCompletePointersUd" target="_blank">GitHub repository</a>.
+</Alert>
+
+## Exercises
+
+<div class="grid gap-4 md:grid-cols-2">
+  <Card
+    title="1. Pointer Fundamentals"
+    description="Introduction to basic pointer concepts and syntax"
+    href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/C%2B%2BTutorialCompletePointersUd/39_Pointers/Pointers.cpp"
+  />
+
+  <Card
+    title="2. Pointer Arithmetic"
+    description="Basic operations with pointers"
+    href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/C%2B%2BTutorialCompletePointersUd/40_Arithmetic/Arithmetic.cpp"
+  />
+
+  <Card
+    title="3. Pointers and Arrays"
+    description="Relationship between pointers and arrays in C++"
+    href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/C%2B%2BTutorialCompletePointersUd/41_2Pointers%20and%20Arrays/Pointers%20and%20Arrays.cpp"
+  />
+
+  <Card
+    title="4. Advanced Arithmetic"
+    description="Advanced operations with pointers"
+    href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/C%2B%2BTutorialCompletePointersUd/42_Pointer%20Arithmetic/PointerArithmetic.cpp"
+  />
+
+  <Card
+    title="5. Character Arrays"
+    description="String manipulation using pointers"
+    href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/C%2B%2BTutorialCompletePointersUd/43_CharArrays/Char%20Arrays.cpp"
+  />
+
+  <Card
+    title="6. String Reversal"
+    description="Practical string manipulation exercise"
+    href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/C%2B%2BTutorialCompletePointersUd/44_ReversingString/Reversing%20a%20String.cpp"
+  />
+
+  <Card
+    title="7. References"
+    description="Using references in C++"
+    href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/C%2B%2BTutorialCompletePointersUd/45_References/References.cpp"
+  />
+
+  <Card
+    title="8. Const and Pointers"
+    description="Using const with pointers and references"
+    href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/C%2B%2BTutorialCompletePointersUd/46_Const/Const.cpp"
+  />
+
+  <Card
+    title="9. Copy Constructors"
+    description="Implementing copy constructors"
+    href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/C%2B%2BTutorialCompletePointersUd/47_Copy%20Constructors/Copy%20Constructors.cpp"
+  />
+
+  <Card
+    title="10. new Operator"
+    description="Dynamic memory allocation"
+    href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/C%2B%2BTutorialCompletePointersUd/48_New%20Operator/New%20Operator.cpp"
+  />
+
+  <Card
+    title="11. Returning Objects"
+    description="Returning objects from methods"
+    href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/C%2B%2BTutorialCompletePointersUd/49_Returning%20Objects%20from%20Methods/Returning.cpp"
+  />
+
+  <Card
+    title="12. Memory Allocation"
+    description="Advanced memory management"
+    href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/C%2B%2BTutorialCompletePointersUd/50_Allocating%20Memory/Allocating%20Memory.cpp"
+  />
+
+  <Card
+    title="13. Arrays and Functions"
+    description="Passing arrays to functions"
+    href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/C%2B%2BTutorialCompletePointersUd/51_Arrays%20and%20Functions/Array%20and%20Functions.cpp"
+  />
+
+  <Card
+    title="14. Namespaces"
+    description="Code organization using namespaces"
+    href="https://github.com/FISI-SM/ParallelProgramming-repo/tree/main/C%2B%2BTutorialCompletePointersUd/52_Namespaces"
+  />
+</div>
+
+## Compilation and Execution
+
+### Using VSCode
+1. Open the tutorial folder in VSCode
+2. Open the `.cpp` file you want to run
+3. Press `Ctrl+Shift+B` (Windows) or `Cmd+Shift+B` (macOS)
+4. The program will compile and run automatically
+
+
+<Alert type="tip">
+  The system will automatically create a `build/` folder in the source file's directory, compile, and place the executable inside that folder.
+</Alert>
+
+### Manual Compilation
+
+If you prefer to use the terminal directly:
+
+#### On Windows
+```bash
+cd <example_directory>
+mkdir build
+g++ archivo.cpp -o build/archivo.exe && ./build/archivo.exe
+```
+
+#### On macOS
+```bash
+cd <example_directory>
+mkdir -p build
+g++-14 archivo.cpp -o build/archivo && ./build/archivo
+```
+
+<Alert type="info">
+  This method may seem tedious, but it is good practice for learning how to use the terminal and understanding how the compiler works.
+</Alert>
+
+
+## Proposed Exercises
+
+<ul>
+<li>
+<a href="https://docs.google.com/document/d/1jqej6pZVGahg4fF7ZiwxzF7cUjaJVO7bD8eBHt7YphA/edit?tab=t.0#heading=h.8fnty5bim6or" target="_blank">Lab 01 - Google Drive</a>
+</li>
+</ul>
+
+## Additional Resources
+
+<ul>
+<li>
+<a href="https://federico-busato.github.io/Modern-CPP-Programming/" target="_blank">Modern C++ Programming</a>
+</li>
+<li>
+<a href="https://www.learncpp.com/" target="_blank">LearnCPP</a>
+</li>
+<li>
+<a href="https://github.com/changkun/modern-cpp-tutorial" target="_blank">Modern C++ Tutorial</a>
+</li>
+</ul>

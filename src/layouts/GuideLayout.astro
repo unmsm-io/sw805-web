@@ -3,6 +3,8 @@ import TableOfContents from "../components/TableOfContents.astro";
 import BaseLayout from "./BaseLayout.astro";
 import { ChevronLeft } from "lucide-astro";
 
+import { type Locale } from "../i18n/translations";
+
 interface Props {
   frontmatter: {
     title: string;
@@ -20,16 +22,18 @@ interface Props {
     text: string;
     depth: number;
   }[];
+  locale?: Locale;
 }
 
-const { frontmatter, id, headings } = Astro.props;
+const { frontmatter, id, headings, locale = "es" } = Astro.props;
+const isEn = locale === "en";
 
 const labNumberMatch = id.match(/lab(\d+)/);
 const labNumber = labNumberMatch ? labNumberMatch[1] : null;
 
 // Format date
 const formattedDate = new Date(frontmatter.pubDate).toLocaleDateString(
-  "es-ES",
+  isEn ? "en-US" : "es-ES",
   {
     year: "numeric",
     month: "long",
@@ -45,6 +49,7 @@ const isoDate = new Date(frontmatter.pubDate).toISOString();
   description={frontmatter.description}
   type="article"
   image={frontmatter.image}
+  locale={locale}
 >
   <article
     class="prose dark:prose-invert max-w-none
@@ -69,7 +74,7 @@ const isoDate = new Date(frontmatter.pubDate).toISOString();
         labNumber && (
           <div class="flex justify-center pt-10 pb-2">
             <span class="px-3 py-1 text-xs font-semibold border border-zinc-300 dark:border-zinc-600 text-black dark:text-white bg-white dark:bg-zinc-800 rounded-full">
-              Laboratorio {labNumber}
+              {isEn ? "Lab" : "Laboratorio"} {labNumber}
             </span>
           </div>
         )
@@ -117,11 +122,11 @@ const isoDate = new Date(frontmatter.pubDate).toISOString();
 
     <div class="mt-12 pt-6 border-t border-zinc-200 dark:border-zinc-800">
       <a
-        href="/labs"
+        href={isEn ? "/en/labs" : "/labs"}
         class="text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1 text-sm"
       >
         <ChevronLeft class="w-3.5 h-3.5" />
-        Volver a Laboratorios
+        {isEn ? "Back to Labs" : "Volver a Laboratorios"}
       </a>
     </div>
   </article>

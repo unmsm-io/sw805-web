@@ -1,0 +1,483 @@
+---
+title: "CUDA Application Optimization"
+description: "Learn advanced optimization techniques for CUDA applications. Explore efficient use of shared memory, warp shuffles, and reduction strategies."
+pubDate: "2025-06-05"
+author: "Railly Hugo"
+authorImageUrl: "/hugo-profile.webp"
+dueDate: "2025-06-12"
+files: ["optimization.cu"]
+path: "Laboratory/CUDA"
+---
+
+import Alert from "../../../components/Alert.astro";
+import CodeBlock from "../../../components/CodeBlock.astro";
+import StepGuide from "../../../components/StepGuide.astro";
+
+## Introduction
+
+Writing a CUDA kernel that works correctly is only the first step. In practice, the difference between a naive implementation and an optimized one can be 10× to 100× in performance. Modern GPUs have very specific memory hierarchies, and performance critically depends on how threads access that memory.
+
+In this laboratory we will explore the most important optimization techniques: shared memory, coalesced access, block configuration, and parallel reduction.
+
+<Alert type="info">
+You need an NVIDIA GPU with compute capability 5.0 or higher. Verify with `nvidia-smi` and `nvcc --version`. The examples compile with `nvcc -arch=sm_75` (Turing). Adjust according to your GPU.
+</Alert>
+
+---
+
+## 1. Shared Memory
+
+### How Does It Work?
+
+Shared memory (`__shared__`) is an on-chip low-latency memory (~5 ns vs ~400 ns for global memory) shared among all threads in a block. It is the programmer's responsibility to explicitly load it from global memory.
+
+The GPU divides shared memory into **banks** (32 banks in modern architectures). If two threads from the same warp access the same bank simultaneously (and not the same address), a **bank conflict** occurs and the accesses are serialized.
+
+### Exercise 1: Matrix Multiplication with Tiling
+
+Matrix multiplication C = A × B of size N×N accesses global memory O(N³) times in the naive version. With tiling, each global memory element is loaded only once per tile.
+
+```cpp
+#include <cuda_runtime.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+#define TILE_SIZE 16
+#define N 512
+
+__global__ void matmul_naive(float *A, float *B, float *C, int n) {
+    int fila = blockIdx.y * blockDim.y + threadIdx.y;
+    int col  = blockIdx.x * blockDim.x + threadIdx.x;
+    if (fila >= n || col >= n) return;
+
+    float suma = 0.0f;
+    for (int k = 0; k < n; k++)
+        suma += A[fila * n + k] * B[k * n + col];
+    C[fila * n + col] = suma;
+}
+
+__global__ void matmul_tiled(float *A, float *B, float *C, int n) {
+    __shared__ float tileA[TILE_SIZE][TILE_SIZE];
+    __shared__ float tileB[TILE_SIZE][TILE_SIZE];
+
+    int fila = blockIdx.y * TILE_SIZE + threadIdx.y;
+    int col  = blockIdx.x * TILE_SIZE + threadIdx.x;
+    float suma = 0.0f;
+
+    int num_tiles = (n + TILE_SIZE - 1) / TILE_SIZE;
+
+    for (int t = 0; t < num_tiles; t++) {
+        int kA = t * TILE_SIZE + threadIdx.x;
+        int kB = t * TILE_SIZE + threadIdx.y;
+
+        tileA[threadIdx.y][threadIdx.x] = (fila < n && kA < n) ? A[fila * n + kA] : 0.0f;
+        tileB[threadIdx.y][threadIdx.x] = (kB < n && col < n)  ? B[kB  * n + col] : 0.0f;
+
+        __syncthreads();
+
+        for (int k = 0; k < TILE_SIZE; k++)
+            suma += tileA[threadIdx.y][k] * tileB[k][threadIdx.x];
+
+        __syncthreads();
+    }
+
+    if (fila < n && col < n)
+        C[fila * n + col] = suma;
+}
+
+int main() {
+    int bytes = N * N * sizeof(float);
+    float *h_A = malloc(bytes), *h_B = malloc(bytes), *h_C = malloc(bytes);
+
+    srand(42);
+    for (int i = 0; i < N * N; i++) {
+        h_A[i] = (float)rand() / RAND_MAX;
+        h_B[i] = (float)rand() / RAND_MAX;
+    }
+
+    float *d_A, *d_B, *d_C;
+    cudaMalloc(&d_A, bytes);
+    cudaMalloc(&d_B, bytes);
+    cudaMalloc(&d_C, bytes);
+    cudaMemcpy(d_A, h_A, bytes, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_B, h_B, bytes, cudaMemcpyHostToDevice);
+
+    dim3 bloque(TILE_SIZE, TILE_SIZE);
+    dim3 grid((N + TILE_SIZE - 1) / TILE_SIZE, (N + TILE_SIZE - 1) / TILE_SIZE);
+
+    cudaEvent_t ini, fin;
+    cudaEventCreate(&ini);
+    cudaEventCreate(&fin);
+    float ms;
+
+    cudaEventRecord(ini);
+    matmul_naive<<<grid, bloque>>>(d_A, d_B, d_C, N);
+    cudaEventRecord(fin);
+    cudaEventSynchronize(fin);
+    cudaEventElapsedTime(&ms, ini, fin);
+    printf("Naive:  %.3f ms\n", ms);
+
+    cudaEventRecord(ini);
+    matmul_tiled<<<grid, bloque>>>(d_A, d_B, d_C, N);
+    cudaEventRecord(fin);
+    cudaEventSynchronize(fin);
+    cudaEventElapsedTime(&ms, ini, fin);
+    printf("Tiled:  %.3f ms\n", ms);
+
+    cudaFree(d_A); cudaFree(d_B); cudaFree(d_C);
+    free(h_A); free(h_B); free(h_C);
+    return 0;
+}
+```
+
+```bash
+nvcc -O2 -arch=sm_75 -o matmul ejercicio1.cu
+./matmul
+```
+
+<Alert type="tip">
+The `__syncthreads()` inside the loop is mandatory: it guarantees that all threads have loaded their element into the tile before computation begins, and that they have finished reading before overwriting the tile in the next iteration.
+</Alert>
+
+---
+
+## 2. Memory Coalescing
+
+### Coalesced vs. Non-Coalesced Access
+
+The GPU groups global memory accesses from 32 consecutive threads (a **warp**) into a single transaction if the addresses are contiguous and aligned. This is called **coalesced access**. If accesses are scattered, the GPU performs multiple transactions, degrading effective bandwidth.
+
+| Pattern | Description | Efficiency |
+|---------|-------------|------------|
+| Thread `i` accesses `A[i]` | Contiguous access | 100% (1 transaction per warp) |
+| Thread `i` accesses `A[i * stride]` | Strided access | ~3% with stride=32 |
+| Thread `i` accesses `A[i * N + j]` by row | Coalesced | 100% |
+| Thread `i` accesses `A[j * N + i]` by column | Non-coalesced | ~3% |
+
+### Exercise 2: Matrix Transposition — Naive vs. Coalesced
+
+```cpp
+#include <cuda_runtime.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#define TILE 16
+#define N 1024
+
+__global__ void transponer_naive(float *in, float *out, int n) {
+    int x = blockIdx.x * blockDim.x + threadIdx.x;
+    int y = blockIdx.y * blockDim.y + threadIdx.y;
+    if (x < n && y < n)
+        out[x * n + y] = in[y * n + x];
+}
+
+__global__ void transponer_coalescente(float *in, float *out, int n) {
+    __shared__ float tile[TILE][TILE + 1];
+
+    int x = blockIdx.x * TILE + threadIdx.x;
+    int y = blockIdx.y * TILE + threadIdx.y;
+
+    if (x < n && y < n)
+        tile[threadIdx.y][threadIdx.x] = in[y * n + x];
+
+    __syncthreads();
+
+    int nx = blockIdx.y * TILE + threadIdx.x;
+    int ny = blockIdx.x * TILE + threadIdx.y;
+
+    if (nx < n && ny < n)
+        out[ny * n + nx] = tile[threadIdx.x][threadIdx.y];
+}
+
+int main() {
+    int bytes = N * N * sizeof(float);
+    float *h_in = malloc(bytes), *h_out = malloc(bytes);
+    for (int i = 0; i < N * N; i++) h_in[i] = (float)i;
+
+    float *d_in, *d_out;
+    cudaMalloc(&d_in,  bytes);
+    cudaMalloc(&d_out, bytes);
+    cudaMemcpy(d_in, h_in, bytes, cudaMemcpyHostToDevice);
+
+    dim3 bloque(TILE, TILE);
+    dim3 grid((N + TILE - 1) / TILE, (N + TILE - 1) / TILE);
+
+    cudaEvent_t ini, fin;
+    cudaEventCreate(&ini); cudaEventCreate(&fin);
+    float ms;
+
+    cudaEventRecord(ini);
+    transponer_naive<<<grid, bloque>>>(d_in, d_out, N);
+    cudaEventRecord(fin); cudaEventSynchronize(fin);
+    cudaEventElapsedTime(&ms, ini, fin);
+    printf("Naive:        %.3f ms\n", ms);
+
+    cudaEventRecord(ini);
+    transponer_coalescente<<<grid, bloque>>>(d_in, d_out, N);
+    cudaEventRecord(fin); cudaEventSynchronize(fin);
+    cudaEventElapsedTime(&ms, ini, fin);
+    printf("Coalescente:  %.3f ms\n", ms);
+
+    cudaFree(d_in); cudaFree(d_out);
+    free(h_in); free(h_out);
+    return 0;
+}
+```
+
+```bash
+nvcc -O2 -arch=sm_75 -o transponer ejercicio2.cu
+./transponer
+```
+
+The key trick is `tile[TILE][TILE + 1]`: the 1-column padding eliminates bank conflicts when transposing within shared memory.
+
+<Alert type="warning">
+Without the `+ 1` in the shared memory dimension, 16 threads from a warp would access the same bank when reading `tile[threadIdx.x][threadIdx.y]`, causing 16 serializations per warp.
+</Alert>
+
+---
+
+## 3. Occupancy and Block Configuration
+
+**Occupancy** is the ratio of active warps to the maximum number of warps an SM can host. High occupancy allows the SM to hide memory latencies with work from other warps.
+
+Occupancy is limited by:
+- Registers per thread (SM register limit)
+- Shared memory per block (SM shared memory limit)
+- Number of threads per block
+
+### Reference Table (GPU with 64K registers and 96 KB shared memory per SM)
+
+| Block size | Warps per block | Blocks per SM (thread limit) | Estimated occupancy |
+|------------|----------------|------------------------------|---------------------|
+| 64 | 2 | 32 | 100% |
+| 128 | 4 | 16 | 100% |
+| 256 | 8 | 8 | 100% |
+| 512 | 16 | 4 | 100% |
+| 1024 | 32 | 2 | 100% |
+
+In practice, registers and shared memory reduce these values. The `nvcc --ptxas-options=-v` tool reports register usage per thread.
+
+### Runtime Occupancy Calculator
+
+```cpp
+#include <cuda_runtime.h>
+#include <stdio.h>
+
+__global__ void mi_kernel(float *d, int n) {
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i < n) d[i] = d[i] * 2.0f;
+}
+
+int main() {
+    int block_size;
+    int min_grid;
+    cudaOccupancyMaxPotentialBlockSize(&min_grid, &block_size, mi_kernel, 0, 0);
+    printf("Tamaño de bloque sugerido: %d\n", block_size);
+    printf("Tamaño mínimo de grid:     %d\n", min_grid);
+
+    int device;
+    cudaGetDevice(&device);
+    struct cudaDeviceProp prop;
+    cudaGetDeviceProperties(&prop, device);
+
+    int warps_por_sm;
+    cudaOccupancyMaxActiveBlocksPerMultiprocessor(&warps_por_sm, mi_kernel, block_size, 0);
+    float ocupancia = (float)(warps_por_sm * block_size) /
+                      (prop.maxThreadsPerMultiProcessor);
+    printf("Ocupancia teórica: %.1f%%\n", ocupancia * 100.0f);
+
+    return 0;
+}
+```
+
+```bash
+nvcc -O2 -arch=sm_75 -o ocupancia ocupancia.cu
+./ocupancia
+```
+
+<Alert type="tip">
+`cudaOccupancyMaxPotentialBlockSize` automatically selects the block size that maximizes occupancy. Use it as a starting point before tuning manually.
+</Alert>
+
+---
+
+## 4. Parallel Reduction
+
+Reduction is a fundamental operation: summing (or finding the maximum or minimum of) N elements into a scalar. On the GPU, the naive reduction serializes accesses; the optimized version uses shared memory and **sequential addressing** to avoid warp divergence.
+
+### The Warp Divergence Problem
+
+In reduction with interleaved addressing (`stride = 1, 2, 4, ...`), the condition `if (tid % (2*s) == 0)` causes some threads in the same warp to take the `if` branch and others not to. Inactive threads still consume warp resources.
+
+The solution is **sequential addressing**: at each step, the active half of threads reads from the upper half of the array, eliminating divergence within the warp.
+
+### Exercise 3: Reduction with Shared Memory (Sequential Addressing)
+
+```cpp
+#include <cuda_runtime.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#define BLOCK_SIZE 256
+
+__global__ void reduccion(float *d_in, float *d_out, int n) {
+    __shared__ float smem[BLOCK_SIZE];
+
+    int tid   = threadIdx.x;
+    int gid   = blockIdx.x * blockDim.x * 2 + threadIdx.x;
+
+    float val = 0.0f;
+    if (gid < n)           val  = d_in[gid];
+    if (gid + blockDim.x < n) val += d_in[gid + blockDim.x];
+    smem[tid] = val;
+
+    __syncthreads();
+
+    for (int s = blockDim.x / 2; s > 0; s >>= 1) {
+        if (tid < s)
+            smem[tid] += smem[tid + s];
+        __syncthreads();
+    }
+
+    if (tid == 0)
+        d_out[blockIdx.x] = smem[0];
+}
+
+int main() {
+    int n = 1 << 22;
+    int bytes = n * sizeof(float);
+    float *h_in = malloc(bytes);
+    for (int i = 0; i < n; i++) h_in[i] = 1.0f;
+
+    float *d_in, *d_out;
+    cudaMalloc(&d_in,  bytes);
+
+    int num_blocks = (n + BLOCK_SIZE * 2 - 1) / (BLOCK_SIZE * 2);
+    cudaMalloc(&d_out, num_blocks * sizeof(float));
+    cudaMemcpy(d_in, h_in, bytes, cudaMemcpyHostToDevice);
+
+    cudaEvent_t ini, fin;
+    cudaEventCreate(&ini); cudaEventCreate(&fin);
+
+    cudaEventRecord(ini);
+    reduccion<<<num_blocks, BLOCK_SIZE>>>(d_in, d_out, n);
+
+    float *h_partial = malloc(num_blocks * sizeof(float));
+    cudaMemcpy(h_partial, d_out, num_blocks * sizeof(float), cudaMemcpyDeviceToHost);
+    cudaEventRecord(fin);
+    cudaEventSynchronize(fin);
+
+    float suma = 0.0f;
+    for (int i = 0; i < num_blocks; i++) suma += h_partial[i];
+
+    float ms;
+    cudaEventElapsedTime(&ms, ini, fin);
+    printf("Suma: %.0f  (esperado: %d)\n", suma, n);
+    printf("Tiempo: %.3f ms\n", ms);
+    printf("Ancho de banda: %.2f GB/s\n", (double)bytes / (ms * 1e-3) / 1e9);
+
+    cudaFree(d_in); cudaFree(d_out);
+    free(h_in); free(h_partial);
+    return 0;
+}
+```
+
+```bash
+nvcc -O2 -arch=sm_75 -o reduccion ejercicio3.cu
+./reduccion
+```
+
+The key line is `val += d_in[gid + blockDim.x]`: each thread loads two elements from the start, doubling the useful work per thread and halving the number of blocks needed.
+
+<Alert type="info">
+For high-efficiency reductions in production, use `cub::DeviceReduce::Sum` from the CUB library (included in the CUDA Toolkit since version 11). It achieves performance close to the theoretical bandwidth limit.
+</Alert>
+
+---
+
+## 5. Profiling with nvprof / Nsight
+
+Measurement is the foundation of optimization. Without profiling data, you do not know what to optimize.
+
+### Basic Commands with nvprof
+
+```bash
+nvprof ./reduccion
+
+nvprof --metrics gld_efficiency,gst_efficiency ./transponer
+
+nvprof --metrics achieved_occupancy,shared_efficiency ./matmul
+
+nvprof --print-gpu-trace ./reduccion
+```
+
+### Key Metrics to Watch
+
+| Metric | Meaning | Ideal value |
+|--------|---------|-------------|
+| `gld_efficiency` | % of global load bytes actually used | ~100% |
+| `gst_efficiency` | % of global store bytes actually used | ~100% |
+| `achieved_occupancy` | Active warps / maximum warps | > 50% |
+| `shared_efficiency` | Shared memory access efficiency (no conflicts) | ~100% |
+| `warp_execution_efficiency` | % of active threads in executed warps | ~100% |
+
+### Nsight Systems (modern replacement for nvprof)
+
+```bash
+nsys profile --stats=true ./reduccion
+
+nsys profile -o mi_sesion ./matmul
+nsys-ui mi_sesion.nsys-rep
+```
+
+<Alert type="warning">
+`nvprof` has been deprecated since CUDA 11. If your toolkit is 12+, use `ncu` (Nsight Compute) for kernel analysis and `nsys` (Nsight Systems) for full-system analysis.
+</Alert>
+
+---
+
+## 6. Proposed Exercises
+
+### PE1: Dot Product with Shared Memory
+
+Implement the dot product of two vectors of N=2^24 elements using shared memory. Compare three versions:
+1. Global reduction with `atomicAdd` (no shared memory)
+2. Per-block reduction with shared memory + `atomicAdd` into d_out
+3. Two-phase reduction: block → host
+
+Report time, bandwidth, and efficiency for each version.
+
+**Expected performance reference** on an RTX 3080 GPU: version 3 should reach >400 GB/s.
+
+### PE2: Bank-Conflict-Free Histogram
+
+Compute the histogram of an array of N=2^20 integers in the range [0, 256) using shared memory.
+
+The challenge: multiple threads in the same block may attempt to update the same bin simultaneously. Implement:
+1. Version using `atomicAdd` in global memory
+2. Version using `atomicAdd` in shared memory (one histogram per block) with a final reduction
+3. Version with padding to eliminate bank conflicts in shared memory
+
+Compare correctness and performance.
+
+### PE3: Tiled 2D Convolution
+
+Implement 2D convolution of a 1024×1024 image with a 5×5 Gaussian kernel using shared memory.
+
+- Load the halo (ghost cells) needed for tile edges
+- Internal tile size: 28×28 with a 2-pixel halo per side → shared memory tile: 32×32
+- Compare with the version using `__ldg()` (read-only cache) without shared memory
+
+Analyze both versions with `nvprof --metrics gld_efficiency`.
+
+---
+
+## References
+
+- NVIDIA Corporation. (2024). *CUDA C++ Best Practices Guide* (CUDA 12.x). [developer.nvidia.com/cuda-documentation](https://developer.nvidia.com/cuda-documentation)
+- Kirk, D. B., & Hwu, W. W. (2022). *Programming Massively Parallel Processors: A Hands-on Approach* (4th ed.). Morgan Kaufmann.
+- Harris, M. (2007). *Optimizing Parallel Reduction in CUDA*. NVIDIA Developer Technology.
+- Cheng, J., Grossman, M., & McKercher, T. (2014). *Professional CUDA C Programming*. Wrox.
+- NVIDIA Corporation. (2024). *Nsight Compute Documentation*. [docs.nvidia.com/nsight-compute](https://docs.nvidia.com/nsight-compute/)

@@ -1,0 +1,57 @@
+---
+title: "Sorting Algorithms and MPI Communicators"
+description: "Implementation of sorting algorithms and advanced communicator management with MPI."
+pubDate: "2025-05-01"
+author: "Railly Hugo"
+authorImageUrl: "/hugo-profile.webp"
+dueDate: "2025-05-10"
+files: [
+  "bubble.c",
+  "mpi_odd_even.c",
+  "odd_even.c",
+  "MergeSort.cpp",
+  "Comunicadores.cpp",
+  "ComunicadorCartesiano.cpp",
+  "ComunicadorCartesianoSecu.cpp",
+  "matrix_mpi.c"
+]
+path: "Laboratory/MPI"
+---
+
+import Alert from "../../../components/Alert.astro";
+import Card from "../../../components/Card.astro";
+
+This lab focuses on advanced parallel programming techniques with MPI. You will explore classic sorting algorithms and work with custom and Cartesian communicators.
+
+<div class="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+  <Card title="Bubble Sort" description="bubble.c" href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI/prog08.0_Bubble-OddEvenSort/bubble.c" />
+  <Card title="Odd-Even Sort (MPI)" description="mpi_odd_even.c" href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI/prog08.0_Bubble-OddEvenSort/mpi_odd_even.c" />
+  <Card title="Odd-Even Sort" description="odd_even.c" href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI/prog08.0_Bubble-OddEvenSort/odd_even.c" />
+  <Card title="Merge Sort" description="MergeSort.cpp" href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI/prog08_MergeSort/MergeSort.cpp" />
+  <Card title="Basic Communicators" description="Comunicadores.cpp" href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI/prog09_Comunicadores/Comunicadores.cpp" />
+  <Card title="Cartesian Communicator (Parallel)" description="ComunicadorCartesiano.cpp" href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI/prog10_ComunicadorCartesiano/ComunicadorCartesiano.cpp" />
+  <Card title="Cartesian Communicator (Sequential)" description="ComunicadorCartesianoSecu.cpp" href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI/prog10_ComunicadorCartesiano/ComunicadorCartesianoSecu.cpp" />
+  <Card title="Matrix Distribution" description="matrix_mpi.c" href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI/prog11_Matrix/matrix_mpi.c" />
+</div>
+
+## Compilation and Execution
+
+```bash
+# For C
+mpicc -g -Wall -o out <program_name>.c
+
+# For C++
+mpicxx -g -Wall -o out <program_name>.cpp
+
+# Run with 4 processes
+mpiexec -n 4 ./out
+```
+
+<Alert type="info">
+  **Due date:** May 10, 2025. Make sure to complete all exercises and submit your observations.
+</Alert>
+
+## References
+- [MPI Tutorial](https://mpitutorial.com/)
+- [Open MPI Docs](https://www.open-mpi.org/doc/)
+- [MPI Forum Standard](https://www.mpi-forum.org/docs/mpi-4.0/mpi40-report.pdf)

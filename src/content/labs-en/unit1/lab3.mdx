@@ -1,0 +1,57 @@
+---
+title: "Numerical Operations with MPI"
+description: "Implementation of distributed numerical operations using MPI: vector addition, average, dot product, and matrix-vector product."
+pubDate: "2025-04-23"
+author: "Railly Hugo"
+authorImageUrl: "/hugo-profile.webp"
+dueDate: "2025-04-30"
+files: [
+  "Add_VectorASequential.c",
+  "Add_VectorParallel.c",
+  "avg.c",
+  "all_avg.c",
+  "ProductoEscalarSecu.cpp",
+  "ProductoEscalarParall.cpp",
+  "ProdMatrizVectorSecu.cpp",
+  "ProdMatrizVectorParall.cpp"
+]
+path: "Laboratory/MPI"
+---
+
+import Alert from "../../../components/Alert.astro";
+import Card from "../../../components/Card.astro";
+
+This lab focuses on developing basic numerical operations with MPI, essential for exploiting parallelism in distributed architectures.
+
+<div class="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+  <Card title="Vector Addition (Sequential)" description="Add_VectorASequential.c" href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI/prog05.2_AddVector/Add_VectorASequential.c" />
+  <Card title="Vector Addition (Parallel)" description="Add_VectorParallel.c" href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI/prog05.2_AddVector/Add_VectorParallel.c" />
+  <Card title="Number Average (Sequential)" description="avg.c" href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI/prog05.3_NumbersAvg/avg.c" />
+  <Card title="Number Average (Parallel)" description="all_avg.c" href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI/prog05.3_NumbersAvg/all_avg.c" />
+  <Card title="Dot Product (Sequential)" description="ProductoEscalarSecu.cpp" href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI/prog06_ProductoEscalar/ProductoEscalarSecu.cpp" />
+  <Card title="Dot Product (Parallel)" description="ProductoEscalarParall.cpp" href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI/prog06_ProductoEscalar/ProductoEscalarParall.cpp" />
+  <Card title="Matrix-Vector Product (Sequential)" description="ProdMatrizVectorSecu.cpp" href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI/prog07_ProductoMatrizVector/ProdMatrizVectorSecu.cpp" />
+  <Card title="Matrix-Vector Product (Parallel)" description="ProdMatrizVectorParall.cpp" href="https://github.com/FISI-SM/ParallelProgramming-repo/blob/main/Laboratory/MPI/prog07_ProductoMatrizVector/ProdMatrizVectorParall.cpp" />
+</div>
+
+## Compilation and Execution
+
+```bash
+# For C
+mpicc -g -Wall -o out <program_name>.c
+
+# For C++
+mpicxx -g -Wall -o out <program_name>.cpp
+
+# Run with 4 processes
+mpiexec -n 4 ./out
+```
+
+<Alert type="info">
+  **Due date:** April 30, 2025. Make sure to complete all exercises and submit your observations.
+</Alert>
+
+## References
+- [MPI Tutorial](https://mpitutorial.com/)
+- [Open MPI Docs](https://www.open-mpi.org/doc/)
+- [MPI Forum Standard](https://www.mpi-forum.org/docs/mpi-4.0/mpi40-report.pdf)
