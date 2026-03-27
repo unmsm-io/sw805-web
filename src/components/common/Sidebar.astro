@@ -12,6 +12,9 @@ import {
   Menu,
   Home,
   X,
+  Presentation,
+  Shield,
+  HelpCircle,
 } from "lucide-astro";
 
 const currentPath = Astro.url.pathname;
@@ -21,9 +24,12 @@ const mainNavigation = [
   { href: "/", text: "Inicio", icon: Home },
   { href: "/syllabus", text: "Sílabo", icon: FileText },
   { href: "/schedule", text: "Cronograma", icon: Calendar },
+  { href: "/lectures", text: "Clases", icon: Presentation },
   { href: "/labs", text: "Laboratorios", icon: Beaker },
   { href: "/resources", text: "Recursos", icon: BookOpen },
   { href: "/project", text: "Proyecto", icon: Rocket },
+  { href: "/policies", text: "Políticas", icon: Shield },
+  { href: "/faq", text: "FAQ", icon: HelpCircle },
   { href: "/staff", text: "Equipo", icon: Users },
 ];
 
