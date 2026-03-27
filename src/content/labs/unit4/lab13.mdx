@@ -29,7 +29,7 @@ La multiplicación de matrices es el núcleo del ML. Si tienes una capa con 1024
 
 En el Lab 10 vimos la multiplicación por tiles. Recordemos la estructura clave:
 
-```cuda
+```cpp
 #define TILE_SIZE 16
 
 __global__ void matmul_tiled(float *A, float *B, float *C,
@@ -78,7 +78,7 @@ Implementaremos una red de dos capas: Entrada → Capa Oculta (ReLU) → Salida 
 - Capa oculta: 4 neuronas + ReLU
 - Capa de salida: 1 neurona + Sigmoid
 
-```cuda
+```cpp
 #include <cuda_runtime.h>
 #include <stdio.h>
 #include <math.h>
@@ -225,7 +225,7 @@ Las funciones de activación son el elemento que introduce no-linealidad en una 
 
 ## Ejercicio 2: Kernels de activación con benchmarks
 
-```cuda
+```cpp
 #include <cuda_runtime.h>
 #include <stdio.h>
 #include <math.h>
@@ -327,7 +327,7 @@ Si ya tenemos la activación sigmoid guardada, el gradiente es gratuito de calcu
 
 ## Ejercicio 3: Gradiente de Sigmoid en CUDA
 
-```cuda
+```cpp
 #include <cuda_runtime.h>
 #include <stdio.h>
 #include <math.h>
@@ -398,7 +398,7 @@ NVIDIA proporciona cuBLAS, una implementación altamente optimizada de rutinas d
 
 ### Comparativa: kernel manual vs cuBLAS
 
-```cuda
+```cpp
 #include <cuda_runtime.h>
 #include <cublas_v2.h>
 #include <stdio.h>

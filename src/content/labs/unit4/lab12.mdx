@@ -160,7 +160,7 @@ static inline void print_result(const char *label, double elapsed_ms,
 
 **`timer_gpu.h`** — Wrapper para eventos CUDA:
 
-```cuda
+```cpp
 #ifndef TIMER_GPU_H
 #define TIMER_GPU_H
 
@@ -209,7 +209,7 @@ La multiplicación de matrices C = A × B para matrices de N×N es O(N³), con a
 
 Implementa las cuatro versiones en el mismo archivo `benchmark.cu`:
 
-```cuda
+```cpp
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

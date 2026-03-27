@@ -49,7 +49,7 @@ Paso 3 (d=4):     [1, 3, 6,10,15,21,28,36]
 
 ### Ejercicio 1: Implementar Hillis-Steele Scan
 
-```cuda
+```cpp
 #include <stdio.h>
 #include <cuda_runtime.h>
 
@@ -149,7 +149,7 @@ Cada etapa del algoritmo realiza comparaciones e intercambios en paralelo. Para 
 
 ### Ejercicio 2: Implementar Bitonic Sort en CUDA
 
-```cuda
+```cpp
 #include <stdio.h>
 #include <stdlib.h>
 #include <cuda_runtime.h>
@@ -226,7 +226,7 @@ Calcular un histograma de forma paralela presenta un problema clásico: **condic
 
 CUDA provee `atomicAdd(addr, val)` que garantiza que la lectura-modificación-escritura es indivisible:
 
-```cuda
+```cpp
 atomicAdd(&histogram[bin], 1);
 ```
 
@@ -238,7 +238,7 @@ La solución es crear **una copia privada del histograma en memoria compartida**
 
 ### Ejercicio 3: Histograma de valores de píxeles
 
-```cuda
+```cpp
 #include <stdio.h>
 #include <stdlib.h>
 #include <cuda_runtime.h>
@@ -356,7 +356,7 @@ En GPU, la fase Map es trivial (un hilo por elemento). La fase Reduce es el patr
 
 Contaremos la frecuencia de cada carácter ASCII (a–z) en un texto, como versión simplificada del problema de frecuencia de palabras.
 
-```cuda
+```cpp
 #include <stdio.h>
 #include <string.h>
 #include <cuda_runtime.h>

@@ -37,7 +37,7 @@ La GPU divide la memoria compartida en **bancos** (32 bancos en arquitecturas mo
 
 La multiplicación de matrices C = A × B de tamaño N×N accede a memoria global O(N³) veces en la versión ingenua. Con tiling, cada elemento de la memoria global se carga solo una vez por tile.
 
-```cuda
+```cpp
 #include <cuda_runtime.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -157,7 +157,7 @@ La GPU agrupa los accesos a memoria global de 32 hilos consecutivos (un **warp**
 
 ### Ejercicio 2: Transposición de matriz — naive vs. coalescente
 
-```cuda
+```cpp
 #include <cuda_runtime.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -261,7 +261,7 @@ En la práctica, los registros y la memoria compartida reducen estos valores. La
 
 ### Calculador de ocupancia en tiempo de ejecución
 
-```cuda
+```cpp
 #include <cuda_runtime.h>
 #include <stdio.h>
 
@@ -315,7 +315,7 @@ La solución es el **direccionamiento secuencial**: en cada paso, la mitad activ
 
 ### Ejercicio 3: Reducción con memoria compartida (direccionamiento secuencial)
 
-```cuda
+```cpp
 #include <cuda_runtime.h>
 #include <stdio.h>
 #include <stdlib.h>
