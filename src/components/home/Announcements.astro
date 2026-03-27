@@ -1,12 +1,18 @@
 ---
 import { COURSE_CONFIG, type Announcement } from "../../config/course";
+import { type Locale } from "../../i18n/translations";
+
+interface Props { locale?: Locale }
+const { locale = "es" } = Astro.props;
 const { announcements } = COURSE_CONFIG;
+const heading = locale === "en" ? "Announcements" : "Anuncios";
+const dateLocale = locale === "en" ? "en-US" : "es-PE";
 ---
 
 <section class="prose dark:prose-invert max-w-none">
   <div class="p-6">
     <h2 class="text-xl font-semibold mt-0 mb-0 flex items-center gap-2">
-      Anuncios
+      {heading}
     </h2>
     <div class="divide-y divide-zinc-200 dark:divide-zinc-700">
       {
@@ -22,7 +28,7 @@ const { announcements } = COURSE_CONFIG;
               datetime={announcement.date}
               class="block mt-2 text-sm text-zinc-500"
             >
-              {new Date(announcement.date).toLocaleDateString("es-PE", {
+              {new Date(announcement.date).toLocaleDateString(dateLocale, {
                 year: "numeric",
                 month: "long",
                 day: "numeric",

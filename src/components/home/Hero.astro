@@ -1,5 +1,14 @@
 ---
 import { COURSE_CONFIG } from "../../config/course";
+import { getTranslations, type Locale } from "../../i18n/translations";
+
+interface Props { locale?: Locale }
+const { locale = "es" } = Astro.props;
+const t = getTranslations(locale);
+const title = locale === "en" ? "Concurrent and Parallel Programming" : COURSE_CONFIG.name;
+const creditsLabel = locale === "en" ? "Credits" : "Créditos";
+const scheduleLabel = locale === "en" ? "Schedule" : "Horario";
+const locationLabel = locale === "en" ? "Location" : "Lugar";
 ---
 
 <header
@@ -9,27 +18,21 @@ import { COURSE_CONFIG } from "../../config/course";
     <div class="flex flex-col gap-2">
       <div class="flex items-baseline gap-2">
         <span class="text-sm font-mono text-zinc-500 dark:text-zinc-400">{COURSE_CONFIG.code}</span>
-        <h1 class="text-2xl font-bold">{COURSE_CONFIG.name}</h1>
+        <h1 class="text-2xl font-bold">{title}</h1>
       </div>
 
       <div class="flex flex-wrap gap-x-8 gap-y-1 text-sm">
         <div class="flex items-center gap-1">
-          <span class="font-medium">Créditos:</span>
-          <span class="text-zinc-600 dark:text-zinc-300"
-            >{COURSE_CONFIG.credits}</span
-          >
+          <span class="font-medium">{creditsLabel}:</span>
+          <span class="text-zinc-600 dark:text-zinc-300">{COURSE_CONFIG.credits}</span>
         </div>
         <div class="flex items-center gap-1">
-          <span class="font-medium">Horario:</span>
-          <span class="text-zinc-600 dark:text-zinc-300"
-            >{COURSE_CONFIG.schedule.lectures}</span
-          >
+          <span class="font-medium">{scheduleLabel}:</span>
+          <span class="text-zinc-600 dark:text-zinc-300">{COURSE_CONFIG.schedule.lectures}</span>
         </div>
         <div class="flex items-center gap-1">
-          <span class="font-medium">Lugar:</span>
-          <span class="text-zinc-600 dark:text-zinc-300"
-            >{COURSE_CONFIG.schedule.location}</span
-          >
+          <span class="font-medium">{locationLabel}:</span>
+          <span class="text-zinc-600 dark:text-zinc-300">{COURSE_CONFIG.schedule.location}</span>
         </div>
       </div>
     </div>

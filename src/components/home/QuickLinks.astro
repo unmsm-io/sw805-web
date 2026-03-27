@@ -1,6 +1,12 @@
 ---
 import { Monitor, GraduationCap, Server, FileText, Presentation, Shield } from "lucide-astro";
 import { COURSE_CONFIG } from "../../config/course";
+import { getTranslations, type Locale } from "../../i18n/translations";
+
+interface Props { locale?: Locale }
+const { locale = "es" } = Astro.props;
+const t = getTranslations(locale);
+const prefix = locale === "en" ? "/en" : "";
 
 const iconMap = {
   Monitor,
@@ -14,14 +20,15 @@ const iconMap = {
 
 <section class="prose dark:prose-invert max-w-none">
   <div class="p-6">
-    <h2 class="text-xl mt-0 font-semibold mb-4">Links Útiles</h2>
+    <h2 class="text-xl mt-0 font-semibold mb-4">{t.home.quickLinks}</h2>
     <div class="space-y-3">
       {
         COURSE_CONFIG.quickLinks.map(({ href, icon, title, description }) => {
           const Icon = iconMap[icon as keyof typeof iconMap];
+          const localizedHref = href.startsWith("/") && !href.startsWith("http") ? `${prefix}${href}` : href;
           return (
             <a
-              href={href}
+              href={localizedHref}
               class="block no-underline hover:underline p-3 bg-white dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded hover:bg-zinc-100 dark:hover:bg-zinc-700/50 transition-colors"
               target={href.startsWith("http") ? "_blank" : undefined}
               rel={href.startsWith("http") ? "noopener noreferrer" : undefined}

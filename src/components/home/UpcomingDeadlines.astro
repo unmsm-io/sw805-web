@@ -1,6 +1,12 @@
 ---
 import { COURSE_CONFIG, type WeekContent } from "../../config/course";
 import { Calendar, BookOpen } from "lucide-astro";
+import { type Locale } from "../../i18n/translations";
+
+interface Props { locale?: Locale }
+const { locale = "es" } = Astro.props;
+const heading = locale === "en" ? "Upcoming Dates" : "Próximas Fechas";
+const dateLocale = locale === "en" ? "en-US" : "es-PE";
 
 const allDeadlines = [
   ...COURSE_CONFIG.modules.flatMap((module) =>
@@ -29,7 +35,7 @@ const allDeadlines = [
 
 <section class="prose dark:prose-invert max-w-none">
   <div class="p-6">
-    <h2 class="text-xl mt-0 font-semibold mb-4">Próximas Fechas</h2>
+    <h2 class="text-xl mt-0 font-semibold mb-4">{heading}</h2>
     <div class="space-y-4">
       {
         allDeadlines.map((deadline) => (
@@ -44,7 +50,7 @@ const allDeadlines = [
             <div>
               <p class="font-medium text-sm mt-0 mb-1">{deadline.title}</p>
               <time class="text-sm text-zinc-500" datetime={deadline.date}>
-                {new Date(deadline.date).toLocaleDateString("es-PE", {
+                {new Date(deadline.date).toLocaleDateString(dateLocale, {
                   year: "numeric",
                   month: "long",
                   day: "numeric",
