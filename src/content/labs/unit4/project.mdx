@@ -13,16 +13,196 @@ import Alert from "../../../components/Alert.astro";
 import CodeBlock from "../../../components/CodeBlock.astro";
 import StepGuide from "../../../components/StepGuide.astro";
 
-## Próximamente
+## Descripción General
 
-El proyecto final estará disponible pronto. En este proyecto, deberás:
+El proyecto final es la síntesis de todo lo aprendido durante el curso. Cada equipo diseñará e implementará una aplicación de computación paralela completa: desde la versión secuencial de referencia hasta una implementación paralela optimizada con análisis de rendimiento cuantitativo.
 
-- Diseñar e implementar una solución paralela completa
-- Combinar múltiples tecnologías (MPI, OpenMP, CUDA)
-- Optimizar el rendimiento y la escalabilidad
-- Documentar y analizar los resultados
-- Presentar y defender tu implementación
+El objetivo no es solo que el programa funcione, sino que puedan explicar cada decisión de diseño: por qué eligieron esa tecnología, cómo distribuyen el trabajo, qué cuellos de botella encontraron y cómo los resolvieron.
+
+---
+
+## Objetivos
+
+Al concluir el proyecto, cada estudiante debe ser capaz de:
+
+- Analizar un problema computacional e identificar las partes paralelizables.
+- Diseñar una estrategia de paralelización usando al menos dos tecnologías del curso.
+- Implementar y depurar código paralelo en un entorno real.
+- Medir speedup y eficiencia usando metodología reproducible.
+- Comparar cuantitativamente una implementación secuencial contra la paralela.
+- Comunicar resultados técnicos de forma clara en un informe y presentación oral.
+
+---
+
+## Requisitos del Proyecto
+
+### Requisitos técnicos obligatorios
+
+1. **Al menos dos tecnologías paralelas** del siguiente conjunto: MPI, OpenMP, Pthreads, CUDA.
+2. **Implementación secuencial de referencia** para calcular speedup real.
+3. **Análisis de rendimiento** con al menos tres tamaños de problema distintos.
+4. **Métricas reportadas**: tiempo de ejecución, speedup S(p) = T(1)/T(p), eficiencia E(p) = S(p)/p.
+5. **Escalabilidad**: mostrar cómo varía el rendimiento al cambiar el número de procesos/hilos/bloques.
+6. **Manejo de errores**: el código no debe fallar silenciosamente ante entradas inválidas o errores de asignación.
+
+### Requisitos de equipo
+
+- Grupos de **2 a 3 estudiantes**.
+- Cada miembro debe poder defender cualquier parte del proyecto durante la presentación.
+- El repositorio en GitHub debe mostrar contribuciones de todos los integrantes (historial de commits).
+
+<Alert type="warning">
+Proyectos con commits de un solo integrante serán evaluados con un factor reductor sobre la nota del equipo. Se espera trabajo colaborativo genuino, no división "uno implementa, otro documenta".
+</Alert>
+
+---
+
+## Temas Propuestos
+
+| # | Tema | Dificultad | Tecnologías recomendadas | Descripción breve |
+|---|------|-----------|--------------------------|-------------------|
+| 1 | Simulación N-body | Alta | CUDA + OpenMP | Simular interacciones gravitacionales entre N partículas. Complejidad O(N²) por paso de tiempo. |
+| 2 | Procesamiento de imágenes | Media | CUDA + Pthreads | Aplicar filtros (Gaussian blur, Sobel, umbralización) a imágenes de alta resolución en paralelo. |
+| 3 | Multiplicación de matrices dispersas | Media | MPI + OpenMP | SpMM (Sparse Matrix-Matrix Multiply) con formato CSR. Relevante para grafos y ML. |
+| 4 | Simulación de transferencia de calor | Media | MPI + OpenMP | Ecuación de calor 2D con método de diferencias finitas. Dominio descompuesto entre procesos. |
+| 5 | Ray tracing paralelo | Alta | CUDA + OpenMP | Renderizar escenas 3D con trazado de rayos. Cada píxel es independiente: paralelismo perfecto. |
+| 6 | Compresión de datos | Media | OpenMP + Pthreads | Compresión Run-Length o Huffman paralela sobre bloques de datos independientes. |
+| 7 | Búsqueda en grafos (BFS/DFS) | Alta | MPI + CUDA | BFS/DFS sobre grafos masivos. Exploración de niveles de forma paralela con fronteras distribuidas. |
+| 8 | Simulación Monte Carlo | Media | MPI + OpenMP | Valoración de opciones financieras (modelo Black-Scholes). Millones de trayectorias independientes. |
+| 9 | FFT paralela | Alta | CUDA + MPI | Transformada rápida de Fourier para análisis de señales de audio o datos sísmicos. |
+| 10 | Red neuronal paralela | Alta | CUDA + OpenMP | Entrenamiento paralelo de una red feedforward. GPU para forward/backward, CPU para actualización. |
+
+<Alert type="tip">
+Si tienen una idea propia fuera de esta lista, pueden proponerla en la primera semana. Debe cumplir los requisitos técnicos y ser aprobada por el instructor.
+</Alert>
+
+---
+
+## Entregables
+
+### 1. Código fuente en GitHub
+
+- Repositorio público o compartido con el instructor.
+- Estructura de carpetas clara: `src/`, `sequential/`, `parallel/`, `benchmarks/`, `report/`.
+- `Makefile` o script que compile todo el proyecto con un solo comando.
+- `README.md` con instrucciones de compilación y ejecución paso a paso.
+- `.gitignore` apropiado (sin binarios compilados ni archivos temporales).
+
+### 2. Informe técnico
+
+Documento PDF de 8 a 15 páginas. Ver la sección **Formato del Informe** más abajo.
+
+### 3. Presentación oral (15 minutos)
+
+- 10 minutos de presentación + 5 minutos de preguntas.
+- Debe incluir: motivación, diseño, demo en vivo, resultados, conclusiones.
+- Todos los integrantes deben hablar durante la presentación.
+- Formato libre: slides, Jupyter Notebook, terminal, lo que prefieran.
+
+### 4. Demo en vivo
+
+Durante la presentación, ejecutarán el programa en tiempo real. Deben poder:
+- Cambiar el tamaño del problema y mostrar cómo varía el tiempo.
+- Mostrar el monitor de GPU (`nvidia-smi`) o métricas de CPU durante la ejecución.
+- Responder a preguntas sobre el código directamente en el editor o terminal.
+
+<Alert type="warning">
+La demo en vivo es obligatoria. Un proyecto que no pueda ejecutarse el día de la presentación tendrá una penalización severa en la rúbrica, independientemente de la calidad del informe.
+</Alert>
+
+---
+
+## Rúbrica de Evaluación
+
+| Criterio | Peso | Indicadores de logro completo |
+|----------|------|-------------------------------|
+| Implementación | 30% | Código funcional, correctamente paralelo, sin condiciones de carrera, manejo de errores |
+| Rendimiento y optimización | 25% | Speedup demostrable, análisis de escalabilidad, justificación de decisiones de diseño |
+| Informe técnico | 20% | Metodología clara, gráficas de rendimiento, análisis de resultados, conclusiones fundamentadas |
+| Presentación | 15% | Claridad expositiva, dominio del tema, respuestas a preguntas, demo exitosa |
+| Código limpio y documentación | 10% | Nombres descriptivos, estructura modular, README completo, commits atómicos con mensajes claros |
+
+### Escala de notas por criterio
+
+| Puntaje | Nivel |
+|---------|-------|
+| 90-100% | Excelente: supera los requisitos, demuestra comprensión profunda |
+| 75-89%  | Bueno: cumple todos los requisitos, pequeñas omisiones |
+| 60-74%  | Regular: cumple los requisitos mínimos con deficiencias notables |
+| < 60%   | Insuficiente: requisitos importantes no cumplidos |
 
 <Alert type="info">
-  Los detalles completos del proyecto, requisitos y rúbrica de evaluación estarán disponibles antes de la fecha de inicio.
-</Alert> 
+El criterio de "Rendimiento y optimización" no evalúa que el proyecto sea el más rápido de la clase, sino que el análisis sea riguroso. Un speedup de 3x bien explicado vale más que un speedup de 10x sin justificación.
+</Alert>
+
+---
+
+## Cronograma
+
+| Semana | Actividad | Entregable |
+|--------|-----------|------------|
+| Semana 1 | Formación de equipos, selección de tema, revisión de bibliografía | Propuesta de 1 página (tema, equipo, plan de trabajo) |
+| Semana 2 | Implementación secuencial de referencia, diseño de arquitectura paralela | Versión secuencial funcional + diagrama de diseño |
+| Semana 3 | Implementación paralela, pruebas de corrección | Primera versión paralela que produce resultados correctos |
+| Semana 4 | Optimización, benchmarks completos, redacción del informe, preparación de presentación | Informe final + repositorio completo + presentación |
+
+<Alert type="warning">
+La propuesta de la Semana 1 es obligatoria para quedar inscrito en el proyecto. Equipos sin propuesta aprobada no podrán presentar el proyecto final.
+</Alert>
+
+---
+
+## Formato del Informe
+
+El informe debe estar escrito en español, en formato PDF, con las siguientes secciones en orden:
+
+### Portada
+- Título del proyecto, nombres completos de los integrantes, código de curso, fecha de entrega.
+
+### Resumen (Abstract)
+Máximo 200 palabras. Describe brevemente el problema, el enfoque de paralelización, los resultados principales y las conclusiones. Debe poder leerse de forma independiente del resto del informe.
+
+### 1. Introducción
+- Descripción del problema: qué se resuelve y por qué es computacionalmente costoso.
+- Motivación para la paralelización.
+- Objetivos específicos del proyecto.
+
+### 2. Metodología
+- Descripción del algoritmo secuencial.
+- Estrategia de paralelización: cómo se divide el trabajo, qué datos se comparten, cómo se sincronizan los procesos.
+- Tecnologías usadas y justificación de por qué se eligieron.
+- Entorno de pruebas: hardware (CPU, GPU, RAM), sistema operativo, versiones de compiladores y bibliotecas.
+
+### 3. Resultados y Análisis
+- Tabla de tiempos de ejecución para distintos tamaños de problema y número de procesos/hilos.
+- Gráficas de speedup y eficiencia.
+- Análisis de los resultados: ¿el speedup se acerca al ideal? ¿Dónde están los cuellos de botella?
+- Aplicación de la Ley de Amdahl si corresponde.
+
+### 4. Conclusiones
+- Qué funcionó bien y qué fue difícil.
+- Limitaciones de la implementación actual.
+- Trabajo futuro: qué mejorarías con más tiempo.
+
+### 5. Referencias
+Bibliografía en formato APA. Mínimo 5 referencias (libros, artículos o documentación oficial).
+
+---
+
+## Preguntas Frecuentes
+
+**¿Puedo usar bibliotecas externas como Thrust o OpenBLAS?**
+Sí, pero debes comprender lo que hace la biblioteca. Si usas `thrust::sort`, debes poder explicar qué algoritmo paralelo ejecuta internamente.
+
+**¿El informe puede estar en inglés?**
+No. El informe y la presentación deben estar en español. El código puede usar nombres de variables y comentarios en inglés, que es la convención estándar.
+
+**¿Qué pasa si el equipo tiene solo 2 personas y el tema es de dificultad Alta?**
+Se espera el mismo nivel de calidad. La dificultad del tema no ajusta la rúbrica, pero sí puede resultar en un proyecto más impresionante si se ejecuta bien.
+
+**¿El repositorio debe ser público?**
+Puede ser privado, pero debe estar compartido con el usuario de GitHub del instructor antes de la fecha de entrega.
+
+<Alert type="tip">
+Usen GitHub Projects o Issues para distribuir tareas dentro del equipo. Esto también sirve como evidencia de trabajo colaborativo y puede compensar si hay desequilibrio en los commits de código.
+</Alert>
