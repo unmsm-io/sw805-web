@@ -13,16 +13,476 @@ import Alert from "../../../components/Alert.astro";
 import CodeBlock from "../../../components/CodeBlock.astro";
 import StepGuide from "../../../components/StepGuide.astro";
 
-## Próximamente
+## Introducción
 
-Este laboratorio estará disponible pronto. En este laboratorio, exploraremos:
+El diseño de programas paralelos eficientes requiere elegir la estrategia de paralelización correcta para cada problema. No existe una solución universal: la elección depende de la estructura del problema, las dependencias entre datos y la arquitectura del hardware disponible.
 
-- Estrategias de descomposición de datos
-- Técnicas de descomposición de tareas
-- Balanceo de carga y distribución de trabajo
-- Patrones de diseño paralelo
-- Optimización de rendimiento y escalabilidad
+En este laboratorio exploraremos las principales estrategias de paralelización, aprenderemos a balancear la carga de trabajo entre procesos y analizaremos las leyes fundamentales que rigen el rendimiento de los sistemas paralelos.
 
 <Alert type="info">
-  El contenido detallado y los materiales del laboratorio estarán disponibles antes de la fecha de inicio.
-</Alert> 
+Asegúrate de tener instalado MPICH o OpenMPI y GCC con soporte para Pthreads. Verifica con `mpicc --version` y `gcc --version`.
+</Alert>
+
+---
+
+## 1. Descomposición de Datos
+
+La **descomposición de datos** divide el conjunto de datos entre los procesos disponibles, de modo que cada proceso trabaja sobre su porción de manera independiente.
+
+### Distribución en bloque (*Block*)
+
+Cada proceso recibe un bloque contiguo de elementos. Si tenemos N elementos y P procesos, el proceso `p` recibe los elementos desde `p*(N/P)` hasta `(p+1)*(N/P) - 1`.
+
+### Distribución cíclica (*Cyclic*)
+
+Los elementos se asignan en forma circular. El proceso `p` recibe los elementos `p, p+P, p+2P, ...`. Esta distribución mejora el balanceo cuando el costo de procesamiento varía por elemento.
+
+### Distribución bloque-cíclica (*Block-Cyclic*)
+
+Combina ambas: se reparten bloques de tamaño `b` en forma cíclica. Es la estrategia que usa ScaLAPACK para matrices densas.
+
+### Tabla de distribución (N=12, P=4)
+
+| Proceso | Bloque | Cíclica | Bloque-cíclica (b=2) |
+|---------|--------|---------|----------------------|
+| 0 | 0, 1, 2 | 0, 4, 8 | 0, 1, 8, 9 |
+| 1 | 3, 4, 5 | 1, 5, 9 | 2, 3, 10, 11 |
+| 2 | 6, 7, 8 | 2, 6, 10 | 4, 5 |
+| 3 | 9, 10, 11 | 3, 7, 11 | 6, 7 |
+
+### Ejercicio 1: Suma de vector con distribución en bloque vs. cíclica
+
+Implementa la suma de un vector de N elementos usando ambas distribuciones y compara el tiempo de ejecución.
+
+```c
+#include <mpi.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+#define N 1000000
+
+double suma_bloque(int rank, int size, double *v) {
+    int inicio = rank * (N / size);
+    int fin    = (rank == size - 1) ? N : inicio + (N / size);
+    double local = 0.0;
+    for (int i = inicio; i < fin; i++)
+        local += v[i];
+    return local;
+}
+
+double suma_ciclica(int rank, int size, double *v) {
+    double local = 0.0;
+    for (int i = rank; i < N; i += size)
+        local += v[i];
+    return local;
+}
+
+int main(int argc, char **argv) {
+    MPI_Init(&argc, &argv);
+
+    int rank, size;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+    double *v = NULL;
+    if (rank == 0) {
+        v = malloc(N * sizeof(double));
+        srand(42);
+        for (int i = 0; i < N; i++)
+            v[i] = (double)rand() / RAND_MAX;
+    } else {
+        v = malloc(N * sizeof(double));
+    }
+
+    MPI_Bcast(v, N, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+
+    double t0, local_sum, total_sum;
+
+    t0 = MPI_Wtime();
+    local_sum = suma_bloque(rank, size, v);
+    MPI_Reduce(&local_sum, &total_sum, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+    if (rank == 0)
+        printf("Bloque   -> suma=%.4f  tiempo=%.6f s\n", total_sum, MPI_Wtime() - t0);
+
+    t0 = MPI_Wtime();
+    local_sum = suma_ciclica(rank, size, v);
+    MPI_Reduce(&local_sum, &total_sum, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+    if (rank == 0)
+        printf("Cíclica  -> suma=%.4f  tiempo=%.6f s\n", total_sum, MPI_Wtime() - t0);
+
+    free(v);
+    MPI_Finalize();
+    return 0;
+}
+```
+
+Compila y ejecuta:
+
+```bash
+mpicc -O2 -o suma_distribuciones ejercicio1.c
+mpirun -np 4 ./suma_distribuciones
+```
+
+<Alert type="tip">
+La distribución en bloque suele ser más eficiente en caché porque accede a memoria de forma contigua. La distribución cíclica puede ser necesaria cuando el costo por elemento es irregular.
+</Alert>
+
+---
+
+## 2. Descomposición de Tareas
+
+La **descomposición de tareas** identifica unidades de trabajo independientes (tareas) que pueden ejecutarse en paralelo. Se modela como un **Grafo Acíclico Dirigido (DAG)** donde los nodos son tareas y las aristas representan dependencias.
+
+### Concepto de DAG
+
+```
+Lectura (T1)
+    |
+    v
+Procesamiento (T2) --> Estadísticas (T4)
+    |
+    v
+Escritura (T3)
+```
+
+El **camino crítico** del DAG determina el límite inferior del tiempo de ejecución paralelo.
+
+### Ejercicio 2: Patrón Pipeline con Pthreads
+
+Implementa un pipeline de tres etapas: lectura, procesamiento y escritura. Cada etapa es un hilo que consume la salida de la etapa anterior.
+
+```c
+#include <pthread.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+#define BUFFER_SIZE 8
+#define TOTAL_ITEMS 32
+
+typedef struct {
+    int datos[BUFFER_SIZE];
+    int cabeza, cola, count;
+    pthread_mutex_t mutex;
+    pthread_cond_t  no_lleno;
+    pthread_cond_t  no_vacio;
+} Buffer;
+
+Buffer buf_leer_procesar;
+Buffer buf_procesar_escribir;
+int items_leidos    = 0;
+int items_procesados = 0;
+
+void buffer_init(Buffer *b) {
+    b->cabeza = b->cola = b->count = 0;
+    pthread_mutex_init(&b->mutex, NULL);
+    pthread_cond_init(&b->no_lleno, NULL);
+    pthread_cond_init(&b->no_vacio, NULL);
+}
+
+void buffer_poner(Buffer *b, int val) {
+    pthread_mutex_lock(&b->mutex);
+    while (b->count == BUFFER_SIZE)
+        pthread_cond_wait(&b->no_lleno, &b->mutex);
+    b->datos[b->cola] = val;
+    b->cola = (b->cola + 1) % BUFFER_SIZE;
+    b->count++;
+    pthread_cond_signal(&b->no_vacio);
+    pthread_mutex_unlock(&b->mutex);
+}
+
+int buffer_tomar(Buffer *b) {
+    pthread_mutex_lock(&b->mutex);
+    while (b->count == 0)
+        pthread_cond_wait(&b->no_vacio, &b->mutex);
+    int val = b->datos[b->cabeza];
+    b->cabeza = (b->cabeza + 1) % BUFFER_SIZE;
+    b->count--;
+    pthread_cond_signal(&b->no_lleno);
+    pthread_mutex_unlock(&b->mutex);
+    return val;
+}
+
+void *hilo_leer(void *arg) {
+    for (int i = 0; i < TOTAL_ITEMS; i++) {
+        usleep(1000);
+        buffer_poner(&buf_leer_procesar, i);
+        printf("[Lectura]     item %d\n", i);
+    }
+    buffer_poner(&buf_leer_procesar, -1);
+    return NULL;
+}
+
+void *hilo_procesar(void *arg) {
+    while (1) {
+        int val = buffer_tomar(&buf_leer_procesar);
+        if (val == -1) { buffer_poner(&buf_procesar_escribir, -1); break; }
+        int resultado = val * val;
+        usleep(2000);
+        buffer_poner(&buf_procesar_escribir, resultado);
+        printf("[Procesamiento] item %d -> %d\n", val, resultado);
+    }
+    return NULL;
+}
+
+void *hilo_escribir(void *arg) {
+    while (1) {
+        int val = buffer_tomar(&buf_procesar_escribir);
+        if (val == -1) break;
+        printf("[Escritura]   resultado %d\n", val);
+        usleep(500);
+    }
+    return NULL;
+}
+
+int main() {
+    buffer_init(&buf_leer_procesar);
+    buffer_init(&buf_procesar_escribir);
+
+    pthread_t t1, t2, t3;
+    pthread_create(&t1, NULL, hilo_leer,     NULL);
+    pthread_create(&t2, NULL, hilo_procesar, NULL);
+    pthread_create(&t3, NULL, hilo_escribir, NULL);
+
+    pthread_join(t1, NULL);
+    pthread_join(t2, NULL);
+    pthread_join(t3, NULL);
+    return 0;
+}
+```
+
+```bash
+gcc -O2 -pthread -o pipeline ejercicio2.c
+./pipeline
+```
+
+---
+
+## 3. Balanceo de Carga
+
+El **balanceo de carga** busca distribuir el trabajo de forma que todos los procesos terminen aproximadamente al mismo tiempo. Un proceso ocioso mientras otros trabajan desperdicia recursos.
+
+### Balanceo estático
+
+Se asigna la carga antes de ejecutar el programa. Es simple pero no se adapta a variaciones en el tiempo de procesamiento por elemento.
+
+### Balanceo dinámico
+
+El trabajo se asigna en tiempo de ejecución. El patrón **maestro-trabajador** es la implementación más común: el maestro distribuye unidades de trabajo a medida que los trabajadores quedan disponibles.
+
+### Ejercicio 3: Patrón maestro-trabajador con MPI
+
+```c
+#include <mpi.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+#define TOTAL_TAREAS 64
+#define TAG_TAREA    1
+#define TAG_RESULTADO 2
+#define TAG_FIN      0
+
+int procesar_tarea(int id) {
+    usleep((id % 5 + 1) * 10000);
+    return id * id;
+}
+
+void maestro(int size) {
+    int proxima = 0;
+    int activos = size - 1;
+    int tarea, resultado, trabajador;
+    MPI_Status estado;
+
+    for (int w = 1; w < size && proxima < TOTAL_TAREAS; w++, proxima++) {
+        MPI_Send(&proxima, 1, MPI_INT, w, TAG_TAREA, MPI_COMM_WORLD);
+        printf("[Maestro] tarea %d -> trabajador %d\n", proxima, w);
+    }
+
+    while (activos > 0) {
+        MPI_Recv(&resultado, 1, MPI_INT, MPI_ANY_SOURCE, TAG_RESULTADO,
+                 MPI_COMM_WORLD, &estado);
+        trabajador = estado.MPI_SOURCE;
+        printf("[Maestro] resultado %d <- trabajador %d\n", resultado, trabajador);
+
+        if (proxima < TOTAL_TAREAS) {
+            MPI_Send(&proxima, 1, MPI_INT, trabajador, TAG_TAREA, MPI_COMM_WORLD);
+            printf("[Maestro] tarea %d -> trabajador %d\n", proxima, trabajador);
+            proxima++;
+        } else {
+            tarea = -1;
+            MPI_Send(&tarea, 1, MPI_INT, trabajador, TAG_FIN, MPI_COMM_WORLD);
+            activos--;
+        }
+    }
+}
+
+void trabajador(int rank) {
+    int tarea, resultado;
+    MPI_Status estado;
+
+    while (1) {
+        MPI_Recv(&tarea, 1, MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &estado);
+        if (estado.MPI_TAG == TAG_FIN) break;
+        resultado = procesar_tarea(tarea);
+        MPI_Send(&resultado, 1, MPI_INT, 0, TAG_RESULTADO, MPI_COMM_WORLD);
+    }
+}
+
+int main(int argc, char **argv) {
+    MPI_Init(&argc, &argv);
+    int rank, size;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+    if (size < 2) {
+        if (rank == 0) fprintf(stderr, "Se necesitan al menos 2 procesos.\n");
+        MPI_Finalize();
+        return 1;
+    }
+
+    if (rank == 0) maestro(size);
+    else           trabajador(rank);
+
+    MPI_Finalize();
+    return 0;
+}
+```
+
+```bash
+mpicc -O2 -o maestro_trabajador ejercicio3.c
+mpirun -np 5 ./maestro_trabajador
+```
+
+<Alert type="warning">
+El patrón maestro-trabajador puede convertirse en cuello de botella cuando el número de trabajadores es muy grande. En ese caso, considera una jerarquía de maestros.
+</Alert>
+
+---
+
+## 4. Ley de Amdahl vs. Ley de Gustafson
+
+### Ley de Amdahl
+
+Limita el speedup cuando el tamaño del problema es **fijo**:
+
+```
+S(P) = 1 / (f_s + (1 - f_s) / P)
+```
+
+Donde `f_s` es la fracción secuencial del programa y `P` es el número de procesadores. El speedup máximo teórico es `1 / f_s`.
+
+### Ley de Gustafson
+
+Modela el speedup cuando el tamaño del problema **crece** con P (escalado débil):
+
+```
+S(P) = P - f_s * (P - 1)
+```
+
+Esta ley es más optimista y refleja mejor la práctica real, donde al tener más procesadores solemos resolver problemas más grandes.
+
+### Comparación
+
+| Aspecto | Ley de Amdahl | Ley de Gustafson |
+|---------|---------------|------------------|
+| Tamaño del problema | Fijo | Crece con P |
+| Tipo de escalado | Fuerte (*strong scaling*) | Débil (*weak scaling*) |
+| Visión del speedup | Pesimista | Optimista |
+| Caso de uso | Reducir tiempo de un problema fijo | Resolver problemas más grandes |
+| Límite con P→∞ | `1 / f_s` | Ilimitado |
+
+### Ejercicio 4: Cálculo de speedup teórico
+
+Dado un programa con fracción secuencial `f_s = 0.05` (5%), calcula el speedup según ambas leyes para P = {1, 2, 4, 8, 16, 32, 64}.
+
+```c
+#include <stdio.h>
+
+int main() {
+    double fs = 0.05;
+    int procesadores[] = {1, 2, 4, 8, 16, 32, 64};
+    int n = 7;
+
+    printf("%-6s  %-12s  %-12s\n", "P", "Amdahl", "Gustafson");
+    printf("%-6s  %-12s  %-12s\n", "---", "----------", "-----------");
+
+    for (int i = 0; i < n; i++) {
+        int P = procesadores[i];
+        double amdahl    = 1.0 / (fs + (1.0 - fs) / P);
+        double gustafson = P - fs * (P - 1);
+        printf("%-6d  %-12.4f  %-12.4f\n", P, amdahl, gustafson);
+    }
+    return 0;
+}
+```
+
+```bash
+gcc -O2 -o speedup ejercicio4.c
+./speedup
+```
+
+Observa cómo la brecha entre ambas leyes se amplía conforme P crece.
+
+---
+
+## 5. Patrones de Diseño Paralelo
+
+Los patrones de diseño paralelo son soluciones reutilizables a problemas recurrentes en programación paralela.
+
+| Patrón | Descripción | Caso de uso típico |
+|--------|-------------|-------------------|
+| **Map** | Aplica la misma función a cada elemento de forma independiente | Transformación de vectores/imágenes |
+| **Reduce** | Combina elementos mediante una operación asociativa | Suma, máximo, producto global |
+| **Scan** | Computa sumas prefijas paralelas | Compresión, ranking, histogramas |
+| **Stencil** | Actualiza celdas a partir de vecinos | Simulaciones de PDEs, filtros de imagen |
+| **Pipeline** | Etapas encadenadas, cada una procesa la salida de la anterior | Procesamiento de streams, compiladores |
+| **Fork-Join** | Divide trabajo en subproblemas, resuelve en paralelo, combina | Merge sort, quicksort paralelo |
+
+<Alert type="tip">
+Los patrones **Map** y **Reduce** son la base de frameworks como MapReduce y Spark. Comprenderlos bien te da intuición para escalar cualquier problema a clústeres.
+</Alert>
+
+---
+
+## 6. Ejercicios Propuestos
+
+### EP1: Suma de matrices con distribución 2D
+
+Implementa la suma de dos matrices N×N con MPI usando descomposición bidimensional de datos (cada proceso recibe un bloque de filas y columnas). Compara el tiempo con la descomposición 1D (solo filas).
+
+**Requisitos:**
+- N = 1000, ejecutar con P = 1, 4, 9, 16 procesos
+- Reportar tiempo de comunicación vs. tiempo de cómputo
+- Calcular la eficiencia paralela `E = S/P`
+
+### EP2: Pipeline de procesamiento de imágenes
+
+Extiende el Ejercicio 2 para procesar frames de un video simulado:
+- **Etapa 1**: Leer frame (genera una matriz aleatoria 64×64)
+- **Etapa 2**: Aplicar filtro gaussiano 3×3
+- **Etapa 3**: Detectar bordes con operador Sobel
+- **Etapa 4**: Guardar resultado (imprimir suma de píxeles)
+
+Mide el throughput (frames por segundo) con 2, 3 y 4 etapas en paralelo.
+
+### EP3: Comparación empírica de Amdahl y Gustafson
+
+Diseña un experimento donde:
+- El 10% del código es inherentemente secuencial (inicialización)
+- El 90% es paralelizable (cómputo numérico)
+- Para escalado fuerte: problema fijo N=10^7, varía P
+- Para escalado débil: problema crece con P (N = P × 10^6), varía P
+
+Grafica los resultados y compara con las predicciones teóricas de ambas leyes.
+
+---
+
+## Referencias
+
+- Foster, I. (1995). *Designing and Building Parallel Programs*. Addison-Wesley.
+- Mattson, T., Sanders, B., & Massingill, B. (2004). *Patterns for Parallel Programming*. Addison-Wesley.
+- Gropp, W., Lusk, E., & Skjellum, A. (2014). *Using MPI: Portable Parallel Programming with the Message-Passing Interface* (3rd ed.). MIT Press.
+- Amdahl, G. (1967). Validity of the single processor approach to achieving large scale computing capabilities. *AFIPS Conference Proceedings*.
+- Gustafson, J. L. (1988). Reevaluating Amdahl's Law. *Communications of the ACM*, 31(5), 532–533.
