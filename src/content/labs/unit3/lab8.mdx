@@ -367,19 +367,15 @@ El patrón maestro-trabajador puede convertirse en cuello de botella cuando el n
 
 Limita el speedup cuando el tamaño del problema es **fijo**:
 
-```
-S(P) = 1 / (f_s + (1 - f_s) / P)
-```
+$$S(P) = \frac{1}{f_s + \frac{1 - f_s}{P}}$$
 
-Donde `f_s` es la fracción secuencial del programa y `P` es el número de procesadores. El speedup máximo teórico es `1 / f_s`.
+Donde $f_s$ es la fracción secuencial del programa y $P$ es el número de procesadores. El speedup máximo teórico es $\frac{1}{f_s}$.
 
 ### Ley de Gustafson
 
-Modela el speedup cuando el tamaño del problema **crece** con P (escalado débil):
+Modela el speedup cuando el tamaño del problema **crece** con $P$ (escalado débil):
 
-```
-S(P) = P - f_s * (P - 1)
-```
+$$S(P) = P - f_s \cdot (P - 1)$$
 
 Esta ley es más optimista y refleja mejor la práctica real, donde al tener más procesadores solemos resolver problemas más grandes.
 
@@ -391,11 +387,11 @@ Esta ley es más optimista y refleja mejor la práctica real, donde al tener má
 | Tipo de escalado | Fuerte (*strong scaling*) | Débil (*weak scaling*) |
 | Visión del speedup | Pesimista | Optimista |
 | Caso de uso | Reducir tiempo de un problema fijo | Resolver problemas más grandes |
-| Límite con P→∞ | `1 / f_s` | Ilimitado |
+| Límite con $P\to\infty$ | $\frac{1}{f_s}$ | Ilimitado |
 
 ### Ejercicio 4: Cálculo de speedup teórico
 
-Dado un programa con fracción secuencial `f_s = 0.05` (5%), calcula el speedup según ambas leyes para P = {1, 2, 4, 8, 16, 32, 64}.
+Dado un programa con fracción secuencial $f_s = 0.05$ (5%), calcula el speedup según ambas leyes para $P = \{1, 2, 4, 8, 16, 32, 64\}$.
 
 ```c
 #include <stdio.h>

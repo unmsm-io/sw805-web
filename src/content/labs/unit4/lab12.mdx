@@ -31,35 +31,29 @@ La medición incorrecta de tiempo es uno de los errores más comunes en trabajos
 
 El **speedup** mide cuánto más rápido es la versión paralela respecto a la secuencial:
 
-```
-S(p) = T(1) / T(p)
-```
+$$S(p) = \frac{T(1)}{T(p)}$$
 
-Donde `T(1)` es el tiempo secuencial y `T(p)` es el tiempo con `p` procesadores.
+Donde $T(1)$ es el tiempo secuencial y $T(p)$ es el tiempo con $p$ procesadores.
 
-- `S(p) = p` : speedup lineal (ideal, raramente alcanzable)
-- `S(p) < p` : speedup sublineal (lo habitual, por overhead y código serial)
-- `S(p) > p` : speedup superlineal (ocurre por efectos de caché, rarísimo)
+- $S(p) = p$ : speedup lineal (ideal, raramente alcanzable)
+- $S(p) < p$ : speedup sublineal (lo habitual, por overhead y código serial)
+- $S(p) > p$ : speedup superlineal (ocurre por efectos de caché, rarísimo)
 
 ### Eficiencia
 
 La **eficiencia** normaliza el speedup por el número de procesadores:
 
-```
-E(p) = S(p) / p = T(1) / (p × T(p))
-```
+$$E(p) = \frac{S(p)}{p} = \frac{T(1)}{p \cdot T(p)}$$
 
 Una eficiencia de 0.85 significa que cada procesador está siendo utilizado al 85% de su capacidad potencial.
 
 ### Ley de Amdahl
 
-La fracción serial `f` del programa limita el speedup máximo alcanzable:
+La fracción serial $f$ del programa limita el speedup máximo alcanzable:
 
-```
-S_max = 1 / (f + (1-f)/p)
-```
+$$S_{max} = \frac{1}{f + \frac{1-f}{p}}$$
 
-Si el 10% del código es inherentemente secuencial, el speedup máximo posible es 10×, sin importar cuántos procesadores uses.
+Si el 10% del código es inherentemente secuencial, el speedup máximo posible es $10\times$, sin importar cuántos procesadores uses.
 
 ### Escalabilidad
 

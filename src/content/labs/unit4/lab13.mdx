@@ -319,11 +319,9 @@ El entrenamiento de una red neuronal requiere calcular cómo cada peso contribuy
 
 Para la función Sigmoid, el gradiente tiene una forma elegante:
 
-```
-d/dx sigmoid(x) = sigmoid(x) * (1 - sigmoid(x))
-```
+$$\frac{d}{dx}\sigma(x) = \sigma(x) \cdot (1 - \sigma(x))$$
 
-Si ya tenemos la activación sigmoid guardada, el gradiente es gratuito de calcular, solo necesitamos multiplicaciones element-wise.
+Si ya tenemos la activación $\sigma(x)$ guardada, el gradiente es gratuito de calcular, solo necesitamos multiplicaciones element-wise.
 
 ## Ejercicio 3: Gradiente de Sigmoid en CUDA
 
