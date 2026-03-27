@@ -1,0 +1,130 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { Shield, Bot, Clock, UserCheck, Heart } from "lucide-astro";
+---
+
+<BaseLayout title="Políticas del Curso">
+  <div class="prose dark:prose-invert max-w-none">
+    <h1 class="text-2xl font-semibold mb-6">Políticas del Curso</h1>
+
+    <div class="space-y-8">
+      <section>
+        <div class="flex items-center gap-3 mb-4">
+          <Shield class="w-5 h-5 text-zinc-500 dark:text-zinc-400 flex-shrink-0" />
+          <h2 class="text-lg font-medium mt-0 mb-0">Integridad Académica</h2>
+        </div>
+        <div class="bg-white dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded p-5 space-y-3">
+          <p class="text-sm text-zinc-600 dark:text-zinc-300 mt-0 mb-0">
+            Todo trabajo entregado debe ser propio, en concordancia con el Código de Honor de la UNMSM. El plagio académico en cualquier forma no será tolerado.
+          </p>
+          <p class="text-sm font-medium mt-0 mb-1">Constituye plagio en código:</p>
+          <ul class="list-disc list-inside text-sm space-y-1 mt-0 mb-0">
+            <li class="text-zinc-600 dark:text-zinc-300">Copiar código de compañeros o de internet sin citar la fuente</li>
+            <li class="text-zinc-600 dark:text-zinc-300">Entregar código generado por IA como trabajo propio sin citarlo</li>
+            <li class="text-zinc-600 dark:text-zinc-300">Modificar superficialmente código ajeno para ocultar su origen</li>
+            <li class="text-zinc-600 dark:text-zinc-300">Compartir soluciones con otros estudiantes del mismo grupo</li>
+          </ul>
+          <p class="text-sm mt-3 mb-0">
+            <span class="font-medium">Consecuencias:</span>
+            <span class="text-zinc-600 dark:text-zinc-300"> Nota cero en la evaluación, reporte a la Dirección de Escuela y posible proceso disciplinario según el Estatuto UNMSM.</span>
+          </p>
+        </div>
+      </section>
+
+      <section>
+        <div class="flex items-center gap-3 mb-4">
+          <Bot class="w-5 h-5 text-zinc-500 dark:text-zinc-400 flex-shrink-0" />
+          <h2 class="text-lg font-medium mt-0 mb-0">Política de Uso de IA</h2>
+        </div>
+        <div class="bg-white dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded p-5 space-y-4">
+          <p class="text-sm text-zinc-600 dark:text-zinc-300 mt-0 mb-0">
+            Las herramientas de inteligencia artificial (ChatGPT, GitHub Copilot, Claude, etc.) tienen un rol limitado y definido en este curso.
+          </p>
+
+          <div>
+            <p class="text-sm font-medium text-green-700 dark:text-green-400 mb-2 mt-0">Permitido</p>
+            <ul class="list-disc list-inside text-sm space-y-1 mt-0 mb-0">
+              <li class="text-zinc-600 dark:text-zinc-300">Usar IA para entender conceptos y clarificar dudas teóricas</li>
+              <li class="text-zinc-600 dark:text-zinc-300">Depurar errores de compilación o comportamiento inesperado</li>
+              <li class="text-zinc-600 dark:text-zinc-300">Explorar alternativas de implementación para aprender</li>
+            </ul>
+          </div>
+
+          <div>
+            <p class="text-sm font-medium text-red-700 dark:text-red-400 mb-2 mt-0">No permitido</p>
+            <ul class="list-disc list-inside text-sm space-y-1 mt-0 mb-0">
+              <li class="text-zinc-600 dark:text-zinc-300">Enviar código generado por IA como trabajo propio</li>
+              <li class="text-zinc-600 dark:text-zinc-300">Usar IA para resolver las preguntas del examen parcial o final</li>
+              <li class="text-zinc-600 dark:text-zinc-300">Delegar el análisis de rendimiento o las conclusiones a la IA</li>
+            </ul>
+          </div>
+
+          <div class="border-t border-zinc-200 dark:border-zinc-700 pt-3">
+            <p class="text-sm mt-0 mb-0">
+              <span class="font-medium">Citación obligatoria:</span>
+              <span class="text-zinc-600 dark:text-zinc-300"> Cuando uses IA como apoyo, debes indicarlo explícitamente en tu entrega (ej. "Usé ChatGPT para entender la diferencia entre MPI_Send bloqueante y no bloqueante"). Toda entrega debe ser explicable por el estudiante en persona si se le solicita.</span>
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="flex items-center gap-3 mb-4">
+          <Clock class="w-5 h-5 text-zinc-500 dark:text-zinc-400 flex-shrink-0" />
+          <h2 class="text-lg font-medium mt-0 mb-0">Política de Entregas Tardías</h2>
+        </div>
+        <div class="bg-white dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded p-5 space-y-3">
+          <div class="grid gap-3 md:grid-cols-3">
+            <div class="border border-zinc-200 dark:border-zinc-700 rounded p-3 text-center">
+              <p class="text-sm font-medium mt-0 mb-1">1 día de retraso</p>
+              <p class="text-2xl font-bold text-yellow-600 dark:text-yellow-400 mt-0 mb-1">-10%</p>
+              <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-0 mb-0">de la nota obtenida</p>
+            </div>
+            <div class="border border-zinc-200 dark:border-zinc-700 rounded p-3 text-center">
+              <p class="text-sm font-medium mt-0 mb-1">2 días de retraso</p>
+              <p class="text-2xl font-bold text-orange-600 dark:text-orange-400 mt-0 mb-1">-20%</p>
+              <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-0 mb-0">de la nota obtenida</p>
+            </div>
+            <div class="border border-zinc-200 dark:border-zinc-700 rounded p-3 text-center">
+              <p class="text-sm font-medium mt-0 mb-1">3 días de retraso</p>
+              <p class="text-2xl font-bold text-orange-700 dark:text-orange-500 mt-0 mb-1">-30%</p>
+              <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-0 mb-0">de la nota obtenida</p>
+            </div>
+          </div>
+          <p class="text-sm text-zinc-600 dark:text-zinc-300 mt-0 mb-0">
+            Después de 3 días de retraso, la entrega recibe nota cero (0). No se aceptan trabajos después del plazo máximo bajo ninguna circunstancia, salvo casos de fuerza mayor comunicados con antelación al docente.
+          </p>
+        </div>
+      </section>
+
+      <section>
+        <div class="flex items-center gap-3 mb-4">
+          <UserCheck class="w-5 h-5 text-zinc-500 dark:text-zinc-400 flex-shrink-0" />
+          <h2 class="text-lg font-medium mt-0 mb-0">Política de Asistencia</h2>
+        </div>
+        <div class="bg-white dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded p-5 space-y-3">
+          <p class="text-sm text-zinc-600 dark:text-zinc-300 mt-0 mb-0">
+            Se requiere un mínimo de <span class="font-medium">70% de asistencia</span> para rendir los exámenes y aprobar el curso, según el Reglamento de Evaluación de la UNMSM.
+          </p>
+          <ul class="list-disc list-inside text-sm space-y-1 mt-0 mb-0">
+            <li class="text-zinc-600 dark:text-zinc-300">3 inasistencias injustificadas acumuladas resultan en la condición de DPI (Desaprobado por Inasistencia)</li>
+            <li class="text-zinc-600 dark:text-zinc-300">Las tardanzas reiteradas (más de 10 minutos) serán contabilizadas como media inasistencia</li>
+            <li class="text-zinc-600 dark:text-zinc-300">Inasistencias por motivos de salud deben ser justificadas con documento médico en un plazo de 48 horas</li>
+          </ul>
+        </div>
+      </section>
+
+      <section>
+        <div class="flex items-center gap-3 mb-4">
+          <Heart class="w-5 h-5 text-zinc-500 dark:text-zinc-400 flex-shrink-0" />
+          <h2 class="text-lg font-medium mt-0 mb-0">Acomodaciones</h2>
+        </div>
+        <div class="bg-white dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded p-5">
+          <p class="text-sm text-zinc-600 dark:text-zinc-300 mt-0 mb-0">
+            Si tienes alguna condición o necesidad especial que requiera acomodaciones académicas (discapacidad visual, auditiva, motora, condición de salud mental u otra), contacta al docente principal al inicio del semestre para coordinar los ajustes necesarios de manera confidencial. Nos comprometemos a garantizar condiciones equitativas para todos los estudiantes.
+          </p>
+        </div>
+      </section>
+    </div>
+  </div>
+</BaseLayout>

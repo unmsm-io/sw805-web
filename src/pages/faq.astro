@@ -1,0 +1,125 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { HelpCircle, ChevronDown } from "lucide-astro";
+
+const faqs = [
+  {
+    id: "dev-setup",
+    question: "¿Cómo configuro mi entorno de desarrollo?",
+    answer:
+      "Consulta la guía de instalación disponible en la sección de recursos del curso. Encontrarás instrucciones detalladas para instalar GCC/G++, OpenMPI y el CUDA Toolkit según tu sistema operativo.",
+    link: { label: "Ver guía de instalación", href: "/labs/unit1/setup" },
+  },
+  {
+    id: "gpu",
+    question: "¿Necesito una GPU NVIDIA para el curso?",
+    answer:
+      "No es obligatorio tener una GPU NVIDIA personal. Puedes usar Google Colab, que ofrece acceso gratuito a GPUs en la nube. Adicionalmente, el laboratorio de la FISI cuenta con equipos con GPU disponibles para los estudiantes del curso.",
+    link: null,
+  },
+  {
+    id: "lab-submission",
+    question: "¿Cómo entrego los laboratorios?",
+    answer:
+      "Los laboratorios se entregan mediante un repositorio en GitHub. Sigue la convención de nombres indicada en cada enunciado (ej. lab01-apellido-nombre). El repositorio debe estar organizado con una carpeta por laboratorio y un README explicando cómo compilar y ejecutar el código.",
+    link: null,
+  },
+  {
+    id: "ai-tools",
+    question: "¿Puedo usar IA para los laboratorios?",
+    answer:
+      "El uso de herramientas de IA está permitido con restricciones. Puedes usar IA para entender conceptos y depurar errores, pero no para generar el código que entregas. Consulta la política completa para más detalles.",
+    link: { label: "Ver política de uso de IA", href: "/policies" },
+  },
+  {
+    id: "project-groups",
+    question: "¿Cómo se forma el grupo del proyecto final?",
+    answer:
+      "Los grupos del proyecto final son de 2 a 3 integrantes, de formación libre. Cada grupo debe registrar sus integrantes y el tema propuesto en el formulario habilitado antes de la semana 10. No se permiten grupos de 1 persona salvo justificación excepcional.",
+    link: null,
+  },
+  {
+    id: "materials",
+    question: "¿Dónde encuentro los materiales del curso?",
+    answer:
+      "Los materiales están disponibles en dos lugares: la sección Recursos de este sitio web y el repositorio oficial del curso en GitHub. El repositorio incluye el código fuente de los laboratorios, ejemplos vistos en clase y ejercicios adicionales.",
+    link: {
+      label: "Ver recursos del curso",
+      href: "/resources",
+    },
+  },
+  {
+    id: "absence",
+    question: "¿Qué hacer si no puedo asistir a una clase?",
+    answer:
+      "Comunica tu inasistencia al docente con la mayor anticipación posible. Eres responsable de recuperar el contenido revisado en esa sesión. Recuerda que más de 3 inasistencias injustificadas resultan en condición DPI. Consulta la política de asistencia para más información.",
+    link: { label: "Ver política de asistencia", href: "/policies" },
+  },
+  {
+    id: "prerequisites",
+    question: "¿Cuáles son los prerrequisitos del curso?",
+    answer:
+      "El prerrequisito obligatorio es haber aprobado el curso Sistemas Operativos (20W0804). Se asume conocimiento sólido de programación en C/C++, manejo de procesos e hilos a nivel de sistema operativo, y fundamentos de arquitectura de computadoras.",
+    link: null,
+  },
+];
+---
+
+<BaseLayout title="Preguntas Frecuentes">
+  <div class="prose dark:prose-invert max-w-none">
+    <h1 class="text-2xl font-semibold mb-6">Preguntas Frecuentes</h1>
+
+    <div class="space-y-3">
+      {
+        faqs.map((faq) => (
+          <div
+            class="bg-white dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded overflow-hidden"
+            data-faq-item={faq.id}
+          >
+            <button
+              type="button"
+              class="w-full flex items-center justify-between gap-4 p-4 text-left hover:bg-zinc-50 dark:hover:bg-zinc-700/30 transition-colors"
+              data-faq-trigger={faq.id}
+            >
+              <div class="flex items-center gap-3">
+                <HelpCircle class="w-4 h-4 text-zinc-400 dark:text-zinc-500 flex-shrink-0" />
+                <span class="text-sm font-medium">{faq.question}</span>
+              </div>
+              <ChevronDown class="w-4 h-4 text-zinc-400 dark:text-zinc-500 flex-shrink-0 transform transition-transform" />
+            </button>
+            <div class="hidden px-4 pb-4 pl-11" data-faq-content={faq.id}>
+              <p class="text-sm text-zinc-600 dark:text-zinc-300 mt-0 mb-0">
+                {faq.answer}
+              </p>
+              {faq.link && (
+                <a
+                  href={faq.link.href}
+                  class="inline-flex items-center gap-1.5 text-sm text-blue-600 dark:text-blue-400 hover:underline mt-3"
+                >
+                  {faq.link.label}
+                </a>
+              )}
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  const triggers = document.querySelectorAll("[data-faq-trigger]");
+
+  triggers.forEach((trigger) => {
+    trigger.addEventListener("click", () => {
+      const id = trigger.getAttribute("data-faq-trigger");
+      const content = document.querySelector(`[data-faq-content="${id}"]`);
+      const icon = trigger.querySelector("svg:last-child");
+
+      if (content && icon) {
+        const isOpen = content.classList.toggle("hidden") === false;
+        icon.classList.toggle("rotate-180", isOpen);
+      }
+    });
+  });
+</script>

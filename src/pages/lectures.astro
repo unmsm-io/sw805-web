@@ -1,0 +1,74 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { COURSE_CONFIG } from "../config/course";
+import { Video, FileText, BookOpen, Presentation } from "lucide-astro";
+---
+
+<BaseLayout title="Clases">
+  <div class="prose dark:prose-invert max-w-none">
+    <h1 class="text-2xl font-semibold mb-6">Clases</h1>
+
+    <div class="space-y-10">
+      {
+        COURSE_CONFIG.modules.map((module) => (
+          <section>
+            <div class="flex items-center gap-3 mb-5">
+              <BookOpen class="w-5 h-5 text-zinc-500 dark:text-zinc-400 flex-shrink-0" />
+              <div>
+                <h2 class="text-lg font-medium mt-0 mb-0">{module.title}</h2>
+                <p class="text-sm text-zinc-500 dark:text-zinc-400 mt-0 mb-0">
+                  Semanas {module.weeks}
+                </p>
+              </div>
+            </div>
+
+            <div class="space-y-3">
+              {module.content.map((week) => (
+                <div class="bg-white dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded p-4">
+                  <div class="flex items-start justify-between gap-4">
+                    <div class="flex items-start gap-4 flex-1 min-w-0">
+                      <div class="flex-shrink-0 w-10 h-10 rounded bg-zinc-100 dark:bg-zinc-700/60 flex items-center justify-center">
+                        <span class="text-sm font-mono font-medium text-zinc-600 dark:text-zinc-300">
+                          {week.week}
+                        </span>
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <h3 class="text-base font-medium mt-0 mb-2">{week.topic}</h3>
+                        <ul class="list-disc list-inside text-sm space-y-0.5 mt-0 mb-3">
+                          {week.subtopics.map((sub) => (
+                            <li class="text-zinc-600 dark:text-zinc-300">{sub}</li>
+                          ))}
+                        </ul>
+                        <div class="flex flex-wrap gap-3">
+                          <div class="inline-flex items-center gap-1.5 text-xs text-zinc-400 dark:text-zinc-500">
+                            <Presentation class="w-3.5 h-3.5" />
+                            <span>Slides: Por publicar</span>
+                          </div>
+                          <div class="inline-flex items-center gap-1.5 text-xs text-zinc-400 dark:text-zinc-500">
+                            <Video class="w-3.5 h-3.5" />
+                            <span>Video: Por publicar</span>
+                          </div>
+                          {week.lab && (
+                            <div class="inline-flex items-center gap-1.5 text-xs text-zinc-400 dark:text-zinc-500">
+                              <FileText class="w-3.5 h-3.5" />
+                              <span>{week.lab.title}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div class="flex-shrink-0">
+                      <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-zinc-100 dark:bg-zinc-700 text-zinc-500 dark:text-zinc-400">
+                        Próximamente
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        ))
+      }
+    </div>
+  </div>
+</BaseLayout>
