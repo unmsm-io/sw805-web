@@ -1,0 +1,354 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Hero from "../../components/home/Hero.astro";
+import { COURSE_CONFIG } from "../../config/course";
+import { getTranslations } from "../../i18n/translations";
+import {
+  Mail,
+  Clock,
+  Book,
+  Calendar,
+  GraduationCap,
+  MapPin,
+  FileText,
+  ExternalLink,
+} from "lucide-astro";
+
+const locale = "en";
+const t = getTranslations(locale);
+
+const courseBasics = [
+  { label: "Code", value: COURSE_CONFIG.code },
+  { label: "Name", value: COURSE_CONFIG.name },
+  { label: "Type", value: COURSE_CONFIG.type },
+  { label: "Area", value: COURSE_CONFIG.area },
+  { label: "Cycle", value: COURSE_CONFIG.cycle },
+  { label: "Modality", value: COURSE_CONFIG.modality },
+];
+
+const courseDetails = [
+  { label: t.common.semester, value: COURSE_CONFIG.semester },
+  { label: t.common.credits, value: COURSE_CONFIG.credits },
+  {
+    label: t.common.theory,
+    value: `${COURSE_CONFIG.weeklyHours.theory} ${t.syllabus.hoursPerWeek}`,
+  },
+  {
+    label: "Practice",
+    value: `${COURSE_CONFIG.weeklyHours.practice} ${t.syllabus.hoursPerWeek}`,
+  },
+  {
+    label: t.common.lab,
+    value: `${COURSE_CONFIG.weeklyHours.laboratory} ${t.syllabus.hoursPerWeek}`,
+  },
+  { label: "Duration", value: `${COURSE_CONFIG.weeks} ${t.syllabus.duration}` },
+];
+
+const mainInstructor = COURSE_CONFIG.instructors[0];
+const teachingAssistant = COURSE_CONFIG.instructors[1];
+
+const moduleTopics = COURSE_CONFIG.modules.map((module) => ({
+  ...module,
+  topics: [...new Set(module.content.map((week) => week.topic))],
+}));
+---
+
+<BaseLayout title={t.syllabus.title} locale={locale}>
+  <Hero />
+  <main class="prose dark:prose-invert max-w-6xl mx-auto p-6">
+    <div class="mb-8 flex items-center justify-between">
+      <h1 class="text-2xl font-bold mt-0 mb-0">{t.syllabus.title}</h1>
+      <a
+        href={COURSE_CONFIG.syllabusUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:underline"
+      >
+        <FileText class="w-4 h-4" />
+        {t.syllabus.viewOfficial}
+        <ExternalLink class="w-3 h-3" />
+      </a>
+    </div>
+
+    <section>
+      <h2 class="text-lg font-medium mt-0 mb-4">{t.syllabus.courseInfo}</h2>
+      <div class="grid gap-4 md:grid-cols-2">
+        {
+          courseBasics.map((item) => (
+            <div class="bg-white dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded p-4">
+              <dt class="text-sm text-zinc-500 dark:text-zinc-400 mt-0">
+                {item.label}
+              </dt>
+              <dd class="text-base font-medium mt-1 mb-0">{item.value}</dd>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <section class="mt-8">
+      <h2 class="text-lg font-medium mb-4">{t.syllabus.courseDetails}</h2>
+      <div class="grid gap-4 md:grid-cols-2">
+        {
+          courseDetails.map((item) => (
+            <div class="bg-white dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded p-4">
+              <dt class="text-sm text-zinc-500 dark:text-zinc-400 mt-0">
+                {item.label}
+              </dt>
+              <dd class="text-base font-medium mt-1 mb-0">{item.value}</dd>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <section class="mt-8">
+      <h2 class="text-lg font-medium mb-4">{t.syllabus.staff}</h2>
+      <div class="grid gap-4 md:grid-cols-2">
+        <div
+          class="bg-white dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded p-4"
+        >
+          <h3 class="text-base font-medium mt-0 mb-3">
+            {mainInstructor.name}
+            <span
+              class="text-sm font-normal text-zinc-500 dark:text-zinc-400 block"
+            >
+              {mainInstructor.title}
+            </span>
+          </h3>
+          <div class="space-y-2 text-sm">
+            <a
+              href={`mailto:${mainInstructor.email}`}
+              class="items-center inline-flex gap-2 text-blue-600 dark:text-blue-400 hover:underline"
+            >
+              <Mail class="w-3.5 h-3.5" />
+              {mainInstructor.email}
+            </a>
+            {
+              mainInstructor.officeHours && (
+                <div class="flex items-center gap-2 text-zinc-600 dark:text-zinc-300">
+                  <Clock class="w-3.5 h-3.5" />
+                  {mainInstructor.officeHours}
+                </div>
+              )
+            }
+            {
+              mainInstructor.education && (
+                <div class="flex items-center gap-2 text-zinc-600 dark:text-zinc-300">
+                  <GraduationCap class="w-3.5 h-3.5" />
+                  {mainInstructor.education}
+                </div>
+              )
+            }
+          </div>
+        </div>
+
+        <div
+          class="bg-white dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded p-4"
+        >
+          <h3 class="text-base font-medium mt-0 mb-3">
+            {teachingAssistant.name}
+            <span
+              class="text-sm font-normal text-zinc-500 dark:text-zinc-400 block"
+            >
+              {teachingAssistant.title}
+            </span>
+          </h3>
+          <div class="space-y-2 text-sm">
+            <a
+              href={`mailto:${teachingAssistant.email}`}
+              class="items-center inline-flex gap-2 text-blue-600 dark:text-blue-400 hover:underline"
+            >
+              <Mail class="w-3.5 h-3.5" />
+              {teachingAssistant.email}
+            </a>
+            {
+              teachingAssistant.officeHours && (
+                <div class="flex items-center gap-2 text-zinc-600 dark:text-zinc-300">
+                  <Clock class="w-3.5 h-3.5" />
+                  {teachingAssistant.officeHours}
+                </div>
+              )
+            }
+            {
+              teachingAssistant.education && (
+                <div class="flex items-center gap-2 text-zinc-600 dark:text-zinc-300">
+                  <GraduationCap class="w-3.5 h-3.5" />
+                  {teachingAssistant.education}
+                </div>
+              )
+            }
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="mt-8">
+      <h2 class="text-lg font-medium mb-4">{t.syllabus.prerequisites}</h2>
+      <div class="grid gap-4">
+        {
+          COURSE_CONFIG.prerequisites.map((prereq) => (
+            <div class="bg-white dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded p-4">
+              <p class="font-medium mt-0 mb-2">
+                {prereq.code}: {prereq.name}
+              </p>
+              <p class="text-sm text-zinc-600 dark:text-zinc-300 m-0">
+                {prereq.description}
+              </p>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <section class="mt-8">
+      <h2 class="text-lg font-medium mb-4">{t.syllabus.learningUnits}</h2>
+      <div class="space-y-6">
+        {
+          moduleTopics.map((module) => (
+            <div class="bg-white dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded p-4">
+              <h3 class="text-base font-medium mt-0 mb-2">{module.title}</h3>
+              <p class="text-sm text-zinc-500 dark:text-zinc-400 mb-3">
+                {t.syllabus.weeks}: {module.weeks}
+              </p>
+              <ul class="list-disc list-inside text-sm space-y-1 mt-0 mb-0">
+                {module.topics.map((topic) => (
+                  <li class="text-zinc-600 dark:text-zinc-300">{topic}</li>
+                ))}
+              </ul>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <section class="mt-8">
+      <h2 class="text-lg font-medium mb-4">{t.syllabus.gradingSystem}</h2>
+      <div class="grid gap-6 md:grid-cols-3">
+        <div
+          class="bg-white dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded p-4"
+        >
+          <h3 class="text-base font-medium mt-0 mb-3">
+            Grade 1 <span
+              class="font-mono text-sm text-zinc-500 dark:text-zinc-400"
+              >(N1)</span
+            >
+          </h3>
+          <ul class="list-none p-0 m-0 space-y-2">
+            {
+              Object.entries(COURSE_CONFIG.grading.n1).map(([key, value]) => (
+                <li class="flex justify-between text-sm">
+                  <span class="text-zinc-600 dark:text-zinc-300">
+                    {key.charAt(0).toUpperCase() + key.slice(1)}
+                  </span>
+                  <span class="font-medium">{value}%</span>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+        <div
+          class="bg-white dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded p-4"
+        >
+          <h3 class="text-base font-medium mt-0 mb-3">
+            Grade 2 <span
+              class="font-mono text-sm text-zinc-500 dark:text-zinc-400"
+              >(N2)</span
+            >
+          </h3>
+          <ul class="list-none p-0 m-0 space-y-2">
+            {
+              Object.entries(COURSE_CONFIG.grading.n2).map(([key, value]) => (
+                <li class="flex justify-between text-sm">
+                  <span class="text-zinc-600 dark:text-zinc-300">
+                    {key.charAt(0).toUpperCase() + key.slice(1)}
+                  </span>
+                  <span class="font-medium">{value}%</span>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+        <div
+          class="bg-white dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded p-4"
+        >
+          <h3 class="text-base font-medium mt-0 mb-3">
+            Grade 3 <span
+              class="font-mono text-sm text-zinc-500 dark:text-zinc-400"
+              >(N3)</span
+            >
+          </h3>
+          <ul class="list-none p-0 m-0 space-y-2">
+            {
+              Object.entries(COURSE_CONFIG.grading.n3).map(([key, value]) => (
+                <li class="flex justify-between text-sm">
+                  <span class="text-zinc-600 dark:text-zinc-300">
+                    {key.charAt(0).toUpperCase() + key.slice(1)}
+                  </span>
+                  <span class="font-medium">{value}%</span>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="mt-8">
+      <h2 class="text-lg font-medium mb-4">{t.syllabus.bibliography}</h2>
+      <div class="space-y-4">
+        <div
+          class="bg-white dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded p-4"
+        >
+          <div class="flex gap-4">
+            <img
+              src={COURSE_CONFIG.resources.mainTextbook.coverImage}
+              alt="Main textbook cover"
+              class="w-24 h-auto !my-0 object-cover rounded"
+            />
+            <div class="text-sm space-y-1">
+              <p class="m-0">
+                <span class="font-medium"
+                  >{COURSE_CONFIG.resources.mainTextbook.author}</span
+                >
+                {" "}({COURSE_CONFIG.resources.mainTextbook.year}).{" "}
+                <span class="italic"
+                  >{COURSE_CONFIG.resources.mainTextbook.title}</span
+                >.{" "}
+                {COURSE_CONFIG.resources.mainTextbook.publisher}.
+              </p>
+              <p class="text-zinc-500 dark:text-zinc-400 m-0">
+                ISBN: {COURSE_CONFIG.resources.mainTextbook.isbn}
+              </p>
+              <p class="text-zinc-500 dark:text-zinc-400 m-0">
+                Edition: {COURSE_CONFIG.resources.mainTextbook.edition}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-3">
+          {
+            COURSE_CONFIG.resources.additionalResources.map((resource) => (
+              <div class="bg-white dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded p-4">
+                <div class="text-sm space-y-1">
+                  <p class="m-0">
+                    <span class="font-medium">{resource.author}</span> (
+                    {resource.year}).{" "}
+                    <span class="italic">{resource.title}</span>.{" "}
+                    {resource.publisher}.
+                  </p>
+                  {"isbn" in resource && (
+                    <p class="text-zinc-500 dark:text-zinc-400 m-0">
+                      ISBN: {resource.isbn}
+                    </p>
+                  )}
+                </div>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+  </main>
+</BaseLayout>

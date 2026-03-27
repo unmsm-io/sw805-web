@@ -1,0 +1,234 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { COURSE_CONFIG } from "../../config/course";
+import { getTranslations } from "../../i18n/translations";
+import {
+  Mail,
+  Clock,
+  ExternalLink,
+  GraduationCap,
+  Github,
+  Linkedin,
+} from "lucide-astro";
+
+const locale = "en";
+const t = getTranslations(locale);
+
+const { instructors } = COURSE_CONFIG;
+const [mainInstructor, teachingAssistant] = instructors;
+---
+
+<BaseLayout title={t.staff.title} locale={locale}>
+  <div class="prose dark:prose-invert max-w-7xl mx-auto">
+    <div class="flex flex-col gap-8">
+      <div>
+        <h1 class="text-2xl font-semibold mb-2 tracking-tight">
+          {t.staff.title}
+        </h1>
+        <p class="mt-6 text-zinc-600 dark:text-zinc-400">
+          {t.staff.subtitle}
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="group relative">
+          <div
+            class="absolute -inset-px border border-transparent opacity-0 transition duration-300 group-hover:opacity-100"
+          >
+          </div>
+          <div
+            class="relative bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6"
+          >
+            <div class="flex flex-col gap-6">
+              <div class="flex items-start gap-4">
+                <img
+                  src={mainInstructor.image}
+                  alt={mainInstructor.name}
+                  class="w-24 h-24 object-cover flex-shrink-0"
+                  loading="lazy"
+                />
+                <div>
+                  <h2 class="text-xl font-semibold tracking-tight">
+                    {mainInstructor.name}
+                    <span
+                      class="block text-sm font-normal text-zinc-600 dark:text-zinc-400 mt-1"
+                    >
+                      {t.staff.mainInstructorRole}
+                    </span>
+                  </h2>
+                  <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+                    {mainInstructor.specialization}
+                  </p>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-3">
+                  <h3
+                    class="text-sm font-medium text-zinc-900 dark:text-zinc-100"
+                  >
+                    {t.staff.contactInfo}
+                  </h3>
+                  <div class="space-y-2">
+                    <a
+                      href={`mailto:${mainInstructor.email}`}
+                      class="inline-flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 transition-colors"
+                    >
+                      <Mail class="w-4 h-4 flex-shrink-0" />
+                      <span>{mainInstructor.email}</span>
+                    </a>
+                    <div
+                      class="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400"
+                    >
+                      <Clock class="w-4 h-4 flex-shrink-0" />
+                      <span>{mainInstructor.officeHours}</span>
+                    </div>
+                    <div
+                      class="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400"
+                    >
+                      <GraduationCap class="w-4 h-4 flex-shrink-0" />
+                      <span>{mainInstructor.education}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="space-y-3">
+                  <h3
+                    class="text-sm font-medium text-zinc-900 dark:text-zinc-100"
+                  >
+                    {t.staff.links}
+                  </h3>
+                  <div class="space-y-2">
+                    <a
+                      href={mainInstructor.socialMedia.github}
+                      class="inline-flex items-center gap-2 text-sm text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200 transition-colors group/link w-full"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Github class="w-4 h-4 flex-shrink-0" />
+                      <span>GitHub</span>
+                      <ExternalLink
+                        class="w-3.5 h-3.5 opacity-0 group-hover/link:opacity-100 transition-opacity"
+                      />
+                    </a>
+                    <a
+                      href={mainInstructor.socialMedia.linkedin}
+                      class="inline-flex items-center gap-2 text-sm text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200 transition-colors group/link w-full"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Linkedin class="w-4 h-4 flex-shrink-0" />
+                      <span>LinkedIn</span>
+                      <ExternalLink
+                        class="w-3.5 h-3.5 opacity-0 group-hover/link:opacity-100 transition-opacity"
+                      />
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="group relative">
+          <div
+            class="absolute -inset-px border border-transparent opacity-0 transition duration-300 group-hover:opacity-100"
+          >
+          </div>
+          <div
+            class="relative bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6"
+          >
+            <div class="flex flex-col gap-6">
+              <div class="flex items-start gap-4">
+                <img
+                  src={teachingAssistant.image}
+                  alt={teachingAssistant.name}
+                  class="w-24 h-24 object-cover flex-shrink-0"
+                  loading="lazy"
+                />
+                <div>
+                  <h2 class="text-xl font-semibold tracking-tight">
+                    {teachingAssistant.name}
+                    <span
+                      class="block text-sm font-normal text-zinc-600 dark:text-zinc-400 mt-1"
+                    >
+                      {t.staff.taRole}
+                    </span>
+                  </h2>
+                  <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+                    {teachingAssistant.specialization}
+                  </p>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-3">
+                  <h3
+                    class="text-sm font-medium text-zinc-900 dark:text-zinc-100"
+                  >
+                    {t.staff.contactInfo}
+                  </h3>
+                  <div class="space-y-2">
+                    <a
+                      href={`mailto:${teachingAssistant.email}`}
+                      class="inline-flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 transition-colors"
+                    >
+                      <Mail class="w-4 h-4 flex-shrink-0" />
+                      <span>{teachingAssistant.email}</span>
+                    </a>
+                    <div
+                      class="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400"
+                    >
+                      <Clock class="w-4 h-4 flex-shrink-0" />
+                      <span>{teachingAssistant.officeHours}</span>
+                    </div>
+                    <div
+                      class="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400"
+                    >
+                      <GraduationCap class="w-4 h-4 flex-shrink-0" />
+                      <span>{teachingAssistant.education}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="space-y-3">
+                  <h3
+                    class="text-sm font-medium text-zinc-900 dark:text-zinc-100"
+                  >
+                    {t.staff.links}
+                  </h3>
+                  <div class="space-y-2">
+                    <a
+                      href={teachingAssistant.socialMedia.github}
+                      class="inline-flex items-center gap-2 text-sm text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200 transition-colors group/link w-full"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Github class="w-4 h-4 flex-shrink-0" />
+                      <span>GitHub</span>
+                      <ExternalLink
+                        class="w-3.5 h-3.5 opacity-0 group-hover/link:opacity-100 transition-opacity"
+                      />
+                    </a>
+                    <a
+                      href={teachingAssistant.socialMedia.linkedin}
+                      class="inline-flex items-center gap-2 text-sm text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200 transition-colors group/link w-full"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Linkedin class="w-4 h-4 flex-shrink-0" />
+                      <span>LinkedIn</span>
+                      <ExternalLink
+                        class="w-3.5 h-3.5 opacity-0 group-hover/link:opacity-100 transition-opacity"
+                      />
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>

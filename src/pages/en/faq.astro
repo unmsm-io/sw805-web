@@ -1,0 +1,129 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getTranslations } from "../../i18n/translations";
+import { HelpCircle, ChevronDown } from "lucide-astro";
+
+const locale = "en";
+const t = getTranslations(locale);
+
+const faqs = [
+  {
+    id: "dev-setup",
+    question: "How do I set up my development environment?",
+    answer:
+      "Check the installation guide available in the course resources section. You'll find detailed instructions for installing GCC/G++, OpenMPI, and the CUDA Toolkit for your operating system.",
+    link: { label: "View installation guide", href: "/labs/unit1/setup" },
+  },
+  {
+    id: "gpu",
+    question: "Do I need an NVIDIA GPU for the course?",
+    answer:
+      "You don't need a personal NVIDIA GPU. You can use Google Colab, which offers free cloud GPU access. Additionally, the FISI lab has GPU-equipped computers available for course students.",
+    link: null,
+  },
+  {
+    id: "lab-submission",
+    question: "How do I submit labs?",
+    answer:
+      "Labs are submitted via a GitHub repository. Follow the naming convention specified in each assignment (e.g., lab01-lastname-firstname). The repository must be organized with one folder per lab and a README explaining how to compile and run the code.",
+    link: null,
+  },
+  {
+    id: "ai-tools",
+    question: "Can I use AI for labs?",
+    answer:
+      "AI tool usage is allowed with restrictions. You may use AI to understand concepts and debug errors, but not to generate the code you submit. Check the full policy for details.",
+    link: { label: "View AI usage policy", href: "/en/policies" },
+  },
+  {
+    id: "project-groups",
+    question: "How are final project groups formed?",
+    answer:
+      "Final project groups consist of 2 to 3 members, formed freely. Each group must register their members and proposed topic in the enabled form before week 10. Single-person groups are not permitted without exceptional justification.",
+    link: null,
+  },
+  {
+    id: "materials",
+    question: "Where can I find course materials?",
+    answer:
+      "Materials are available in two places: the Resources section of this website and the official course repository on GitHub. The repository includes lab source code, in-class examples, and additional exercises.",
+    link: {
+      label: "View course resources",
+      href: "/en/resources",
+    },
+  },
+  {
+    id: "absence",
+    question: "What should I do if I can't attend a class?",
+    answer:
+      "Notify the instructor as early as possible. You are responsible for catching up on the content covered in that session. Remember that more than 3 unexcused absences result in DPI status. Check the attendance policy for more information.",
+    link: { label: "View attendance policy", href: "/en/policies" },
+  },
+  {
+    id: "prerequisites",
+    question: "What are the course prerequisites?",
+    answer:
+      "The mandatory prerequisite is having passed the Operating Systems course (20W0804). Solid knowledge of C/C++ programming, process and thread management at the OS level, and fundamentals of computer architecture are assumed.",
+    link: null,
+  },
+];
+---
+
+<BaseLayout title={t.faq.title} locale={locale}>
+  <div class="prose dark:prose-invert max-w-none">
+    <h1 class="text-2xl font-semibold mb-6">{t.faq.title}</h1>
+
+    <div class="space-y-3">
+      {
+        faqs.map((faq) => (
+          <div
+            class="bg-white dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded overflow-hidden"
+            data-faq-item={faq.id}
+          >
+            <button
+              type="button"
+              class="w-full flex items-center justify-between gap-4 p-4 text-left hover:bg-zinc-50 dark:hover:bg-zinc-700/30 transition-colors"
+              data-faq-trigger={faq.id}
+            >
+              <div class="flex items-center gap-3">
+                <HelpCircle class="w-4 h-4 text-zinc-400 dark:text-zinc-500 flex-shrink-0" />
+                <span class="text-sm font-medium">{faq.question}</span>
+              </div>
+              <ChevronDown class="w-4 h-4 text-zinc-400 dark:text-zinc-500 flex-shrink-0 transform transition-transform" />
+            </button>
+            <div class="hidden px-4 pb-4 pl-11" data-faq-content={faq.id}>
+              <p class="text-sm text-zinc-600 dark:text-zinc-300 mt-0 mb-0">
+                {faq.answer}
+              </p>
+              {faq.link && (
+                <a
+                  href={faq.link.href}
+                  class="inline-flex items-center gap-1.5 text-sm text-blue-600 dark:text-blue-400 hover:underline mt-3"
+                >
+                  {faq.link.label}
+                </a>
+              )}
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  const triggers = document.querySelectorAll("[data-faq-trigger]");
+
+  triggers.forEach((trigger) => {
+    trigger.addEventListener("click", () => {
+      const id = trigger.getAttribute("data-faq-trigger");
+      const content = document.querySelector(`[data-faq-content="${id}"]`);
+      const icon = trigger.querySelector("svg:last-child");
+
+      if (content && icon) {
+        const isOpen = content.classList.toggle("hidden") === false;
+        icon.classList.toggle("rotate-180", isOpen);
+      }
+    });
+  });
+</script>

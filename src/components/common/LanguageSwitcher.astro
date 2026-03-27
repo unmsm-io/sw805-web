@@ -1,0 +1,46 @@
+---
+import { getLocaleFromUrl } from "../../i18n/translations";
+
+const currentLocale = getLocaleFromUrl(Astro.url);
+const currentPath = Astro.url.pathname;
+
+function getAlternatePath(path: string, currentLocale: string): string {
+  if (currentLocale === "en") {
+    return path.replace(/^\/en/, "") || "/";
+  } else {
+    const enPath = `/en${path === "/" ? "" : path}`;
+    return enPath;
+  }
+}
+
+const alternatePath = getAlternatePath(currentPath, currentLocale);
+const isEs = currentLocale === "es";
+---
+
+<div class="flex items-center gap-1 text-xs font-medium">
+  <a
+    href={isEs ? currentPath : alternatePath}
+    class:list={[
+      "px-1.5 py-0.5 rounded transition-colors",
+      isEs
+        ? "text-blue-600 dark:text-blue-400 font-semibold"
+        : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200",
+    ]}
+    aria-current={isEs ? "true" : undefined}
+  >
+    ES
+  </a>
+  <span class="text-zinc-300 dark:text-zinc-600">|</span>
+  <a
+    href={!isEs ? currentPath : alternatePath}
+    class:list={[
+      "px-1.5 py-0.5 rounded transition-colors",
+      !isEs
+        ? "text-blue-600 dark:text-blue-400 font-semibold"
+        : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200",
+    ]}
+    aria-current={!isEs ? "true" : undefined}
+  >
+    EN
+  </a>
+</div>

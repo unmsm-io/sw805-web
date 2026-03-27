@@ -1,5 +1,7 @@
 ---
 import { COURSE_CONFIG, type WeekContent } from "../../config/course";
+import { getTranslations } from "../../i18n/translations";
+import LanguageSwitcher from "./LanguageSwitcher.astro";
 import {
   FileText,
   Calendar,
@@ -9,7 +11,6 @@ import {
   Users,
   ChevronDown,
   Github,
-  Menu,
   Home,
   X,
   Presentation,
@@ -17,20 +18,27 @@ import {
   HelpCircle,
 } from "lucide-astro";
 
+interface Props {
+  locale?: "es" | "en";
+}
+
+const { locale = "es" } = Astro.props;
+const t = getTranslations(locale);
 const currentPath = Astro.url.pathname;
-console.log({ currentPath });
+
+const prefix = locale === "en" ? "/en" : "";
 
 const mainNavigation = [
-  { href: "/", text: "Inicio", icon: Home },
-  { href: "/syllabus", text: "Sílabo", icon: FileText },
-  { href: "/schedule", text: "Cronograma", icon: Calendar },
-  { href: "/lectures", text: "Clases", icon: Presentation },
-  { href: "/labs", text: "Laboratorios", icon: Beaker },
-  { href: "/resources", text: "Recursos", icon: BookOpen },
-  { href: "/project", text: "Proyecto", icon: Rocket },
-  { href: "/policies", text: "Políticas", icon: Shield },
-  { href: "/faq", text: "FAQ", icon: HelpCircle },
-  { href: "/staff", text: "Equipo", icon: Users },
+  { href: `${prefix}/`, text: t.nav.home, icon: Home },
+  { href: `${prefix}/syllabus`, text: t.nav.syllabus, icon: FileText },
+  { href: `${prefix}/schedule`, text: t.nav.schedule, icon: Calendar },
+  { href: `${prefix}/lectures`, text: t.nav.lectures, icon: Presentation },
+  { href: `${prefix}/labs`, text: t.nav.labs, icon: Beaker },
+  { href: `${prefix}/resources`, text: t.nav.resources, icon: BookOpen },
+  { href: `${prefix}/project`, text: t.nav.project, icon: Rocket },
+  { href: `${prefix}/policies`, text: t.nav.policies, icon: Shield },
+  { href: `${prefix}/faq`, text: t.nav.faq, icon: HelpCircle },
+  { href: `${prefix}/staff`, text: t.nav.staff, icon: Users },
 ];
 
 const modules = COURSE_CONFIG.modules.map((module) => ({
@@ -44,7 +52,7 @@ const modules = COURSE_CONFIG.modules.map((module) => ({
     .map((week) => ({
       id: week.lab.id,
       title: week.lab.title,
-      href: `/labs/${module.id}/${week.lab.id}`,
+      href: `${prefix}/labs/${module.id}/${week.lab.id}`,
       dueDate: week.lab.dueDate,
     })),
 }));
@@ -58,7 +66,7 @@ const modules = COURSE_CONFIG.modules.map((module) => ({
     <div
       class="flex items-center justify-between h-16 px-4 border-b border-zinc-200 dark:border-zinc-700"
     >
-      <a href="/" class="flex items-center space-x-2">
+      <a href={`${prefix}/`} class="flex items-center space-x-2">
         <span class="text-xl font-mono font-bold text-zinc-900 dark:text-white">
           {COURSE_CONFIG.code}
         </span>
@@ -97,7 +105,7 @@ const modules = COURSE_CONFIG.modules.map((module) => ({
         <h2
           class="px-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider"
         >
-          Módulos
+          {t.nav.modules}
         </h2>
         <div class="mt-2 space-y-1">
           {
@@ -138,22 +146,25 @@ const modules = COURSE_CONFIG.modules.map((module) => ({
     <div
       class="flex-shrink-0 p-4 border-t border-zinc-200 dark:border-zinc-700"
     >
-      <div class="flex items-center">
-        <img src="/logo-unmsm.webp" alt="UNMSM Logo" class="h-8 w-8" />
-        <div class="ml-3">
-          <p class="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-            {COURSE_CONFIG.semester}
-          </p>
-          <a
-            href={COURSE_CONFIG.repository.url}
-            class="text-xs text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300 flex items-center"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Github class="w-4 h-4 mr-1" />
-            Ver en GitHub
-          </a>
+      <div class="flex items-center justify-between">
+        <div class="flex items-center">
+          <img src="/logo-unmsm.webp" alt="UNMSM Logo" class="h-8 w-8" />
+          <div class="ml-3">
+            <p class="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              {COURSE_CONFIG.semester}
+            </p>
+            <a
+              href={COURSE_CONFIG.repository.url}
+              class="text-xs text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300 flex items-center"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Github class="w-4 h-4 mr-1" />
+              {t.nav.viewOnGitHub}
+            </a>
+          </div>
         </div>
+        <LanguageSwitcher />
       </div>
     </div>
   </div>

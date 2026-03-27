@@ -1,0 +1,57 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import WeeklySchedule from "../../components/schedule/WeeklySchedule.astro";
+import ImportantDates from "../../components/schedule/ImportantDates.astro";
+import { COURSE_CONFIG, type WeekContent } from "../../config/course";
+import { getTranslations } from "../../i18n/translations";
+
+const locale = "en";
+const t = getTranslations(locale);
+
+const semesterStart = new Date(COURSE_CONFIG.importantDates[0].date);
+
+const weeklySchedule: WeekContent[] = COURSE_CONFIG.modules
+  .flatMap((module) => [...module.content])
+  .sort((a, b) => a.week - b.week);
+
+type ImportantDate = {
+  event: string;
+  date: string;
+  type: "lab" | "milestone";
+};
+
+const importantDates: ImportantDate[] = [
+  ...COURSE_CONFIG.modules
+    .flatMap((module) => [...module.content])
+    .filter(
+      (week): week is WeekContent & { lab: NonNullable<WeekContent["lab"]> } =>
+        week.lab !== null,
+    )
+    .map((week) => ({
+      event: `Submission: ${week.lab.title}`,
+      date: week.lab.dueDate,
+      type: "lab" as const,
+    })),
+  ...COURSE_CONFIG.importantDates.map((date) => ({
+    ...date,
+    type: "milestone" as const,
+  })),
+].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+---
+
+<BaseLayout title={t.schedule.title} locale={locale}>
+  <div class="space-y-4 dark:bg-zinc-900">
+    <h1 class="text-3xl font-bold text-zinc-900 dark:text-white">
+      {t.schedule.title}
+    </h1>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div class="lg:col-span-2">
+        <WeeklySchedule schedule={weeklySchedule} />
+      </div>
+      <div>
+        <ImportantDates dates={importantDates} />
+      </div>
+    </div>
+  </div>
+</BaseLayout>

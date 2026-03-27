@@ -1,0 +1,28 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Hero from "../../components/home/Hero.astro";
+import CourseOverview from "../../components/home/CourseOverview.astro";
+import UpcomingDeadlines from "../../components/home/UpcomingDeadlines.astro";
+import QuickLinks from "../../components/home/QuickLinks.astro";
+import Announcements from "../../components/home/Announcements.astro";
+---
+
+<BaseLayout
+  title="Concurrent and Parallel Programming | SW805 - UNMSM"
+  description="Concurrent and Parallel Programming course (SW805) at UNMSM. Learn MPI, Pthreads, OpenMP, and CUDA with hands-on labs and projects."
+  locale="en"
+>
+  <Hero />
+  <main class="max-w-6xl mx-auto">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div class="lg:col-span-2 space-y-6">
+        <CourseOverview />
+        <Announcements />
+      </div>
+      <aside class="space-y-6">
+        <QuickLinks />
+        <UpcomingDeadlines />
+      </aside>
+    </div>
+  </main>
+</BaseLayout>
