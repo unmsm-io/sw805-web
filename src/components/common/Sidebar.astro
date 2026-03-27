@@ -1,6 +1,6 @@
 ---
 import { COURSE_CONFIG, type WeekContent } from "../../config/course";
-import { getTranslations } from "../../i18n/translations";
+import { getTranslations, moduleTranslations, labTranslations } from "../../i18n/translations";
 import LanguageSwitcher from "./LanguageSwitcher.astro";
 import {
   FileText,
@@ -43,7 +43,7 @@ const mainNavigation = [
 
 const modules = COURSE_CONFIG.modules.map((module) => ({
   id: module.id,
-  title: module.title,
+  title: moduleTranslations[module.id]?.[locale] ?? module.title,
   labs: module.content
     .filter(
       (week): week is WeekContent & { lab: NonNullable<WeekContent["lab"]> } =>
@@ -51,7 +51,7 @@ const modules = COURSE_CONFIG.modules.map((module) => ({
     )
     .map((week) => ({
       id: week.lab.id,
-      title: week.lab.title,
+      title: labTranslations[week.lab.id]?.[locale] ?? week.lab.title,
       href: `${prefix}/labs/${module.id}/${week.lab.id}`,
       dueDate: week.lab.dueDate,
     })),

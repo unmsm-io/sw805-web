@@ -325,6 +325,92 @@ export const translations = {
   },
 } as const;
 
+export const moduleTranslations: Record<string, Record<string, string>> = {
+  unit1: {
+    es: "Fundamentos de programación concurrente y paralela",
+    en: "Fundamentals of Concurrent and Parallel Programming",
+  },
+  unit2: {
+    es: "Programación en memoria distribuida y compartida",
+    en: "Distributed and Shared Memory Programming",
+  },
+  unit3: {
+    es: "Programación con Memoria Compartida y Programación con GPU",
+    en: "Shared Memory and GPU Programming",
+  },
+  unit4: {
+    es: "Patrones de diseño de Programas Paralelos",
+    en: "Parallel Program Design Patterns",
+  },
+};
+
+export const labTranslations: Record<string, Record<string, string>> = {
+  setup: {
+    es: "Configuración del Entorno",
+    en: "Environment Setup",
+  },
+  lab1: {
+    es: "Lab 1: Tutorial de Punteros en C++",
+    en: "Lab 1: C++ Pointers Tutorial",
+  },
+  lab2: {
+    es: "Lab 2: Programación Distribuida con MPI",
+    en: "Lab 2: Distributed Programming with MPI",
+  },
+  lab3: {
+    es: "Lab 3: Operaciones Numéricas MPI",
+    en: "Lab 3: MPI Numerical Operations",
+  },
+  lab4: {
+    es: "Lab 4: Ordenamientos y Comunicadores MPI",
+    en: "Lab 4: Sorting and MPI Communicators",
+  },
+  "lab-mpi-exercises": {
+    es: "Lista de Ejercicios de MPI",
+    en: "MPI Exercise List",
+  },
+  lab5: {
+    es: "Lab 5: Pthreads Básico",
+    en: "Lab 5: Pthreads Basics",
+  },
+  lab6: {
+    es: "Lab 6: OpenMP vs Pthreads",
+    en: "Lab 6: OpenMP vs Pthreads",
+  },
+  lab7: {
+    es: "Lab 7: OpenMP Avanzado",
+    en: "Lab 7: Advanced OpenMP",
+  },
+  lab8: {
+    es: "Lab 8: Estrategias de Paralelización",
+    en: "Lab 8: Parallelization Strategies",
+  },
+  lab9: {
+    es: "Lab 9: CUDA Básico",
+    en: "Lab 9: CUDA Basics",
+  },
+  lab10: {
+    es: "Lab 10: CUDA Optimización",
+    en: "Lab 10: CUDA Optimization",
+  },
+  lab11: {
+    es: "Lab 11: CUDA Algoritmos",
+    en: "Lab 11: CUDA Algorithms",
+  },
+  lab12: {
+    es: "Lab 12: Análisis de Rendimiento",
+    en: "Lab 12: Performance Analysis",
+  },
+  lab13: {
+    es: "Lab 13: ML en CUDA",
+    en: "Lab 13: ML with CUDA",
+  },
+  project: {
+    es: "Proyecto Final",
+    en: "Final Project",
+  },
+};
+
 export type Locale = keyof typeof translations;
 
 export function getTranslations(locale: Locale) {
