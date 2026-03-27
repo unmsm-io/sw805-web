@@ -51,9 +51,9 @@ export const COURSE_CONFIG = {
 
   // Course Schedule
   schedule: {
-    lectures: "Por definir",
-    labs: "Por definir",
-    location: "FISI",
+    lectures: "Jueves (teoría y laboratorio, mismo día)",
+    labs: "Jueves (bloque laboratorio)",
+    location: "FISI - Laboratorio de Cómputo",
   },
 
   // Prerequisites
@@ -539,15 +539,27 @@ export const COURSE_CONFIG = {
     },
     {
       title: "Recursos de Aprendizaje",
-      description: "Material complementario y tutoriales",
+      description: "Libros, cursos y repos open source",
       href: "/resources",
       icon: "GraduationCap"
+    },
+    {
+      title: "Clases y Materiales",
+      description: "Slides y lecturas por semana",
+      href: "/lectures",
+      icon: "Presentation"
     },
     {
       title: "LLNL HPC Tutorials",
       description: "Tutoriales de computación paralela del LLNL",
       href: "https://hpc-tutorials.llnl.gov/",
       icon: "Server"
+    },
+    {
+      title: "Políticas del Curso",
+      description: "Integridad académica, IA y entregas",
+      href: "/policies",
+      icon: "Shield"
     }
   ],
 
@@ -555,23 +567,30 @@ export const COURSE_CONFIG = {
   announcements: [
     {
       id: 1,
-      title: "Bienvenidos al curso",
-      content: "Iniciamos el semestre 2025-II. Por favor, revisen el sílabo y configuren su entorno de desarrollo.",
+      title: "Bienvenidos al curso 2025-II",
+      content: "Iniciamos el semestre 2025-II. Revisen el sílabo, configuren su entorno de desarrollo y lean las políticas del curso.",
       date: "2025-08-25",
       type: "info"
     },
     {
       id: 2,
-      title: "Lista de Ejercicios MPI",
-      content: "Nueva lista de ejercicios avanzados de MPI disponible. Incluye 6 ejercicios prácticos para después de la semana 4.",
-      date: "2025-09-17",
-      type: "lab"
+      title: "Nuevos recursos disponibles",
+      content: "Se han agregado libros gratuitos, cursos de universidades top (CMU, Stanford, MIT) y repos open source en la sección de Recursos.",
+      date: "2025-08-27",
+      type: "info"
     },
     {
       id: 3,
+      title: "Política de uso de IA publicada",
+      content: "Revisen la nueva política sobre uso de herramientas de IA (ChatGPT, Copilot, Claude) en la página de Políticas.",
+      date: "2025-08-26",
+      type: "info"
+    },
+    {
+      id: 4,
       title: "Primer Laboratorio",
-      content: "El primer laboratorio estará disponible desde el viernes. Recuerden revisar la guía de configuración.",
-      date: "2025-08-27",
+      content: "El Lab 1 (Tutorial de Punteros en C++) está disponible. Recuerden revisar la guía de configuración del entorno.",
+      date: "2025-08-28",
       type: "lab"
     }
   ]
