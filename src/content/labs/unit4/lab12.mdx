@@ -13,16 +13,598 @@ import Alert from "../../../components/Alert.astro";
 import CodeBlock from "../../../components/CodeBlock.astro";
 import StepGuide from "../../../components/StepGuide.astro";
 
-## Próximamente
+## Introducción
 
-Este laboratorio estará disponible pronto. En este laboratorio, exploraremos:
+Escribir código paralelo correcto es solo la mitad del trabajo. La otra mitad es saber si realmente es más rápido, cuánto más rápido, y bajo qué condiciones deja de serlo. Sin métricas precisas, las afirmaciones de rendimiento son anécdotas.
 
-- Métricas de rendimiento en computación paralela
-- Herramientas de profiling y análisis
-- Comparación CPU vs GPU
-- Técnicas de optimización basadas en datos
-- Evaluación empírica del speedup
+En este laboratorio aprenderás a medir tiempo de ejecución con herramientas apropiadas para CPU y GPU, a calcular speedup y eficiencia, y a construir una metodología de benchmarking reproducible. Compararás cuatro implementaciones de multiplicación de matrices —secuencial, OpenMP, Pthreads y CUDA— con datos reales.
 
 <Alert type="info">
-  El contenido detallado y los materiales del laboratorio estarán disponibles antes de la fecha de inicio.
-</Alert> 
+La medición incorrecta de tiempo es uno de los errores más comunes en trabajos de computación paralela. Este laboratorio establece las herramientas y la disciplina que usarás en todos los proyectos subsiguientes.
+</Alert>
+
+---
+
+## 1. Métricas de Rendimiento
+
+### Speedup
+
+El **speedup** mide cuánto más rápido es la versión paralela respecto a la secuencial:
+
+```
+S(p) = T(1) / T(p)
+```
+
+Donde `T(1)` es el tiempo secuencial y `T(p)` es el tiempo con `p` procesadores.
+
+- `S(p) = p` : speedup lineal (ideal, raramente alcanzable)
+- `S(p) < p` : speedup sublineal (lo habitual, por overhead y código serial)
+- `S(p) > p` : speedup superlineal (ocurre por efectos de caché, rarísimo)
+
+### Eficiencia
+
+La **eficiencia** normaliza el speedup por el número de procesadores:
+
+```
+E(p) = S(p) / p = T(1) / (p × T(p))
+```
+
+Una eficiencia de 0.85 significa que cada procesador está siendo utilizado al 85% de su capacidad potencial.
+
+### Ley de Amdahl
+
+La fracción serial `f` del programa limita el speedup máximo alcanzable:
+
+```
+S_max = 1 / (f + (1-f)/p)
+```
+
+Si el 10% del código es inherentemente secuencial, el speedup máximo posible es 10×, sin importar cuántos procesadores uses.
+
+### Escalabilidad
+
+| Tipo | Definición | Cómo medirla |
+|------|-----------|--------------|
+| **Strong scaling** | Mismo tamaño de problema, más procesadores | Fija N, varía p = 1,2,4,8,16 |
+| **Weak scaling** | Crece el problema proporcionalmente con los procesadores | N = N₀ × p, varía p |
+
+En weak scaling ideal, el tiempo permanece constante. En strong scaling ideal, el tiempo se reduce a la mitad al doblar los procesadores.
+
+### Plantilla de registro de resultados
+
+Usa esta tabla al ejecutar tus benchmarks (cópiala y rellénala):
+
+| Implementación | N | Tiempo (ms) | Speedup S(p) | Eficiencia E(p) |
+|----------------|---|-------------|-------------|----------------|
+| Secuencial     | 256 | — | 1.00 | 1.00 |
+| OpenMP (4 hilos) | 256 | — | — | — |
+| Pthreads (4 hilos) | 256 | — | — | — |
+| CUDA | 256 | — | — | — |
+| Secuencial     | 512 | — | 1.00 | 1.00 |
+| OpenMP (4 hilos) | 512 | — | — | — |
+| Pthreads (4 hilos) | 512 | — | — | — |
+| CUDA | 512 | — | — | — |
+| Secuencial     | 1024 | — | 1.00 | 1.00 |
+| OpenMP (4 hilos) | 1024 | — | — | — |
+| Pthreads (4 hilos) | 1024 | — | — | — |
+| CUDA | 1024 | — | — | — |
+| Secuencial     | 2048 | — | 1.00 | 1.00 |
+| OpenMP (4 hilos) | 2048 | — | — | — |
+| Pthreads (4 hilos) | 2048 | — | — | — |
+| CUDA | 2048 | — | — | — |
+
+---
+
+## 2. Herramientas de Medición
+
+Elegir la herramienta de timing correcta importa. Las herramientas incorrectas introducen error de medición mayor que la diferencia que intentas medir.
+
+| Herramienta | Resolución | Uso |
+|-------------|-----------|-----|
+| `time` (shell) | ~10ms | Solo para procesos completos, nunca para microbenchmarks |
+| `clock()` (C) | Variable | Mide tiempo de CPU, no tiempo de pared. Evitar. |
+| `clock_gettime(CLOCK_MONOTONIC)` | ~1ns | Correcto para CPU. Usa este. |
+| `std::chrono::high_resolution_clock` | ~1ns | Correcto para C++. |
+| `cudaEventRecord` | ~0.5µs | El único método correcto para GPU. Mide tiempo de GPU, no CPU. |
+
+<Alert type="warning">
+Nunca uses `clock()` para medir código paralelo. Mide ciclos de CPU consumidos por el proceso, que en programas multi-hilo es la suma de todos los hilos y puede ser mayor que el tiempo real.
+</Alert>
+
+### Ejercicio 1: Framework de benchmarking
+
+Escribe una biblioteca reutilizable de timing que usarás en el resto del laboratorio.
+
+**`benchmark.h`** — Definición de la interfaz:
+
+```c
+#ifndef BENCHMARK_H
+#define BENCHMARK_H
+
+#include <time.h>
+#include <stdio.h>
+
+typedef struct {
+    double start_ms;
+    double end_ms;
+} Timer;
+
+static inline double now_ms() {
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return ts.tv_sec * 1000.0 + ts.tv_nsec / 1.0e6;
+}
+
+static inline void timer_start(Timer *t) {
+    t->start_ms = now_ms();
+}
+
+static inline void timer_stop(Timer *t) {
+    t->end_ms = now_ms();
+}
+
+static inline double timer_elapsed(const Timer *t) {
+    return t->end_ms - t->start_ms;
+}
+
+static inline void print_result(const char *label, double elapsed_ms,
+                                 double seq_ms, int threads) {
+    double speedup = seq_ms / elapsed_ms;
+    double efficiency = speedup / (double)threads;
+    printf("%-25s  %8.2f ms  speedup=%5.2fx  efic=%5.1f%%\n",
+           label, elapsed_ms, speedup, efficiency * 100.0);
+}
+
+#endif
+```
+
+**`timer_gpu.h`** — Wrapper para eventos CUDA:
+
+```cuda
+#ifndef TIMER_GPU_H
+#define TIMER_GPU_H
+
+#include <cuda_runtime.h>
+#include <stdio.h>
+
+typedef struct {
+    cudaEvent_t start;
+    cudaEvent_t stop;
+} GpuTimer;
+
+static inline void gpu_timer_create(GpuTimer *t) {
+    cudaEventCreate(&t->start);
+    cudaEventCreate(&t->stop);
+}
+
+static inline void gpu_timer_start(GpuTimer *t) {
+    cudaEventRecord(t->start);
+}
+
+static inline float gpu_timer_stop(GpuTimer *t) {
+    float ms;
+    cudaEventRecord(t->stop);
+    cudaEventSynchronize(t->stop);
+    cudaEventElapsedTime(&ms, t->start, t->stop);
+    return ms;
+}
+
+static inline void gpu_timer_destroy(GpuTimer *t) {
+    cudaEventDestroy(t->start);
+    cudaEventDestroy(t->stop);
+}
+
+#endif
+```
+
+<Alert type="tip">
+Siempre ejecuta el kernel al menos una vez como "calentamiento" antes de medir. La primera invocación puede incluir tiempos de inicialización del driver CUDA que distorsionan los resultados.
+</Alert>
+
+---
+
+## 3. Ejercicio 2: Benchmark de Multiplicación de Matrices
+
+La multiplicación de matrices C = A × B para matrices de N×N es O(N³), con acceso intensivo a memoria. Es un benchmark estándar en HPC.
+
+Implementa las cuatro versiones en el mismo archivo `benchmark.cu`:
+
+```cuda
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+#include <omp.h>
+#include <pthread.h>
+#include <cuda_runtime.h>
+#include "benchmark.h"
+#include "timer_gpu.h"
+
+#define MAX_N 2048
+#define TILE_SIZE 16
+
+typedef struct {
+    float *A;
+    float *B;
+    float *C;
+    int N;
+    int row_start;
+    int row_end;
+} MatMulArgs;
+
+void matmul_seq(const float *A, const float *B, float *C, int N) {
+    for (int i = 0; i < N; i++)
+        for (int k = 0; k < N; k++)
+            for (int j = 0; j < N; j++)
+                C[i * N + j] += A[i * N + k] * B[k * N + j];
+}
+
+void matmul_openmp(const float *A, const float *B, float *C, int N, int threads) {
+    #pragma omp parallel for num_threads(threads) schedule(static)
+    for (int i = 0; i < N; i++)
+        for (int k = 0; k < N; k++)
+            for (int j = 0; j < N; j++)
+                C[i * N + j] += A[i * N + k] * B[k * N + j];
+}
+
+void *pthread_worker(void *arg) {
+    MatMulArgs *a = (MatMulArgs *)arg;
+    for (int i = a->row_start; i < a->row_end; i++)
+        for (int k = 0; k < a->N; k++)
+            for (int j = 0; j < a->N; j++)
+                a->C[i * a->N + j] += a->A[i * a->N + k] * a->B[k * a->N + j];
+    return NULL;
+}
+
+void matmul_pthreads(const float *A, const float *B, float *C, int N, int threads) {
+    pthread_t *tids = malloc(threads * sizeof(pthread_t));
+    MatMulArgs *args = malloc(threads * sizeof(MatMulArgs));
+    int rows_per_thread = N / threads;
+
+    for (int t = 0; t < threads; t++) {
+        args[t].A = (float *)A;
+        args[t].B = (float *)B;
+        args[t].C = C;
+        args[t].N = N;
+        args[t].row_start = t * rows_per_thread;
+        args[t].row_end = (t == threads - 1) ? N : args[t].row_start + rows_per_thread;
+        pthread_create(&tids[t], NULL, pthread_worker, &args[t]);
+    }
+    for (int t = 0; t < threads; t++) pthread_join(tids[t], NULL);
+
+    free(tids);
+    free(args);
+}
+
+__global__ void matmul_cuda_kernel(const float *A, const float *B, float *C, int N) {
+    __shared__ float tileA[TILE_SIZE][TILE_SIZE];
+    __shared__ float tileB[TILE_SIZE][TILE_SIZE];
+
+    int row = blockIdx.y * TILE_SIZE + threadIdx.y;
+    int col = blockIdx.x * TILE_SIZE + threadIdx.x;
+    float sum = 0.0f;
+
+    for (int t = 0; t < (N + TILE_SIZE - 1) / TILE_SIZE; t++) {
+        int aCol = t * TILE_SIZE + threadIdx.x;
+        int bRow = t * TILE_SIZE + threadIdx.y;
+
+        tileA[threadIdx.y][threadIdx.x] = (row < N && aCol < N) ? A[row * N + aCol] : 0.0f;
+        tileB[threadIdx.y][threadIdx.x] = (bRow < N && col < N) ? B[bRow * N + col] : 0.0f;
+        __syncthreads();
+
+        for (int k = 0; k < TILE_SIZE; k++)
+            sum += tileA[threadIdx.y][k] * tileB[k][threadIdx.x];
+        __syncthreads();
+    }
+
+    if (row < N && col < N) C[row * N + col] = sum;
+}
+
+void matmul_cuda(const float *h_A, const float *h_B, float *h_C, int N, float *elapsed_ms) {
+    int bytes = N * N * sizeof(float);
+    float *d_A, *d_B, *d_C;
+    cudaMalloc(&d_A, bytes);
+    cudaMalloc(&d_B, bytes);
+    cudaMalloc(&d_C, bytes);
+
+    cudaMemcpy(d_A, h_A, bytes, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_B, h_B, bytes, cudaMemcpyHostToDevice);
+    cudaMemset(d_C, 0, bytes);
+
+    dim3 block(TILE_SIZE, TILE_SIZE);
+    dim3 grid((N + TILE_SIZE - 1) / TILE_SIZE, (N + TILE_SIZE - 1) / TILE_SIZE);
+
+    GpuTimer gt;
+    gpu_timer_create(&gt);
+    gpu_timer_start(&gt);
+    matmul_cuda_kernel<<<grid, block>>>(d_A, d_B, d_C, N);
+    *elapsed_ms = gpu_timer_stop(&gt);
+    gpu_timer_destroy(&gt);
+
+    cudaMemcpy(h_C, d_C, bytes, cudaMemcpyDeviceToHost);
+    cudaFree(d_A); cudaFree(d_B); cudaFree(d_C);
+}
+
+int main() {
+    int sizes[] = {256, 512, 1024, 2048};
+    int num_threads = 4;
+
+    for (int si = 0; si < 4; si++) {
+        int N = sizes[si];
+        int bytes = N * N * sizeof(float);
+        float *A = malloc(bytes);
+        float *B = malloc(bytes);
+        float *C = calloc(N * N, sizeof(float));
+
+        for (int i = 0; i < N * N; i++) {
+            A[i] = (float)rand() / RAND_MAX;
+            B[i] = (float)rand() / RAND_MAX;
+        }
+
+        printf("\n=== N = %d ===\n", N);
+
+        Timer t;
+        double seq_ms = 0.0;
+
+        if (N <= 1024) {
+            timer_start(&t);
+            matmul_seq(A, B, C, N);
+            timer_stop(&t);
+            seq_ms = timer_elapsed(&t);
+            printf("%-25s  %8.2f ms  speedup= 1.00x  efic=100.0%%\n", "Secuencial", seq_ms);
+        } else {
+            printf("Secuencial N=2048: omitido (> 30s)\n");
+            seq_ms = -1;
+        }
+
+        memset(C, 0, bytes);
+        timer_start(&t);
+        matmul_openmp(A, B, C, N, num_threads);
+        timer_stop(&t);
+        double omp_ms = timer_elapsed(&t);
+        if (seq_ms > 0) print_result("OpenMP (4 hilos)", omp_ms, seq_ms, num_threads);
+        else printf("%-25s  %8.2f ms\n", "OpenMP (4 hilos)", omp_ms);
+
+        memset(C, 0, bytes);
+        timer_start(&t);
+        matmul_pthreads(A, B, C, N, num_threads);
+        timer_stop(&t);
+        double pth_ms = timer_elapsed(&t);
+        if (seq_ms > 0) print_result("Pthreads (4 hilos)", pth_ms, seq_ms, num_threads);
+        else printf("%-25s  %8.2f ms\n", "Pthreads (4 hilos)", pth_ms);
+
+        float cuda_ms = 0.0f;
+        matmul_cuda(A, B, C, N, &cuda_ms);
+        if (seq_ms > 0) print_result("CUDA (tiled)", (double)cuda_ms, seq_ms, 1);
+        else printf("%-25s  %8.2f ms\n", "CUDA (tiled)", cuda_ms);
+
+        free(A); free(B); free(C);
+    }
+    return 0;
+}
+```
+
+**Compilar:**
+
+```bash
+nvcc -O2 -Xcompiler "-fopenmp" -o benchmark benchmark.cu -lm -lpthread
+./benchmark
+```
+
+**Rellena la tabla de resultados** con los valores obtenidos en tu máquina o en el servidor del laboratorio.
+
+---
+
+## 4. Ejercicio 3: Análisis de Escalabilidad
+
+### Strong Scaling
+
+Fija el tamaño del problema en N=1024 y varía el número de hilos OpenMP de 1 a 16. Anota los tiempos y calcula speedup.
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <omp.h>
+#include "benchmark.h"
+
+#define N 1024
+
+void matmul_omp(const float *A, const float *B, float *C, int n, int p) {
+    #pragma omp parallel for num_threads(p) schedule(static)
+    for (int i = 0; i < n; i++)
+        for (int k = 0; k < n; k++)
+            for (int j = 0; j < n; j++)
+                C[i * n + j] += A[i * n + k] * B[k * n + j];
+}
+
+int main() {
+    int thread_counts[] = {1, 2, 4, 8, 16};
+    int bytes = N * N * sizeof(float);
+    float *A = malloc(bytes), *B = malloc(bytes), *C = malloc(bytes);
+
+    for (int i = 0; i < N * N; i++) { A[i] = 1.0f; B[i] = 1.0f; }
+
+    printf("Strong Scaling (N=%d fijo):\n", N);
+    printf("%-8s  %-12s  %-10s  %-10s\n", "Hilos", "Tiempo (ms)", "Speedup", "Efic (%)");
+
+    double t1 = 0.0;
+    for (int ti = 0; ti < 5; ti++) {
+        int p = thread_counts[ti];
+        memset(C, 0, bytes);
+        Timer t;
+        timer_start(&t);
+        matmul_omp(A, B, C, N, p);
+        timer_stop(&t);
+        double ms = timer_elapsed(&t);
+
+        if (p == 1) t1 = ms;
+        double speedup = t1 / ms;
+        double eff = speedup / p * 100.0;
+        printf("%-8d  %10.2f ms  %8.2fx  %8.1f%%\n", p, ms, speedup, eff);
+    }
+
+    printf("\nWeak Scaling (N crece con p, N0=%d):\n", 256);
+    printf("%-8s  %-8s  %-12s  %-10s\n", "Hilos", "N", "Tiempo (ms)", "Efic (%)");
+
+    double t_base = 0.0;
+    int n_base = 256;
+    for (int ti = 0; ti < 5; ti++) {
+        int p = thread_counts[ti];
+        int n = n_base * p;
+        if (n > 2048) { printf("%-8d  N=%d demasiado grande, omitido\n", p, n); continue; }
+
+        int b2 = n * n * sizeof(float);
+        float *A2 = malloc(b2), *B2 = malloc(b2), *C2 = malloc(b2);
+        for (int i = 0; i < n * n; i++) { A2[i] = 1.0f; B2[i] = 1.0f; }
+        memset(C2, 0, b2);
+
+        Timer t;
+        timer_start(&t);
+        matmul_omp(A2, B2, C2, n, p);
+        timer_stop(&t);
+        double ms = timer_elapsed(&t);
+
+        if (p == 1) t_base = ms;
+        double eff = t_base / ms * 100.0;
+        printf("%-8d  %-8d  %10.2f ms  %8.1f%%\n", p, n, ms, eff);
+
+        free(A2); free(B2); free(C2);
+    }
+
+    free(A); free(B); free(C);
+    return 0;
+}
+```
+
+**Compilar:**
+
+```bash
+gcc -O2 -fopenmp -o scaling scaling.c -lm
+./scaling
+```
+
+### Tabla de strong scaling esperada (rellena la tuya):
+
+| Hilos (p) | Tiempo (ms) | Speedup S(p) | Eficiencia E(p) |
+|-----------|-------------|-------------|----------------|
+| 1 | — | 1.00× | 100.0% |
+| 2 | — | — | — |
+| 4 | — | — | — |
+| 8 | — | — | — |
+| 16 | — | — | — |
+
+<Alert type="info">
+Es normal que la eficiencia caiga al aumentar hilos. La causa es overhead de sincronización, contención de memoria compartida (cache coherency) y la parte serial del código (Ley de Amdahl). Una caída de eficiencia de 80% a 4 hilos es aceptable para este benchmark.
+</Alert>
+
+---
+
+## 5. Visualización de Resultados
+
+### Con gnuplot (recomendado en servidores sin GUI)
+
+Guarda tus datos en un archivo `scaling.dat`:
+
+```
+# hilos tiempo_ms speedup eficiencia
+1      850.2    1.00    100.0
+2      435.1    1.95     97.5
+4      225.3    3.77     94.3
+8      120.8    7.03     87.9
+16      72.1   11.79     73.7
+```
+
+Luego grafica:
+
+```bash
+gnuplot << 'EOF'
+set terminal png size 800,500
+set output 'speedup.png'
+set title 'Strong Scaling - MatMul N=1024'
+set xlabel 'Número de hilos'
+set ylabel 'Speedup'
+set grid
+plot 'scaling.dat' using 1:3 with linespoints title 'Speedup medido', \
+     'scaling.dat' using 1:1 with lines dashtype 2 title 'Speedup ideal'
+EOF
+```
+
+### Con Python / matplotlib
+
+```python
+import matplotlib.pyplot as plt
+
+hilos = [1, 2, 4, 8, 16]
+speedup = [1.00, 1.95, 3.77, 7.03, 11.79]
+ideal   = [1, 2, 4, 8, 16]
+
+plt.figure(figsize=(8, 5))
+plt.plot(hilos, speedup, 'o-', label='Speedup medido')
+plt.plot(hilos, ideal, '--', label='Speedup ideal')
+plt.xlabel('Número de hilos')
+plt.ylabel('Speedup')
+plt.title('Strong Scaling — MatMul N=1024')
+plt.legend()
+plt.grid(True)
+plt.savefig('speedup.png', dpi=150)
+print("Guardado: speedup.png")
+```
+
+---
+
+## Ejercicios Propuestos
+
+### Ejercicio A: Perfila una aplicación real con nvprof / Nsight
+
+Toma el kernel de multiplicación de matrices del Ejercicio 2 y perfilalo con NVIDIA Nsight Systems:
+
+```bash
+nsys profile --stats=true ./benchmark
+```
+
+Responde:
+1. ¿Cuál es la ocupación del kernel CUDA?
+2. ¿Cuánto tiempo se gasta en transferencias de memoria vs. cómputo?
+3. ¿El cuello de botella es memoria o cómputo? ¿Cómo lo determines?
+
+### Ejercicio B: Modelo Roofline
+
+El modelo Roofline relaciona el rendimiento computacional (FLOPS/s) con la intensidad aritmética (FLOPS/byte de memoria accedida) para identificar si un kernel está limitado por cómputo o por ancho de banda de memoria.
+
+Para la multiplicación de matrices N×N:
+- Operaciones: `2N³` (N³ multiplicaciones + N³ sumas)
+- Bytes accedidos: `3 × N² × 4` bytes (matrices A, B, C en float)
+- Intensidad aritmética: `2N³ / (12N²) = N/6`
+
+1. Calcula la intensidad aritmética para N = 256, 512, 1024, 2048.
+2. Consulta las especificaciones de la GPU del laboratorio (pico de TFLOPS y ancho de banda de memoria).
+3. Determina si la implementación está en la zona "memory-bound" o "compute-bound" del roofline.
+4. ¿Qué optimización aplicarías según el modelo?
+
+### Ejercicio C: Eficiencia energética
+
+El rendimiento no solo se mide en velocidad. En centros de datos, el rendimiento por vatio (FLOPS/W) es crítico.
+
+Usa `nvidia-smi` para monitorear la potencia de la GPU durante la ejecución:
+
+```bash
+nvidia-smi dmon -s p -d 1 > power_log.txt &
+./benchmark
+kill %1
+```
+
+1. Calcula el GFLOPS/W para la versión CUDA con N=2048.
+2. Compara con la versión OpenMP midiendo la potencia de CPU con `powertop` o RAPL.
+3. ¿Cuál implementación es más eficiente energéticamente? ¿Coincide con la que tiene mayor speedup?
+
+---
+
+## Referencias
+
+| Recurso | Secciones relevantes |
+|---------|---------------------|
+| Pacheco, *An Introduction to Parallel Programming* (2ª ed.) | Cap. 11 (Timing Parallel Programs), Cap. 12 (Analyzing Parallel Program Performance) |
+| LLNL HPC Tutorials | [Introduction to Parallel Computing](https://hpc.llnl.gov/documentation/tutorials/introduction-parallel-computing-tutorial) — Sección "Performance Analysis" |
+| Kirk & Hwu, *Programming Massively Parallel Processors* | Cap. 5 (Performance Considerations), Cap. 6 (Numerical Considerations) |
+| NVIDIA Nsight Systems User Guide | [docs.nvidia.com/nsight-systems](https://docs.nvidia.com/nsight-systems/) |
+| Williams et al., "Roofline: An Insightful Visual Performance Model" | *Communications of the ACM*, 2009 |

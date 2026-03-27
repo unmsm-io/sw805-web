@@ -13,16 +13,443 @@ import Alert from "../../../components/Alert.astro";
 import CodeBlock from "../../../components/CodeBlock.astro";
 import StepGuide from "../../../components/StepGuide.astro";
 
-## Próximamente
+## Introducción
 
-Este laboratorio estará disponible pronto. En este laboratorio, exploraremos:
-
-- Algoritmos de ordenamiento paralelo
-- Implementación de MapReduce en GPU
-- Patrones algorítmicos en CUDA
-- Optimización de algoritmos paralelos
-- Análisis de rendimiento y escalabilidad
+Los algoritmos paralelos clásicos —como la suma de prefijos, el ordenamiento o el histograma— tienen versiones optimizadas para GPU que aprovechan los miles de hilos disponibles en CUDA. En este laboratorio implementarás cuatro patrones fundamentales que aparecen como bloques de construcción en aplicaciones reales: visión por computadora, bases de datos en GPU, procesamiento de señales y análisis de texto.
 
 <Alert type="info">
-  El contenido detallado y los materiales del laboratorio estarán disponibles antes de la fecha de inicio.
-</Alert> 
+Este laboratorio asume que ya comprendes la jerarquía de hilos CUDA (grid, block, warp) y el uso básico de memoria compartida de los laboratorios anteriores.
+</Alert>
+
+---
+
+## 1. Prefix Sum (Scan)
+
+El **prefix sum** (o *scan*) toma un arreglo de entrada `[a₀, a₁, a₂, ..., aₙ₋₁]` y produce un arreglo de salida donde cada elemento es la suma acumulada de los anteriores.
+
+Existen dos variantes:
+
+| Variante | Definición | Ejemplo con `[1, 2, 3, 4]` |
+|----------|-----------|---------------------------|
+| **Inclusive scan** | `out[i] = a[0] + ... + a[i]` | `[1, 3, 6, 10]` |
+| **Exclusive scan** | `out[i] = a[0] + ... + a[i-1]`, `out[0]=0` | `[0, 1, 3, 6]` |
+
+El scan exclusivo es más útil en la práctica porque permite calcular offsets de escritura independientes para cada hilo.
+
+### Algoritmo de Hillis-Steele
+
+El algoritmo de Hillis-Steele realiza O(n log n) operaciones pero tiene un paralelismo alto, lo que lo hace eficiente en GPU a pesar de ser work-inefficient. En cada paso `d`, cada elemento suma el elemento que está `2^(d-1)` posiciones atrás.
+
+```
+Paso 0 (inicial): [1, 2, 3, 4, 5, 6, 7, 8]
+Paso 1 (d=1):     [1, 3, 5, 7, 9,11,13,15]
+Paso 2 (d=2):     [1, 3, 6,10,14,18,22,26]
+Paso 3 (d=4):     [1, 3, 6,10,15,21,28,36]
+```
+
+### Ejercicio 1: Implementar Hillis-Steele Scan
+
+```cuda
+#include <stdio.h>
+#include <cuda_runtime.h>
+
+#define N 1024
+#define BLOCK_SIZE 1024
+
+__global__ void hillisStealeScan(int *d_out, const int *d_in, int n) {
+    extern __shared__ int temp[];
+
+    int tid = threadIdx.x;
+    int gid = blockIdx.x * blockDim.x + threadIdx.x;
+
+    if (gid < n) {
+        temp[tid] = d_in[gid];
+    } else {
+        temp[tid] = 0;
+    }
+    __syncthreads();
+
+    for (int d = 1; d < blockDim.x; d <<= 1) {
+        int val = 0;
+        if (tid >= d) {
+            val = temp[tid - d];
+        }
+        __syncthreads();
+        temp[tid] += val;
+        __syncthreads();
+    }
+
+    if (gid < n) {
+        d_out[gid] = temp[tid];
+    }
+}
+
+int main() {
+    int h_in[N], h_out[N];
+    for (int i = 0; i < N; i++) h_in[i] = 1;
+
+    int *d_in, *d_out;
+    cudaMalloc(&d_in, N * sizeof(int));
+    cudaMalloc(&d_out, N * sizeof(int));
+    cudaMemcpy(d_in, h_in, N * sizeof(int), cudaMemcpyHostToDevice);
+
+    hillisStealeScan<<<1, BLOCK_SIZE, BLOCK_SIZE * sizeof(int)>>>(d_out, d_in, N);
+
+    cudaMemcpy(h_out, d_out, N * sizeof(int), cudaMemcpyDeviceToHost);
+
+    printf("Primeros 10 valores del scan inclusivo:\n");
+    for (int i = 0; i < 10; i++) {
+        printf("out[%d] = %d\n", i, h_out[i]);
+    }
+
+    cudaFree(d_in);
+    cudaFree(d_out);
+    return 0;
+}
+```
+
+<Alert type="warning">
+Esta implementación solo funciona para arreglos de hasta `BLOCK_SIZE` elementos. Para arreglos más grandes, se necesita un scan jerárquico de dos pasadas (scan de bloques + scan de sumas parciales + propagación).
+</Alert>
+
+**Compilar y ejecutar:**
+
+```bash
+nvcc -o scan scan.cu
+./scan
+```
+
+**Preguntas de análisis:**
+1. ¿Cuántas operaciones de suma realiza Hillis-Steele para N=1024? ¿Y un algoritmo secuencial?
+2. Modifica el kernel para implementar la variante **exclusiva** (cada `out[i]` es la suma de los elementos anteriores, `out[0]=0`).
+
+---
+
+## 2. Ordenamiento Paralelo: Bitonic Sort
+
+El **Bitonic Sort** es un algoritmo de ordenamiento diseñado para redes paralelas de comparadores. Funciona construyendo y fusionando secuencias *bitónicas* (secuencias que primero suben y luego bajan, o viceversa).
+
+### ¿Cómo funciona?
+
+Una secuencia bitónica tiene una cima única. El algoritmo construye secuencias bitónicas de longitud creciente y las fusiona:
+
+```
+Entrada:  [8, 3, 5, 1, 9, 2, 7, 4]
+
+Fase 1 - bloques de 2 (alternando orden):
+          [3, 8, 5, 1, 2, 9, 4, 7]  → [3,8] asc, [5,1] desc, [2,9] asc, [7,4] desc
+          Después de merge: [3, 8, 1, 5, 2, 9, 4, 7]
+
+Fase 2 - bloques de 4:
+          Construye secuencias bitónicas de longitud 4, luego las ordena
+          ...continúa hasta ordenar todo el arreglo
+```
+
+Cada etapa del algoritmo realiza comparaciones e intercambios en paralelo. Para N elementos, se necesitan `log₂(N) × (log₂(N)+1) / 2` pasos de comparación.
+
+### Ejercicio 2: Implementar Bitonic Sort en CUDA
+
+```cuda
+#include <stdio.h>
+#include <stdlib.h>
+#include <cuda_runtime.h>
+
+#define N 1024
+
+__global__ void bitonicSortStep(int *arr, int j, int k) {
+    int i = threadIdx.x + blockDim.x * blockIdx.x;
+    int l = i ^ j;
+
+    if (l > i) {
+        bool ascending = ((i & k) == 0);
+        if ((ascending && arr[i] > arr[l]) || (!ascending && arr[i] < arr[l])) {
+            int tmp = arr[i];
+            arr[i] = arr[l];
+            arr[l] = tmp;
+        }
+    }
+}
+
+int main() {
+    int h_arr[N];
+    srand(42);
+    for (int i = 0; i < N; i++) h_arr[i] = rand() % 10000;
+
+    int *d_arr;
+    cudaMalloc(&d_arr, N * sizeof(int));
+    cudaMemcpy(d_arr, h_arr, N * sizeof(int), cudaMemcpyHostToDevice);
+
+    int threads = 256;
+    int blocks = N / threads;
+
+    for (int k = 2; k <= N; k <<= 1) {
+        for (int j = k >> 1; j > 0; j >>= 1) {
+            bitonicSortStep<<<blocks, threads>>>(d_arr, j, k);
+            cudaDeviceSynchronize();
+        }
+    }
+
+    cudaMemcpy(h_arr, d_arr, N * sizeof(int), cudaMemcpyDeviceToHost);
+
+    printf("Primeros 10 elementos ordenados:\n");
+    for (int i = 0; i < 10; i++) printf("%d ", h_arr[i]);
+    printf("\n...\nÚltimos 10 elementos:\n");
+    for (int i = N - 10; i < N; i++) printf("%d ", h_arr[i]);
+    printf("\n");
+
+    bool sorted = true;
+    for (int i = 0; i < N - 1; i++) {
+        if (h_arr[i] > h_arr[i + 1]) { sorted = false; break; }
+    }
+    printf("¿Correctamente ordenado? %s\n", sorted ? "SÍ" : "NO");
+
+    cudaFree(d_arr);
+    return 0;
+}
+```
+
+<Alert type="tip">
+Bitonic Sort requiere que N sea potencia de 2. Si tu arreglo no lo es, rellénalo con valores `INT_MAX` para que los elementos extra queden al final después de ordenar.
+</Alert>
+
+**Preguntas de análisis:**
+1. ¿Cuántos kernels lanza el programa para N=1024? Enumera cuántas llamadas a `bitonicSortStep` se realizan.
+2. Compara el tiempo de ejecución con `std::sort` en CPU para N=1024, N=65536. ¿En qué punto la GPU supera a la CPU?
+
+---
+
+## 3. Histograma Paralelo
+
+Calcular un histograma de forma paralela presenta un problema clásico: **condición de carrera**. Múltiples hilos pueden intentar incrementar el mismo contador simultáneamente.
+
+### La solución: operaciones atómicas
+
+CUDA provee `atomicAdd(addr, val)` que garantiza que la lectura-modificación-escritura es indivisible:
+
+```cuda
+atomicAdd(&histogram[bin], 1);
+```
+
+Sin embargo, las operaciones atómicas tienen costo: cuando muchos hilos atacan el mismo bin, hay **contención** en memoria global.
+
+### Optimización: histograma privatizado
+
+La solución es crear **una copia privada del histograma en memoria compartida** por bloque. Cada bloque acumula su histograma local sin contención, y al final todos los histogramas locales se reducen en memoria global con `atomicAdd`.
+
+### Ejercicio 3: Histograma de valores de píxeles
+
+```cuda
+#include <stdio.h>
+#include <stdlib.h>
+#include <cuda_runtime.h>
+
+#define IMG_SIZE (1024 * 1024)
+#define NUM_BINS 256
+#define BLOCK_SIZE 256
+
+__global__ void histogramNaive(const unsigned char *img, int *hist, int n) {
+    int gid = blockIdx.x * blockDim.x + threadIdx.x;
+    if (gid < n) {
+        atomicAdd(&hist[img[gid]], 1);
+    }
+}
+
+__global__ void histogramPrivatized(const unsigned char *img, int *hist, int n) {
+    __shared__ int localHist[NUM_BINS];
+
+    int tid = threadIdx.x;
+    for (int i = tid; i < NUM_BINS; i += blockDim.x) {
+        localHist[i] = 0;
+    }
+    __syncthreads();
+
+    int gid = blockIdx.x * blockDim.x + tid;
+    int stride = blockDim.x * gridDim.x;
+    while (gid < n) {
+        atomicAdd(&localHist[img[gid]], 1);
+        gid += stride;
+    }
+    __syncthreads();
+
+    for (int i = tid; i < NUM_BINS; i += blockDim.x) {
+        atomicAdd(&hist[i], localHist[i]);
+    }
+}
+
+int main() {
+    unsigned char *h_img = (unsigned char *)malloc(IMG_SIZE);
+    int h_hist_naive[NUM_BINS] = {0};
+    int h_hist_priv[NUM_BINS] = {0};
+
+    srand(42);
+    for (int i = 0; i < IMG_SIZE; i++) h_img[i] = rand() % 256;
+
+    unsigned char *d_img;
+    int *d_hist_naive, *d_hist_priv;
+
+    cudaMalloc(&d_img, IMG_SIZE);
+    cudaMalloc(&d_hist_naive, NUM_BINS * sizeof(int));
+    cudaMalloc(&d_hist_priv, NUM_BINS * sizeof(int));
+
+    cudaMemcpy(d_img, h_img, IMG_SIZE, cudaMemcpyHostToDevice);
+    cudaMemset(d_hist_naive, 0, NUM_BINS * sizeof(int));
+    cudaMemset(d_hist_priv, 0, NUM_BINS * sizeof(int));
+
+    int blocks = (IMG_SIZE + BLOCK_SIZE - 1) / BLOCK_SIZE;
+
+    cudaEvent_t start, stop;
+    cudaEventCreate(&start);
+    cudaEventCreate(&stop);
+    float ms;
+
+    cudaEventRecord(start);
+    histogramNaive<<<blocks, BLOCK_SIZE>>>(d_img, d_hist_naive, IMG_SIZE);
+    cudaEventRecord(stop);
+    cudaEventSynchronize(stop);
+    cudaEventElapsedTime(&ms, start, stop);
+    printf("Histograma naïve:        %.3f ms\n", ms);
+
+    cudaEventRecord(start);
+    histogramPrivatized<<<blocks, BLOCK_SIZE>>>(d_img, d_hist_priv, IMG_SIZE);
+    cudaEventRecord(stop);
+    cudaEventSynchronize(stop);
+    cudaEventElapsedTime(&ms, start, stop);
+    printf("Histograma privatizado:  %.3f ms\n", ms);
+
+    cudaMemcpy(h_hist_naive, d_hist_naive, NUM_BINS * sizeof(int), cudaMemcpyDeviceToHost);
+    cudaMemcpy(h_hist_priv, d_hist_priv, NUM_BINS * sizeof(int), cudaMemcpyDeviceToHost);
+
+    bool match = true;
+    for (int i = 0; i < NUM_BINS; i++) {
+        if (h_hist_naive[i] != h_hist_priv[i]) { match = false; break; }
+    }
+    printf("¿Resultados idénticos? %s\n", match ? "SÍ" : "NO");
+
+    printf("Bin 128: %d ocurrencias\n", h_hist_naive[128]);
+
+    free(h_img);
+    cudaFree(d_img);
+    cudaFree(d_hist_naive);
+    cudaFree(d_hist_priv);
+    cudaEventDestroy(start);
+    cudaEventDestroy(stop);
+    return 0;
+}
+```
+
+**Preguntas de análisis:**
+1. ¿Cuántas veces se llama a `atomicAdd` en global memory en la versión naïve vs. la privatizada para IMG_SIZE = 1048576?
+2. ¿Por qué la versión privatizada es más rápida incluso teniendo más código?
+
+---
+
+## 4. MapReduce en GPU
+
+El patrón **MapReduce** descompone un problema en dos fases:
+
+- **Map**: aplica una función independiente a cada elemento del conjunto de datos.
+- **Reduce**: agrega todos los resultados parciales en un único valor final.
+
+En GPU, la fase Map es trivial (un hilo por elemento). La fase Reduce es el patrón de reducción paralela que viste en el Laboratorio 9.
+
+### Ejercicio 4: Conteo de caracteres (Word Frequency simplificado)
+
+Contaremos la frecuencia de cada carácter ASCII (a–z) en un texto, como versión simplificada del problema de frecuencia de palabras.
+
+```cuda
+#include <stdio.h>
+#include <string.h>
+#include <cuda_runtime.h>
+
+#define ALPHA_SIZE 26
+#define BLOCK_SIZE 256
+
+__global__ void mapCharCount(const char *text, int *counts, int n) {
+    int gid = blockIdx.x * blockDim.x + threadIdx.x;
+    if (gid < n) {
+        char c = text[gid];
+        if (c >= 'a' && c <= 'z') {
+            atomicAdd(&counts[c - 'a'], 1);
+        } else if (c >= 'A' && c <= 'Z') {
+            atomicAdd(&counts[c - 'A'], 1);
+        }
+    }
+}
+
+int main() {
+    const char *h_text =
+        "En la computacion paralela cada hilo ejecuta una tarea independiente "
+        "lo que permite procesar grandes volumenes de datos de forma eficiente "
+        "CUDA facilita el uso de miles de hilos en la GPU de manera sencilla";
+
+    int n = strlen(h_text);
+    int h_counts[ALPHA_SIZE] = {0};
+
+    char *d_text;
+    int *d_counts;
+
+    cudaMalloc(&d_text, n);
+    cudaMalloc(&d_counts, ALPHA_SIZE * sizeof(int));
+
+    cudaMemcpy(d_text, h_text, n, cudaMemcpyHostToDevice);
+    cudaMemset(d_counts, 0, ALPHA_SIZE * sizeof(int));
+
+    int blocks = (n + BLOCK_SIZE - 1) / BLOCK_SIZE;
+    mapCharCount<<<blocks, BLOCK_SIZE>>>(d_text, d_counts, n);
+
+    cudaMemcpy(h_counts, d_counts, ALPHA_SIZE * sizeof(int), cudaMemcpyDeviceToHost);
+
+    printf("Frecuencia de caracteres:\n");
+    for (int i = 0; i < ALPHA_SIZE; i++) {
+        if (h_counts[i] > 0) {
+            printf("  '%c': %d\n", 'a' + i, h_counts[i]);
+        }
+    }
+
+    cudaFree(d_text);
+    cudaFree(d_counts);
+    return 0;
+}
+```
+
+<Alert type="tip">
+Para escalar esto a frecuencia de palabras real en GPU, se necesitan técnicas adicionales: tokenización paralela, tablas hash en GPU (como `cuco::unordered_map` de la librería RAPIDS cuCollections), y reducción por clave.
+</Alert>
+
+---
+
+## Ejercicios Propuestos
+
+### Ejercicio A: Merge Sort paralelo
+
+Implementa la fase de merge de Merge Sort en CUDA. Dado un arreglo de N elementos dividido en 2 mitades ordenadas, escribe un kernel que fusione ambas mitades en paralelo.
+
+- Cada hilo determina la posición de un elemento de la mitad izquierda usando búsqueda binaria en la mitad derecha.
+- Discute: ¿qué speedup obtienes respecto al merge secuencial?
+
+### Ejercicio B: Stream Compaction
+
+El **stream compaction** filtra los elementos de un arreglo que cumplen una condición y los compacta en un arreglo de salida contiguo. Es el equivalente GPU de `std::copy_if`.
+
+Implementa stream compaction en dos pasos:
+1. Kernel de predicado: crea un arreglo de 0/1 indicando si cada elemento pasa el filtro.
+2. Scan exclusivo sobre ese arreglo para obtener los índices de escritura.
+3. Kernel de dispersión: escribe cada elemento en su posición calculada.
+
+Prueba tu implementación filtrando todos los números pares de un arreglo de 1M de enteros.
+
+### Ejercicio C: Multiplicación de vector disperso (SpMV)
+
+Dado un vector de N elementos donde el 90% son ceros, implementa la multiplicación matriz-vector donde la matriz es diagonal (simplificación). Usa el formato **CSR (Compressed Sparse Row)** para representar solo los valores no nulos y sus índices, luego computa el producto disperso-denso en paralelo.
+
+---
+
+## Referencias
+
+| Recurso | Capítulos relevantes |
+|---------|----------------------|
+| Kirk & Hwu, *Programming Massively Parallel Processors* (3ª ed.) | Cap. 10 (Parallel Patterns: Reduction), Cap. 11 (Prefix Sum), Cap. 12 (Merge), Cap. 13 (Sorting) |
+| Harris, *GPU Gems 3*, Cap. 39 | Parallel Prefix Sum (Scan) with CUDA |
+| Blelloch, *Vector Models for Data-Parallel Computing* | Algoritmos de scan originales |
+| NVIDIA CUDA Samples | `samples/6_Advanced/scan`, `samples/6_Advanced/sortingNetworks` |
+| Thrust library | `thrust::inclusive_scan`, `thrust::sort`, `thrust::copy_if` — implementaciones de producción |
