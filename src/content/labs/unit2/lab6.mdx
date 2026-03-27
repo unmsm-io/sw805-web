@@ -13,16 +13,434 @@ import Alert from "../../../components/Alert.astro";
 import CodeBlock from "../../../components/CodeBlock.astro";
 import StepGuide from "../../../components/StepGuide.astro";
 
-## Próximamente
+## Introducción
 
-Este laboratorio estará disponible pronto. En este laboratorio, exploraremos:
+OpenMP y Pthreads son las dos herramientas más utilizadas para programación paralela con memoria compartida en C/C++. Aunque ambas permiten explotar el paralelismo en sistemas multinúcleo, difieren profundamente en su filosofía de diseño: OpenMP apuesta por anotaciones declarativas que el compilador transforma en código paralelo, mientras que Pthreads expone la API del sistema operativo de forma directa, cediendo el control total al programador.
 
-- Comparación de modelos de programación
-- Implementación de algoritmos en OpenMP y Pthreads
-- Análisis de rendimiento y escalabilidad
-- Facilidad de uso y mantenibilidad
-- Casos de uso óptimos para cada tecnología
+Comprender cuándo usar cada una es una habilidad fundamental en computación de alto rendimiento. En este laboratorio implementaremos tres problemas clásicos con ambas tecnologías y mediremos objetivamente las diferencias.
+
+## Modelo de programación
+
+| Característica | OpenMP | Pthreads |
+|---|---|---|
+| Nivel de abstracción | Alto (directivas de compilador) | Bajo (llamadas al sistema) |
+| Curva de aprendizaje | Moderada | Pronunciada |
+| Control sobre hilos | Limitado | Total |
+| Portabilidad | Alta (estándar ISO/IEC) | Alta (POSIX) |
+| Overhead de código | Mínimo | Significativo |
+| Depuración | Moderada | Difícil |
+| Granularidad | Bloques y bucles | Funciones completas |
+| Casos de uso | Bucles paralelos, secciones | Control fino, protocolos propios |
 
 <Alert type="info">
-  El contenido detallado y los materiales del laboratorio estarán disponibles antes de la fecha de inicio.
-</Alert> 
+OpenMP es ideal cuando quieres paralelizar rápidamente código existente. Pthreads es preferible cuando necesitas control preciso sobre la sincronización o cuando implementas estructuras de datos concurrentes complejas.
+</Alert>
+
+## Ejercicio 1: Suma de vectores
+
+El problema más básico de paralelismo de datos: sumar dos vectores elemento a elemento. Lo implementamos con ambas APIs para observar la diferencia en cantidad de código y estructura.
+
+### Versión OpenMP — `vector_add_omp.c`
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <omp.h>
+
+#define N 100000000
+
+int main(void) {
+    double *a = malloc(N * sizeof(double));
+    double *b = malloc(N * sizeof(double));
+    double *c = malloc(N * sizeof(double));
+
+    for (int i = 0; i < N; i++) {
+        a[i] = i * 1.0;
+        b[i] = i * 2.0;
+    }
+
+    double t_start = omp_get_wtime();
+
+    #pragma omp parallel for
+    for (int i = 0; i < N; i++) {
+        c[i] = a[i] + b[i];
+    }
+
+    double t_end = omp_get_wtime();
+
+    printf("Tiempo OpenMP: %.4f segundos\n", t_end - t_start);
+    printf("c[0]=%.1f  c[N-1]=%.1f\n", c[0], c[N-1]);
+
+    free(a); free(b); free(c);
+    return 0;
+}
+```
+
+### Versión Pthreads — `vector_add_pth.c`
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+#include <time.h>
+
+#define N          100000000
+#define NUM_HILOS  4
+
+double *a, *b, *c;
+
+typedef struct {
+    int inicio;
+    int fin;
+} RangoHilo;
+
+void *sumar_rango(void *arg) {
+    RangoHilo *rango = (RangoHilo *)arg;
+    for (int i = rango->inicio; i < rango->fin; i++) {
+        c[i] = a[i] + b[i];
+    }
+    return NULL;
+}
+
+int main(void) {
+    a = malloc(N * sizeof(double));
+    b = malloc(N * sizeof(double));
+    c = malloc(N * sizeof(double));
+
+    for (int i = 0; i < N; i++) {
+        a[i] = i * 1.0;
+        b[i] = i * 2.0;
+    }
+
+    pthread_t hilos[NUM_HILOS];
+    RangoHilo rangos[NUM_HILOS];
+    int bloque = N / NUM_HILOS;
+
+    struct timespec t_start, t_end;
+    clock_gettime(CLOCK_MONOTONIC, &t_start);
+
+    for (int t = 0; t < NUM_HILOS; t++) {
+        rangos[t].inicio = t * bloque;
+        rangos[t].fin = (t == NUM_HILOS - 1) ? N : rangos[t].inicio + bloque;
+        pthread_create(&hilos[t], NULL, sumar_rango, &rangos[t]);
+    }
+
+    for (int t = 0; t < NUM_HILOS; t++) {
+        pthread_join(hilos[t], NULL);
+    }
+
+    clock_gettime(CLOCK_MONOTONIC, &t_end);
+    double elapsed = (t_end.tv_sec - t_start.tv_sec)
+                   + (t_end.tv_nsec - t_start.tv_nsec) / 1e9;
+
+    printf("Tiempo Pthreads: %.4f segundos\n", elapsed);
+    printf("c[0]=%.1f  c[N-1]=%.1f\n", c[0], c[N-1]);
+
+    free(a); free(b); free(c);
+    return 0;
+}
+```
+
+### Compilación y ejecución
+
+```bash
+gcc -O2 -fopenmp vector_add_omp.c -o vector_add_omp
+gcc -O2 -pthread vector_add_pth.c -o vector_add_pth
+
+export OMP_NUM_THREADS=4
+./vector_add_omp
+./vector_add_pth
+```
+
+<Alert type="tip">
+Prueba variando `OMP_NUM_THREADS` (2, 4, 8) y `NUM_HILOS` en Pthreads para observar el efecto en el tiempo de ejecución. En vectores grandes, el cuello de botella suele ser el ancho de banda de memoria, no la CPU.
+</Alert>
+
+## Ejercicio 2: Producto punto
+
+El producto punto requiere una reducción: cada hilo calcula una suma parcial y al final se acumulan todos los resultados. Este patrón muestra una diferencia importante: OpenMP tiene soporte nativo con `reduction`, mientras que Pthreads requiere sincronización manual.
+
+### Versión OpenMP
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <omp.h>
+
+#define N 100000000
+
+int main(void) {
+    double *a = malloc(N * sizeof(double));
+    double *b = malloc(N * sizeof(double));
+
+    for (int i = 0; i < N; i++) {
+        a[i] = 1.0 / (i + 1);
+        b[i] = 1.0 / (i + 1);
+    }
+
+    double resultado = 0.0;
+    double t_start = omp_get_wtime();
+
+    #pragma omp parallel for reduction(+:resultado)
+    for (int i = 0; i < N; i++) {
+        resultado += a[i] * b[i];
+    }
+
+    double t_end = omp_get_wtime();
+
+    printf("Producto punto (OMP): %.6f\n", resultado);
+    printf("Tiempo: %.4f segundos\n", t_end - t_start);
+
+    free(a); free(b);
+    return 0;
+}
+```
+
+### Versión Pthreads
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+#include <time.h>
+
+#define N          100000000
+#define NUM_HILOS  4
+
+double *a, *b;
+double resultado_global = 0.0;
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+
+typedef struct {
+    int inicio;
+    int fin;
+} RangoHilo;
+
+void *producto_parcial(void *arg) {
+    RangoHilo *rango = (RangoHilo *)arg;
+    double suma_local = 0.0;
+
+    for (int i = rango->inicio; i < rango->fin; i++) {
+        suma_local += a[i] * b[i];
+    }
+
+    pthread_mutex_lock(&mutex);
+    resultado_global += suma_local;
+    pthread_mutex_unlock(&mutex);
+
+    return NULL;
+}
+
+int main(void) {
+    a = malloc(N * sizeof(double));
+    b = malloc(N * sizeof(double));
+
+    for (int i = 0; i < N; i++) {
+        a[i] = 1.0 / (i + 1);
+        b[i] = 1.0 / (i + 1);
+    }
+
+    pthread_t hilos[NUM_HILOS];
+    RangoHilo rangos[NUM_HILOS];
+    int bloque = N / NUM_HILOS;
+
+    struct timespec t_start, t_end;
+    clock_gettime(CLOCK_MONOTONIC, &t_start);
+
+    for (int t = 0; t < NUM_HILOS; t++) {
+        rangos[t].inicio = t * bloque;
+        rangos[t].fin = (t == NUM_HILOS - 1) ? N : rangos[t].inicio + bloque;
+        pthread_create(&hilos[t], NULL, producto_parcial, &rangos[t]);
+    }
+
+    for (int t = 0; t < NUM_HILOS; t++) {
+        pthread_join(hilos[t], NULL);
+    }
+
+    clock_gettime(CLOCK_MONOTONIC, &t_end);
+    double elapsed = (t_end.tv_sec - t_start.tv_sec)
+                   + (t_end.tv_nsec - t_start.tv_nsec) / 1e9;
+
+    printf("Producto punto (PTH): %.6f\n", resultado_global);
+    printf("Tiempo: %.4f segundos\n", elapsed);
+
+    pthread_mutex_destroy(&mutex);
+    free(a); free(b);
+    return 0;
+}
+```
+
+<Alert type="warning">
+En la versión Pthreads, acumular directamente en `resultado_global` dentro del bucle (sin suma local) generaría contención severa en el mutex. La clave de rendimiento está en que cada hilo acumule en una variable local y solo haga una operación con el mutex al final.
+</Alert>
+
+## Ejercicio 3: Cálculo de Pi (Monte Carlo)
+
+El método Monte Carlo estima π generando puntos aleatorios en un cuadrado unitario y contando cuántos caen dentro del círculo inscrito. Es un algoritmo embarazosamente paralelo, pero requiere cuidado con la generación de números aleatorios — `rand()` no es seguro para uso multihilo.
+
+### Versión OpenMP
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <omp.h>
+
+#define MUESTRAS 100000000L
+
+int main(void) {
+    long dentro = 0;
+    double t_start = omp_get_wtime();
+
+    #pragma omp parallel reduction(+:dentro)
+    {
+        unsigned int semilla = omp_get_thread_num() + 42;
+        long dentro_local = 0;
+
+        #pragma omp for
+        for (long i = 0; i < MUESTRAS; i++) {
+            double x = (double)rand_r(&semilla) / RAND_MAX;
+            double y = (double)rand_r(&semilla) / RAND_MAX;
+            if (x * x + y * y <= 1.0) {
+                dentro_local++;
+            }
+        }
+
+        dentro += dentro_local;
+    }
+
+    double t_end = omp_get_wtime();
+    double pi = 4.0 * dentro / MUESTRAS;
+
+    printf("Pi estimado (OMP): %.6f\n", pi);
+    printf("Tiempo: %.4f segundos\n", t_end - t_start);
+
+    return 0;
+}
+```
+
+### Versión Pthreads
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+#include <time.h>
+
+#define MUESTRAS   100000000L
+#define NUM_HILOS  4
+
+long dentro_global = 0;
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+
+typedef struct {
+    long n_muestras;
+    int  id_hilo;
+} ArgHilo;
+
+void *montecarlo(void *arg) {
+    ArgHilo *args = (ArgHilo *)arg;
+    unsigned int semilla = args->id_hilo + 42;
+    long dentro_local = 0;
+
+    for (long i = 0; i < args->n_muestras; i++) {
+        double x = (double)rand_r(&semilla) / RAND_MAX;
+        double y = (double)rand_r(&semilla) / RAND_MAX;
+        if (x * x + y * y <= 1.0) {
+            dentro_local++;
+        }
+    }
+
+    pthread_mutex_lock(&mutex);
+    dentro_global += dentro_local;
+    pthread_mutex_unlock(&mutex);
+
+    return NULL;
+}
+
+int main(void) {
+    pthread_t hilos[NUM_HILOS];
+    ArgHilo args[NUM_HILOS];
+    long muestras_por_hilo = MUESTRAS / NUM_HILOS;
+
+    struct timespec t_start, t_end;
+    clock_gettime(CLOCK_MONOTONIC, &t_start);
+
+    for (int t = 0; t < NUM_HILOS; t++) {
+        args[t].n_muestras = (t == NUM_HILOS - 1)
+                           ? MUESTRAS - (NUM_HILOS - 1) * muestras_por_hilo
+                           : muestras_por_hilo;
+        args[t].id_hilo = t;
+        pthread_create(&hilos[t], NULL, montecarlo, &args[t]);
+    }
+
+    for (int t = 0; t < NUM_HILOS; t++) {
+        pthread_join(hilos[t], NULL);
+    }
+
+    clock_gettime(CLOCK_MONOTONIC, &t_end);
+    double elapsed = (t_end.tv_sec - t_start.tv_sec)
+                   + (t_end.tv_nsec - t_start.tv_nsec) / 1e9;
+
+    double pi = 4.0 * dentro_global / MUESTRAS;
+    printf("Pi estimado (PTH): %.6f\n", pi);
+    printf("Tiempo: %.4f segundos\n", elapsed);
+
+    pthread_mutex_destroy(&mutex);
+    return 0;
+}
+```
+
+```bash
+gcc -O2 -fopenmp pi_omp.c -o pi_omp
+gcc -O2 -pthread pi_pth.c -o pi_pth -lm
+
+./pi_omp
+./pi_pth
+```
+
+## Análisis comparativo
+
+Completa la siguiente tabla ejecutando cada programa en tu equipo. Registra el tiempo promedio de 3 ejecuciones.
+
+| Ejercicio | Métrica | OpenMP | Pthreads |
+|---|---|---|---|
+| Suma de vectores | Tiempo de ejecución (s) | | |
+| Suma de vectores | Líneas de código | | |
+| Suma de vectores | Complejidad percibida (1-5) | | |
+| Producto punto | Tiempo de ejecución (s) | | |
+| Producto punto | Líneas de código | | |
+| Producto punto | Complejidad percibida (1-5) | | |
+| Monte Carlo Pi | Tiempo de ejecución (s) | | |
+| Monte Carlo Pi | Líneas de código | | |
+| Monte Carlo Pi | Complejidad percibida (1-5) | | |
+
+**Preguntas de análisis:**
+
+1. ¿En cuál ejercicio la diferencia de rendimiento entre OpenMP y Pthreads fue mayor? ¿Por qué?
+2. ¿Cuántas líneas adicionales requiere Pthreads en promedio para implementar el mismo algoritmo?
+3. Si el rendimiento es similar, ¿qué criterio usarías para elegir entre ambas tecnologías en un proyecto real?
+
+<Alert type="tip">
+Para medir tiempos con mayor precisión en Linux puedes usar `perf stat ./programa` o `time ./programa`. Ejecuta siempre con el sistema sin carga adicional (cierra el navegador y otras aplicaciones).
+</Alert>
+
+## Ejercicios propuestos
+
+### EP1: Histograma paralelo
+
+Implementa el cálculo de un histograma de un arreglo de 10 millones de enteros aleatorios con 256 cubetas. La versión Pthreads debe usar histogramas privados por hilo que se fusionan al final (evita usar mutex en el bucle principal). Compara con la versión OpenMP usando `reduction` o secciones críticas.
+
+### EP2: Multiplicación de matrices
+
+Implementa la multiplicación de matrices cuadradas N×N (N=1024) con ambas tecnologías paralelizando el bucle externo. Mide el speedup con 1, 2, 4 y 8 hilos. Genera una gráfica de speedup vs. número de hilos para cada implementación.
+
+### EP3: Búsqueda en paralelo
+
+Dado un arreglo de 50 millones de enteros, encuentra todos los índices donde aparece un valor objetivo usando ambas APIs. La versión Pthreads debe almacenar los resultados locales en listas por hilo y fusionarlas al final sin usar memoria compartida durante la búsqueda. Verifica que ambas versiones produzcan el mismo conjunto de índices.
+
+## Referencias
+
+- Blaise Barney, *POSIX Threads Programming*, Lawrence Livermore National Laboratory. https://hpc-tutorials.llnl.gov/posix/
+- Blaise Barney, *OpenMP*, Lawrence Livermore National Laboratory. https://hpc-tutorials.llnl.gov/openmp/
+- Peter S. Pacheco, *An Introduction to Parallel Programming*, Morgan Kaufmann, 2011. Capítulos 4 y 5.
+- OpenMP Architecture Review Board, *OpenMP Application Programming Interface*, v5.2, 2021. https://www.openmp.org/specifications/
