@@ -2,6 +2,7 @@
 import { defineConfig } from "astro/config";
 import tailwindcss from "@tailwindcss/vite";
 import mdx from '@astrojs/mdx';
+import sitemap from '@astrojs/sitemap';
 import vesperDark from "./public/theme/vesper-dark.json";
 import vesperLight from "./public/theme/vesper-light.json";
 import remarkMath from 'remark-math'
@@ -14,7 +15,14 @@ export default defineConfig({
     plugins: [tailwindcss()],
   },
   site: "https://sw805.vercel.app",
-  integrations: [mdx()],
+  integrations: [mdx(), sitemap()],
+  i18n: {
+    defaultLocale: "es",
+    locales: ["es", "en"],
+    routing: {
+      prefixDefaultLocale: false,
+    },
+  },
   markdown: {
     remarkPlugins: [remarkMath],
     rehypePlugins: [

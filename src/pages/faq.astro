@@ -63,9 +63,23 @@ const faqs = [
     link: null,
   },
 ];
+
+const faqJsonLD = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": faqs.map((faq) => ({
+    "@type": "Question",
+    "name": faq.question,
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": faq.answer,
+    },
+  })),
+};
 ---
 
-<BaseLayout title="Preguntas Frecuentes">
+<BaseLayout title="Preguntas Frecuentes" description="Preguntas frecuentes sobre el curso de Programación Concurrente y Paralela SW805.">
+  <script type="application/ld+json" set:html={JSON.stringify(faqJsonLD)} />
   <div class="prose dark:prose-invert max-w-none">
     <h1 class="text-2xl font-semibold mb-6">Preguntas Frecuentes</h1>
 
