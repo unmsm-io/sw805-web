@@ -1,7 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { COURSE_CONFIG } from "../config/course";
-import { ChevronRight, ExternalLink } from "lucide-astro";
+import { ExternalLink, BookOpen, GraduationCap, Github, FileText } from "lucide-astro";
 
 const additionalDocs = [
   {
@@ -19,21 +19,161 @@ const additionalDocs = [
     description: "Documentación completa de NVIDIA CUDA",
     url: "https://docs.nvidia.com/cuda/",
   },
+  {
+    title: "NVIDIA CUDA C Programming Guide",
+    description: "Guía oficial de programación CUDA C (PDF gratuito)",
+    url: "https://docs.nvidia.com/cuda/pdf/CUDA_C_Programming_Guide.pdf",
+  },
+  {
+    title: "NVIDIA CUDA Best Practices Guide",
+    description: "Guía de mejores prácticas para optimización CUDA",
+    url: "https://docs.nvidia.com/cuda/pdf/CUDA_C_Best_Practices_Guide.pdf",
+  },
 ];
+
+const freeBooks = [
+  {
+    title: "Parallel Programming in MPI and OpenMP",
+    author: "Victor Eijkhout",
+    year: 2024,
+    description: "Libro gratuito y actualizado. Cubre MPI y OpenMP en C, Fortran, C++ y Python.",
+    url: "https://theartofhpc.com/pcse.html",
+    pdfUrl: "https://github.com/VictorEijkhout/TheArtofHPC_pdfs/blob/main/vol2/EijkhoutParallelProgramming.pdf",
+    tag: "GRATUITO",
+  },
+  {
+    title: "High Performance Scientific Computing",
+    author: "Victor Eijkhout",
+    year: 2024,
+    description: "Arquitectura de computadores, aritmética, álgebra lineal, HPC.",
+    url: "https://theartofhpc.com/istc.html",
+    pdfUrl: "https://github.com/VictorEijkhout/TheArtofHPC_pdfs/blob/main/vol1/EijkhoutIntroToHPC.pdf",
+    tag: "GRATUITO",
+  },
+];
+
+const universityCourses = [
+  {
+    university: "CMU",
+    course: "15-418: Parallel Computer Architecture",
+    url: "https://www.cs.cmu.edu/~418/",
+    topics: "OpenMP, MPI, CUDA, arquitectura",
+  },
+  {
+    university: "Stanford",
+    course: "CS149: Parallel Computing",
+    url: "https://gfxcourses.stanford.edu/cs149",
+    topics: "ISPC, OpenMP, CUDA, rendimiento",
+  },
+  {
+    university: "Stanford",
+    course: "CME 213: Intro to Parallel Computing",
+    url: "https://ericdarve.github.io/cme213-spring-2021/",
+    topics: "MPI, OpenMP, CUDA, híbrido",
+  },
+  {
+    university: "UC Berkeley",
+    course: "CS267: Applications of Parallel Computers",
+    url: "https://people.eecs.berkeley.edu/~demmel/cs267/",
+    topics: "Algoritmos paralelos, HPC científico",
+  },
+  {
+    university: "UIUC",
+    course: "ECE408: Applied Parallel Programming",
+    url: "https://lumetta.web.engr.illinois.edu/408-Sum25/slide-copies/",
+    topics: "CUDA, GPU, Kirk & Hwu textbook",
+  },
+  {
+    university: "MIT",
+    course: "6.172: Performance Engineering",
+    url: "https://ocw.mit.edu/courses/6-172-performance-engineering-of-software-systems-fall-2018/",
+    topics: "Optimización, paralelismo, cache",
+  },
+  {
+    university: "Helsinki",
+    course: "CSM14212: Programming Parallel Computers",
+    url: "https://hy-ppc.github.io/",
+    topics: "Self-paced, OpenMP, CUDA, auto-grading",
+  },
+  {
+    university: "Michigan State",
+    course: "CMSE 822: Parallel Computing",
+    url: "https://cmse822.github.io/",
+    topics: "MPI, OpenMP, GPU, textbooks gratuitos",
+  },
+];
+
+const openSourceRepos = [
+  {
+    name: "LLNL HPC Tutorials",
+    description: "Tutoriales de MPI, OpenMP, Pthreads del Lawrence Livermore National Lab",
+    url: "https://hpc-tutorials.llnl.gov/",
+    topics: ["MPI", "OpenMP", "Pthreads"],
+  },
+  {
+    name: "GPU Puzzles",
+    description: "Aprende CUDA resolviendo puzzles interactivos (Python/NUMBA)",
+    url: "https://github.com/srush/GPU-Puzzles",
+    topics: ["CUDA"],
+  },
+  {
+    name: "NVIDIA CUDA Samples",
+    description: "Ejemplos oficiales de NVIDIA desde intro hasta avanzado",
+    url: "https://github.com/NVIDIA/cuda-samples",
+    topics: ["CUDA"],
+  },
+  {
+    name: "Tim Mattson OpenMP Tutorial",
+    description: "Tutorial del co-creador de OpenMP (Intel)",
+    url: "https://github.com/tgmattso/OpenMP_intro_tutorial",
+    topics: ["OpenMP"],
+  },
+  {
+    name: "CSC Training (Finland)",
+    description: "Cursos completos de MPI, OpenMP, CUDA con soluciones",
+    url: "https://github.com/csc-training",
+    topics: ["MPI", "OpenMP", "CUDA"],
+  },
+  {
+    name: "PDC Lab Exercises",
+    description: "Labs estructurados de MPI, OpenMP, CUDA del PDC Sweden",
+    url: "https://github.com/PDC-support",
+    topics: ["MPI", "OpenMP", "CUDA"],
+  },
+  {
+    name: "OLCF CUDA Training Series",
+    description: "13 partes con videos de 1 hora + ejercicios (Oak Ridge National Lab)",
+    url: "https://www.olcf.ornl.gov/cuda-training-series/",
+    topics: ["CUDA"],
+  },
+  {
+    name: "Stanford CS149 Assignments",
+    description: "Assignments oficiales: K-means, task scheduling, CUDA renderer",
+    url: "https://github.com/stanford-cs149",
+    topics: ["OpenMP", "CUDA"],
+  },
+];
+
+const topicColors: Record<string, string> = {
+  "MPI": "bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300",
+  "OpenMP": "bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300",
+  "CUDA": "bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300",
+  "Pthreads": "bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300",
+};
 ---
 
 <BaseLayout title="Recursos">
   <div class="prose dark:prose-invert max-w-none">
     <h1 class="text-2xl font-semibold mb-6">Recursos</h1>
 
-    <div class="space-y-8">
+    <div class="space-y-10">
       <!-- Quick Links -->
       <section>
         <div class="flex items-baseline gap-2 mb-4">
           <h2 class="text-lg font-medium mt-0 mb-0">Links Útiles</h2>
         </div>
 
-        <div class="grid gap-4 md:grid-cols-2">
+        <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {
             COURSE_CONFIG.quickLinks.map((link) => (
               <a
@@ -59,14 +199,13 @@ const additionalDocs = [
         </div>
       </section>
 
-      <!-- Documentation -->
+      <!-- Main Textbook -->
       <section>
         <div class="flex items-baseline gap-2 mb-4">
-          <h2 class="text-lg font-medium mt-0 mb-0">Documentación</h2>
+          <h2 class="text-lg font-medium mt-0 mb-0">Texto Principal</h2>
         </div>
 
         <div class="grid gap-4 md:grid-cols-2">
-          <!-- Main Textbook -->
           <div
             class="bg-white dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded p-3"
           >
@@ -109,7 +248,6 @@ const additionalDocs = [
             </div>
           </div>
 
-          <!-- Additional Books -->
           {
             COURSE_CONFIG.resources.additionalResources.map((resource) => (
               <a
@@ -135,10 +273,129 @@ const additionalDocs = [
         </div>
       </section>
 
-      <!-- Additional Documentation -->
+      <!-- Free Books -->
       <section>
         <div class="flex items-baseline gap-2 mb-4">
-          <h2 class="text-lg font-medium mt-0 mb-0">Documentación Adicional</h2>
+          <BookOpen class="w-5 h-5 text-green-600" />
+          <h2 class="text-lg font-medium mt-0 mb-0">Libros Gratuitos</h2>
+        </div>
+
+        <div class="grid gap-4 md:grid-cols-2">
+          {
+            freeBooks.map((book) => (
+              <div class="bg-white dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded p-4">
+                <div class="flex items-start justify-between mb-2">
+                  <h4 class="text-base font-medium mt-0 mb-1">{book.title}</h4>
+                  <span class="text-xs font-semibold px-2 py-0.5 rounded bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300 shrink-0">
+                    {book.tag}
+                  </span>
+                </div>
+                <p class="text-sm text-zinc-500 mb-1 mt-0">{book.author} ({book.year})</p>
+                <p class="text-sm text-zinc-600 dark:text-zinc-300 mb-3 mt-0">{book.description}</p>
+                <div class="flex gap-3">
+                  <a
+                    href={book.url}
+                    class="text-blue-600 dark:text-blue-400 text-sm hover:underline inline-flex items-center gap-1"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Sitio web <ExternalLink class="w-3 h-3" />
+                  </a>
+                  <a
+                    href={book.pdfUrl}
+                    class="text-blue-600 dark:text-blue-400 text-sm hover:underline inline-flex items-center gap-1"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Descargar PDF <FileText class="w-3 h-3" />
+                  </a>
+                </div>
+              </div>
+            ))
+          }
+        </div>
+      </section>
+
+      <!-- University Courses -->
+      <section>
+        <div class="flex items-baseline gap-2 mb-4">
+          <GraduationCap class="w-5 h-5 text-blue-600" />
+          <h2 class="text-lg font-medium mt-0 mb-0">Cursos de Universidades Top</h2>
+        </div>
+        <p class="text-sm text-zinc-500 dark:text-zinc-400 mt-0 mb-4">
+          Cursos con materiales públicos de las mejores universidades del mundo en computación paralela.
+        </p>
+
+        <div class="grid gap-3 md:grid-cols-2">
+          {
+            universityCourses.map((course) => (
+              <a
+                href={course.url}
+                class="block no-underline hover:underline bg-white dark:bg-zinc-800/50 hover:bg-zinc-100 dark:hover:bg-zinc-700/50 transition-colors border border-zinc-200 dark:border-zinc-700 rounded p-3"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <div class="flex items-center justify-between">
+                  <div>
+                    <div class="flex items-center gap-2 mb-1">
+                      <span class="text-xs font-semibold px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-600 dark:bg-zinc-700 dark:text-zinc-300">
+                        {course.university}
+                      </span>
+                      <h4 class="text-sm font-medium mt-0 mb-0">{course.course}</h4>
+                    </div>
+                    <p class="text-xs text-zinc-500 dark:text-zinc-400 mb-0 mt-1">{course.topics}</p>
+                  </div>
+                  <ExternalLink class="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+                </div>
+              </a>
+            ))
+          }
+        </div>
+      </section>
+
+      <!-- Open Source Repos -->
+      <section>
+        <div class="flex items-baseline gap-2 mb-4">
+          <Github class="w-5 h-5" />
+          <h2 class="text-lg font-medium mt-0 mb-0">Repos y Labs Open Source</h2>
+        </div>
+        <p class="text-sm text-zinc-500 dark:text-zinc-400 mt-0 mb-4">
+          Repositorios con ejercicios, labs y tutoriales para practicar.
+        </p>
+
+        <div class="grid gap-3 md:grid-cols-2">
+          {
+            openSourceRepos.map((repo) => (
+              <a
+                href={repo.url}
+                class="block no-underline hover:underline bg-white dark:bg-zinc-800/50 hover:bg-zinc-100 dark:hover:bg-zinc-700/50 transition-colors border border-zinc-200 dark:border-zinc-700 rounded p-3"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <div>
+                  <div class="flex items-center justify-between mb-1">
+                    <h4 class="text-sm font-medium mt-0 mb-0">{repo.name}</h4>
+                    <ExternalLink class="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+                  </div>
+                  <p class="text-xs text-zinc-600 dark:text-zinc-300 mb-2 mt-0">{repo.description}</p>
+                  <div class="flex gap-1.5 flex-wrap">
+                    {repo.topics.map((topic) => (
+                      <span class={`text-xs px-1.5 py-0.5 rounded ${topicColors[topic] || "bg-zinc-100 text-zinc-600"}`}>
+                        {topic}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </a>
+            ))
+          }
+        </div>
+      </section>
+
+      <!-- Official Documentation -->
+      <section>
+        <div class="flex items-baseline gap-2 mb-4">
+          <h2 class="text-lg font-medium mt-0 mb-0">Documentación Oficial</h2>
         </div>
 
         <div class="grid gap-3 md:grid-cols-3">
