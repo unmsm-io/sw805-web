@@ -1,11 +1,12 @@
 export const COURSE_CONFIG = {
   // Course Information
-  code: "20W0805",
+  code: "202W0805",
   name: "Programación Concurrente y Paralela",
-  semester: "2025-II",
+  semester: "2025-2",
   department: "Ingeniería de Software",
   faculty: "Facultad de Ingeniería de Sistemas e Informática",
   university: "Universidad Nacional Mayor de San Marcos",
+  universitySubtitle: "Universidad del Perú, DECANA DE AMÉRICA",
   credits: 3,
   type: "Obligatorio",
   area: "Específica",
@@ -15,23 +16,37 @@ export const COURSE_CONFIG = {
     practice: 0,
     laboratory: 2
   },
-  cycle: "VII",
+  cycle: "VIII",
   modality: "Presencial",
   syllabusUrl: "https://docs.google.com/document/d/1lBEv_-IVv6f05SW8hvw2XfXhCnAqNWqeerouK8zP8eU/edit?usp=sharing",
+  sumilla: "Esta asignatura corresponde al área de formación especializada, es de naturaleza teórico-práctica; tiene como propósito proporcionar los conocimientos necesarios para realizar aplicaciones que se ejecuten de forma concurrente, paralela y distribuida.",
 
   // Course Staff
   instructors: [
     {
-      name: "Dr. Herminio Paucar",
+      name: "Herminio Paucar Curasma",
       email: "hpaucarc@unmsm.edu.pe",
       officeHours: "Martes y Jueves 14:00 - 16:00",
       image: "/paucar-profile.webp",
-      title: "Profesor",
+      title: "Docente",
       education: "Estudiante de Doctorado en Ciencias de la Computación (USP)",
       specialization: "Sistemas Distribuidos y Programación Concurrente",
       socialMedia: {
         github: "https://github.com/hpaucar",
         linkedin: "https://www.linkedin.com/in/herminio-paucar/"
+      }
+    },
+    {
+      name: "Javier Prudencio",
+      email: "jprudenciov@unmsm.edu.pe",
+      officeHours: "Por definir",
+      image: "/paucar-profile.webp",
+      title: "Docente",
+      education: "",
+      specialization: "",
+      socialMedia: {
+        github: "",
+        linkedin: ""
       }
     },
     {
@@ -62,15 +77,29 @@ export const COURSE_CONFIG = {
       code: "20W0804",
       name: "Sistemas Operativos",
       description: "Pre-requisito obligatorio",
+    },
+    {
+      code: "",
+      name: "Redes y Transmisión de Datos",
+      description: "Pre-requisito obligatorio",
     }
   ],
+
+  competencies: [
+    { code: "CG3", description: "Capacidad de análisis y pensamiento crítico", type: "Genérico", level: "Intermedio" },
+    { code: "CG4", description: "Habilidad para la comunicación oral y escrita", type: "Genérico", level: "Intermedio" },
+    { code: "CE1.1", description: "Desarrolla Sistemas de Información", type: "Especialidad", level: "Intermedio" },
+  ],
+
+  learningOutcome: "Al finalizar la asignatura el estudiante aplica métodos y técnicas para realizar las actividades relacionadas con la programación de algoritmos paralelos y concurrentes, apoyadas en herramientas software, demostrando capacidad de análisis y pensamiento crítico, y habilidad para la comunicación.",
 
   // Course Modules
   modules: [
     {
       id: "unit1",
-      title: "Fundamentos de Computación Paralela y Concurrente",
-      weeks: "1-4",
+      title: "Fundamentos de programación concurrente y paralela",
+      weeks: "1-2",
+      capacity: "Comprende los fundamentos de la programación concurrente y paralela y sus limitaciones basado a los conceptos de tareas, grafo de dependencias, planificación y métricas de rendimiento.",
       content: [
         {
           week: 1,
@@ -185,8 +214,9 @@ export const COURSE_CONFIG = {
     },
     {
       id: "unit2",
-      title: "Programación en Memoria Compartida",
-      weeks: "5-8",
+      title: "Programación en memoria distribuida y compartida",
+      weeks: "3-8",
+      capacity: "Resuelve problemas utilizando el modelo de paso de mensajes en programación concurrente y paralela.",
       content: [
         {
           week: 5,
@@ -254,8 +284,9 @@ export const COURSE_CONFIG = {
     },
     {
       id: "unit3",
-      title: "Algoritmos y Estrategias de Paralelización",
-      weeks: "9-12",
+      title: "Programación con Memoria Compartida y Programación con GPU",
+      weeks: "9-13",
+      capacity: "Elabora algoritmos concurrentes que aprovechan las tarjetas gráficas.",
       content: [
         {
           week: 9,
@@ -331,8 +362,9 @@ export const COURSE_CONFIG = {
     },
     {
       id: "unit4",
-      title: "Desafíos y Aplicaciones en Computación Paralela",
+      title: "Patrones de diseño de Programas Paralelos",
       weeks: "13-16",
+      capacity: "Conocer el proceso completo de desarrollo de un programa paralelo y las tendencias actuales de la PP.",
       content: [
         {
           week: 13,
@@ -401,22 +433,35 @@ export const COURSE_CONFIG = {
 
   // Grading
   grading: {
+    formula: "NF = N1 × 0.3 + N3 × 0.3 + N2 × 0.4",
     n1: {
-      ejercicios: 20,
-      foros: 20,
-      lecturas: 10,
-      examen: 50
+      label: "Examen Parcial",
+      weight: 30,
+      components: {
+        ejercicios: 20,
+        foros: 20,
+        lecturas: 10,
+        examen: 50
+      }
     },
     n2: {
-      proyecto: 30,
-      presentaciones: 30,
-      laboratorios: 40
+      label: "Participación teoría y trabajos de laboratorio",
+      weight: 40,
+      components: {
+        proyecto: 30,
+        presentaciones: 30,
+        laboratorios: 40
+      }
     },
     n3: {
-      ejercicios: 20,
-      foros: 20,
-      lecturas: 10,
-      examen: 50
+      label: "Examen Final",
+      weight: 30,
+      components: {
+        ejercicios: 20,
+        foros: 20,
+        lecturas: 10,
+        examen: 50
+      }
     }
   },
 
@@ -468,11 +513,51 @@ export const COURSE_CONFIG = {
       },
       {
         title: "Introduction to Parallel Computing",
-        author: "Grama, A., Gupta, A., Karypis, G., & Kumas, V.",
+        author: "Grama, A., Gupta, A., Karypis, G., & Kumar, V.",
         year: 2003,
         publisher: "Pearson Addison Wesley",
         coverImage: "/images/books/introduction-to-parallel-computing.jpg",
         url: "https://www.amazon.com/Introduction-Parallel-Computing-Ananth-Grama/dp/0201648652"
+      },
+      {
+        title: "Fundamentals of Parallel Processing",
+        author: "Jordan, H. & Alaghband, G.",
+        year: 2004,
+        publisher: "Prentice Hall",
+        coverImage: "",
+        url: ""
+      },
+      {
+        title: "Parallel and Distributed Programming Using C++",
+        author: "Hughes, C. & Hughes, T.",
+        year: 2004,
+        publisher: "Addison Wesley",
+        coverImage: "",
+        url: ""
+      },
+      {
+        title: "Programación Concurrente con Java",
+        author: "Lea, D.",
+        year: 2001,
+        publisher: "Addison Wesley",
+        coverImage: "",
+        url: ""
+      },
+      {
+        title: "Introduction to Parallel Processing",
+        author: "Parhami, B.",
+        year: 2002,
+        publisher: "Kluwer Academic Publisher",
+        coverImage: "",
+        url: ""
+      },
+      {
+        title: "Introduction to Parallel Computing",
+        author: "Petersen, W. P. & Arbenz, P.",
+        year: 2004,
+        publisher: "Oxford University Press",
+        coverImage: "",
+        url: "https://wiki.rice.edu/confluence/pages/viewpage.action?pageId=34801924"
       }
     ],
     developmentSetup: {
