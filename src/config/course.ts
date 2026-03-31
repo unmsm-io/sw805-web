@@ -37,19 +37,6 @@ export const COURSE_CONFIG = {
       }
     },
     {
-      name: "Javier Prudencio",
-      email: "jprudenciov@unmsm.edu.pe",
-      officeHours: "Por definir",
-      image: "/paucar-profile.webp",
-      title: "Docente",
-      education: "",
-      specialization: "",
-      socialMedia: {
-        github: "",
-        linkedin: ""
-      }
-    },
-    {
       name: "Railly Hugo",
       email: "railly.hugo@unmsm.edu.pe",
       officeHours: "Lunes 15:00 - 17:00",
